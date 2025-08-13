@@ -1,0 +1,486 @@
+import type { Express, Request, Response, NextFunction } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { WebSocketServer, WebSocket } from "ws";
+import { 
+  insertUserSchema, 
+  insertAuditFormSchema, 
+  insertAuditReportSchema,
+  insertAtaReviewSchema,
+  insertSkippedSampleSchema,
+  insertDeletedAuditSchema,
+  insertAuditSampleSchema,
+  users,
+  auditForms,
+  auditReports,
+  ataReviews,
+  deletedAudits,
+  skippedSamples,
+  auditSamples
+} from "@shared/schema";
+import { z } from "zod";
+import { setupAuth, hashPassword } from "./auth";
+import { db } from "./db";
+import { eq, desc, and, sql } from "drizzle-orm";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Add middleware to update session lastActivity timestamp
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.session) {
+      (req.session as any).lastActivity = new Date().toISOString();
+      
+      // Store basic user agent and IP for security purposes
+      (req.session as any).userAgent = req.headers['user-agent'];
+      (req.session as any).ip = req.ip || req.socket.remoteAddress;
+      
+      // If this is an authenticated user, also update activity tracking
+      if (req.isAuthenticated() && req.user) {
+        try {
+          const userId = (req.user as any).id;
+          if (userId) {
+            const localStorage = storage.getLocalStorage();
+            const loginTimestamps = localStorage.getItem('userLoginTimestamps')
+              ? JSON.parse(localStorage.getItem('userLoginTimestamps'))
+              : {};
+              
+            // Update the timestamp for this user
+            loginTimestamps[userId] = new Date().toISOString();
+            localStorage.setItem('userLoginTimestamps', JSON.stringify(loginTimestamps));
+          }
+        } catch (error) {
+          console.error('Error updating activity timestamp:', error);
+          // Continue even if this fails
+        }
+      }
+    }
+    next();
+  });
+
+  // Set up authentication
+  setupAuth(app);
+  
+  // HTTP Server
+  const httpServer = createServer(app);
+  
+  // WebSocket Server for real-time updates
+  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  
+  // WebSocket Handler
+  wss.on('connection', (ws) => {
+    console.log('WebSocket client connected');
+    
+    // Send initial connection message
+    ws.send(JSON.stringify({
+      type: 'connection',
+      message: 'Connected to ThorEye server'
+    }));
+    
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received message:', data);
+        
+        // Handle different message types
+        switch (data.type) {
+          case 'ping':
+            ws.send(JSON.stringify({
+              type: 'pong',
+              timestamp: Date.now()
+            }));
+            break;
+            
+          default:
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: 'Unknown message type'
+            }));
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+    
+    ws.on('close', () => {
+      console.log('WebSocket client disconnected');
+    });
+  });
+  
+  // Broadcast function - send message to all connected clients
+  const broadcast = (message: any) => {
+    wss.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify(message));
+      }
+    });
+  };
+
+  // USER ROUTES
+  
+  // Get all users
+  app.get('/api/users', async (req: Request, res: Response) => {
+    try {
+      const users = await storage.getAllUsers();
+      
+      // Filter out the default admin user from the displayed list
+      // The admin still exists and has all rights, but is hidden from the user list
+      const filteredUsers = users.filter(user => user.username !== 'admin');
+      
+      res.json(filteredUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+  });
+  
+  // Get user by ID
+  app.get('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
+  });
+
+  // Create user
+  app.post('/api/users', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertUserSchema.parse(req.body);
+      
+      // Check if username already exists
+      const existingUser = await db.select().from(users).where(eq(users.username, validatedData.username));
+      if (existingUser.length > 0) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+
+      const [newUser] = await db.insert(users).values({
+        ...validatedData,
+        password: await hashPassword(validatedData.password)
+      }).returning();
+
+      broadcast({
+        type: 'user_created',
+        user: { id: newUser.id, username: newUser.username, rights: newUser.rights }
+      });
+
+      res.status(201).json(newUser);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating user:', error);
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
+  // AUDIT FORMS ROUTES
+
+  // Get all audit forms
+  app.get('/api/forms', async (req: Request, res: Response) => {
+    try {
+      const forms = await db.select().from(auditForms).orderBy(desc(auditForms.createdAt));
+      res.json(forms);
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      res.status(500).json({ error: 'Failed to fetch forms' });
+    }
+  });
+
+  // Create audit form
+  app.post('/api/forms', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAuditFormSchema.parse(req.body);
+      
+      const [newForm] = await db.insert(auditForms).values({
+        ...validatedData,
+        createdBy: req.user?.id || null
+      }).returning();
+
+      broadcast({
+        type: 'form_created',
+        form: newForm
+      });
+
+      res.status(201).json(newForm);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating form:', error);
+      res.status(500).json({ error: 'Failed to create form' });
+    }
+  });
+
+  // AUDIT REPORTS ROUTES
+
+  // Get all audit reports
+  app.get('/api/reports', async (req: Request, res: Response) => {
+    try {
+      const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+      res.status(500).json({ error: 'Failed to fetch reports' });
+    }
+  });
+
+  // Create audit report
+  app.post('/api/reports', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAuditReportSchema.parse(req.body);
+      
+      const [newReport] = await db.insert(auditReports).values({
+        ...validatedData,
+        auditor: req.user?.id || null
+      }).returning();
+
+      broadcast({
+        type: 'report_created',
+        report: newReport
+      });
+
+      res.status(201).json(newReport);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating report:', error);
+      res.status(500).json({ error: 'Failed to create report' });
+    }
+  });
+
+  // ATA REVIEW ROUTES
+
+  // Get all ATA reviews
+  app.get('/api/ata-reviews', async (req: Request, res: Response) => {
+    try {
+      const reviews = await db.select().from(ataReviews).orderBy(desc(ataReviews.timestamp));
+      res.json(reviews);
+    } catch (error) {
+      console.error('Error fetching ATA reviews:', error);
+      res.status(500).json({ error: 'Failed to fetch ATA reviews' });
+    }
+  });
+
+  // Create ATA review
+  app.post('/api/ata-reviews', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAtaReviewSchema.parse(req.body);
+      
+      const [newReview] = await db.insert(ataReviews).values({
+        ...validatedData,
+        reviewerId: req.user?.id || null
+      }).returning();
+
+      broadcast({
+        type: 'ata_review_created',
+        review: newReview
+      });
+
+      res.status(201).json(newReview);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating ATA review:', error);
+      res.status(500).json({ error: 'Failed to create ATA review' });
+    }
+  });
+
+  // MIGRATION ROUTES
+
+  // Migrate localStorage data to database
+  app.post('/api/migrate', async (req: Request, res: Response) => {
+    try {
+      const { data } = req.body;
+      let migratedCount = 0;
+
+      if (data.forms && Array.isArray(data.forms)) {
+        for (const form of data.forms) {
+          try {
+            const validatedForm = insertAuditFormSchema.parse({
+              name: form.name,
+              sections: form.sections,
+              createdBy: form.createdBy || null
+            });
+            
+            await db.insert(auditForms).values(validatedForm).onConflictDoNothing();
+            migratedCount++;
+          } catch (error) {
+            console.error('Error migrating form:', error);
+          }
+        }
+      }
+
+      if (data.reports && Array.isArray(data.reports)) {
+        for (const report of data.reports) {
+          try {
+            const validatedReport = insertAuditReportSchema.parse({
+              auditId: report.auditId || report.id,
+              formName: report.formName,
+              agent: report.agent,
+              agentId: report.agentId,
+              auditor: null,
+              auditorName: report.auditorName || report.auditor || 'Unknown',
+              sectionAnswers: report.answers || report.sectionAnswers || [],
+              score: report.score || 0,
+              maxScore: report.maxScore || 0,
+              hasFatal: report.hasFatal || false,
+              status: report.status || 'completed'
+            });
+            
+            await db.insert(auditReports).values(validatedReport).onConflictDoNothing();
+            migratedCount++;
+          } catch (error) {
+            console.error('Error migrating report:', error);
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Migrated ${migratedCount} items to database`,
+        migratedCount
+      });
+    } catch (error) {
+      console.error('Migration error:', error);
+      res.status(500).json({ error: 'Failed to migrate data' });
+    }
+  });
+
+  // Database initialization route
+  app.post('/api/init-db', async (req: Request, res: Response) => {
+    try {
+      // Try database initialization first
+      try {
+        // Check if admin user exists
+        const existingAdmin = await db.select().from(users).where(eq(users.username, 'admin'));
+        
+        if (existingAdmin.length === 0) {
+          await db.insert(users).values({
+            username: 'admin',
+            password: await hashPassword('admin123'),
+            rights: ['admin', 'manager', 'team_leader', 'auditor'],
+            isInactive: false
+          });
+        }
+
+        // Check if default user exists
+        const existingUser = await db.select().from(users).where(eq(users.username, 'Abhishek'));
+        
+        if (existingUser.length === 0) {
+          await db.insert(users).values({
+            username: 'Abhishek',
+            password: await hashPassword('1234'),
+            rights: ['auditor'],
+            isInactive: false
+          });
+        }
+
+        res.json({ success: true, message: 'Database initialized successfully' });
+        return;
+      } catch (dbError) {
+        console.warn('Database initialization failed, using localStorage fallback:', dbError);
+        
+        // Fallback to localStorage if database fails
+        const localStorage = storage.getLocalStorage();
+        const existingUsers = JSON.parse(localStorage.getItem('qa-users') || '[]');
+        
+        // Check if admin user exists in localStorage
+        const adminExists = existingUsers.some((u: any) => u.username === 'admin');
+        if (!adminExists) {
+          const adminUser = {
+            id: Date.now(),
+            username: 'admin',
+            password: await hashPassword('admin123'),
+            rights: ['admin', 'manager', 'team_leader', 'auditor'],
+            isInactive: false
+          };
+          existingUsers.push(adminUser);
+        }
+        
+        // Check if default user exists in localStorage
+        const abhishekExists = existingUsers.some((u: any) => u.username === 'Abhishek');
+        if (!abhishekExists) {
+          const defaultUser = {
+            id: Date.now() + 1,
+            username: 'Abhishek',
+            password: await hashPassword('1234'),
+            rights: ['auditor'],
+            isInactive: false
+          };
+          existingUsers.push(defaultUser);
+        }
+        
+        localStorage.setItem('qa-users', JSON.stringify(existingUsers));
+        res.json({ success: true, message: 'Users initialized in localStorage (database unavailable)' });
+      }
+    } catch (error) {
+      console.error('Complete initialization error:', error);
+      res.status(500).json({ error: 'Failed to initialize database or localStorage' });
+    }
+  });
+
+  // Database health check endpoint
+  app.get('/api/health', async (req, res) => {
+    try {
+      await db.execute(sql`SELECT 1`);
+      res.json({ 
+        status: 'healthy',
+        database: 'connected',
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        status: 'unhealthy', 
+        database: 'disconnected',
+        error: String(error),
+        timestamp: new Date().toISOString() 
+      });
+    }
+  });
+
+  // Database statistics endpoint
+  app.get('/api/stats', async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const totalReports = await db.select({ count: sql`count(*)` })
+        .from(auditReports)
+        .where(eq(auditReports.deleted, false));
+
+      const averageScore = await db.select({ avg: sql`avg(score)` })
+        .from(auditReports)
+        .where(eq(auditReports.deleted, false));
+
+      const fatalCount = await db.select({ count: sql`count(*)` })
+        .from(auditReports)
+        .where(and(eq(auditReports.deleted, false), eq(auditReports.hasFatal, true)));
+
+      res.json({
+        totalReports: totalReports[0]?.count || 0,
+        averageScore: averageScore[0]?.avg || 0,
+        fatalCount: fatalCount[0]?.count || 0,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Stats error:', error);
+      res.status(500).json({ error: 'Failed to fetch statistics' });
+    }
+  });
+
+  return httpServer;
+}

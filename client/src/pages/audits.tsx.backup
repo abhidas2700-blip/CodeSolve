@@ -1,0 +1,2085 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/context/auth-context';
+import { Upload, FileSpreadsheet, FileUp, CheckCircle, Clock, Filter, User, Users, ClipboardList, AlertCircle, Undo2, FileDown, Download, RefreshCw } from 'lucide-react';
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
+// Transform section answers to report format
+const transformSectionAnswersToReportFormat = (sectionAnswers: any[] = []) => {
+  if (!Array.isArray(sectionAnswers)) {
+    console.warn("sectionAnswers is not an array in transformSectionAnswersToReportFormat");
+    return [];
+  }
+  
+  console.log(`Transforming ${sectionAnswers.length} section answers to report format`);
+  
+  return sectionAnswers.map(section => {
+    // Check if section.answers exists and is an array
+    if (!section || typeof section !== 'object') {
+      console.warn("Invalid section in sectionAnswers:", section);
+      return {
+        section: "Invalid Section",
+        questions: []
+      };
+    }
+    
+    console.log(`Processing section "${section.sectionName}":`, {
+      hasAnswers: !!section.answers,
+      isArray: Array.isArray(section.answers),
+      count: section.answers ? (Array.isArray(section.answers) ? section.answers.length : 'not an array') : 0
+    });
+    
+    const questions = (section.answers && Array.isArray(section.answers)) 
+      ? section.answers.map(answer => {
+          if (!answer || typeof answer !== 'object') {
+            console.warn("Invalid answer in section.answers:", answer);
+            return {
+              text: "Invalid Question",
+              answer: "",
+              remarks: ""
+            };
+          }
+          
+          console.log(`Processing answer for "${answer.questionId}":`, {
+            questionId: answer.questionId,
+            answer: answer.answer,
+            hasRemarks: !!answer.remarks
+          });
+          
+          return {
+            text: answer.questionId || "Untitled Question",
+            answer: answer.answer !== undefined ? answer.answer : '',
+            remarks: answer.remarks || ''
+          };
+        })
+      : []; // Empty array if no answers or not an array
+      
+    return {
+      section: section.sectionName || "Untitled Section",
+      questions: questions
+    };
+  });
+};
+
+// Deep clone the submitted audit with enhanced error handling and logging
+const getEnhancedAuditCopy = (auditId: string): any => {
+  try {
+    // First check for submitted audits
+    const submittedAudits = JSON.parse(localStorage.getItem('qa-submitted-audits') || '[]');
+    const auditDetails = submittedAudits.find((a: any) => a.id === auditId);
+    
+    if (auditDetails) {
+      console.log(`Found submitted audit ${auditId} with:`, {
+        hasSectionAnswers: !!auditDetails.sectionAnswers,
+        count: auditDetails.sectionAnswers?.length || 0
+      });
+      
+      // Create a deep clone of the audit
+      const enhancedAudit = JSON.parse(JSON.stringify(auditDetails));
+      
+      // Make sure section answers are properly formatted
+      if (enhancedAudit.sectionAnswers && Array.isArray(enhancedAudit.sectionAnswers)) {
+        // For debugging, check structure of sectionAnswers
+        const sampleSection = enhancedAudit.sectionAnswers[0];
+        if (sampleSection) {
+          console.log('Sample section structure:', {
+            name: sampleSection.sectionName,
+            hasAnswers: !!sampleSection.answers,
+            answerCount: sampleSection.answers?.length || 0
+          });
+          
+          if (sampleSection.answers && sampleSection.answers.length > 0) {
+            const sampleAnswer = sampleSection.answers[0];
+            console.log('Sample answer structure:', {
+              questionId: sampleAnswer.questionId,
+              answer: sampleAnswer.answer,
+              hasRemarks: !!sampleAnswer.remarks
+            });
+          }
+        }
+      }
+      
+      return enhancedAudit;
+    }
+    
+    // If not found in submitted audits, check completed audits in audit samples
+    const auditSamples = JSON.parse(localStorage.getItem('qa-audit-samples') || '[]');
+    const sampleDetails = auditSamples.find((s: any) => s.id === auditId);
+    
+    if (sampleDetails) {
+      console.log(`Found sample ${auditId} with status: ${sampleDetails.status}`);
+      return JSON.parse(JSON.stringify(sampleDetails));
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error in getEnhancedAuditCopy:', error);
+    return null;
+  }
+};
+
+// Form renderer component for audit forms
+interface Question {
+  id: string;
+  text: string;
+  type: string;
+  options?: string;
+  weightage: number;
+  deductionPoints?: number;
+  mandatory: boolean;
+  isFatal: boolean;
+  enableRemarks: boolean;
+  grazingLogic: boolean;
+  grazingPercentage?: number;
+  // Sub-dropdown fields
+  showSubDropdownOn?: string[];
+  subDropdownLabel?: string;
+  subDropdownOptions?: string;
+}
+
+interface Section {
+  name: string;
+  questions: Question[];
+}
+
+interface AuditForm {
+  name: string;
+  sections: Section[];
+  createdAt: string;
+}
+
+// Form renderer component
+// Define a custom event for form updates
+interface FormUpdateEvent extends Event {
+  detail: {
+    formName: string;
+  };
+}
+
+// Custom event name
+const FORM_UPDATE_EVENT = 'qa-form-update';
+
+// Function to dispatch form update event
+// Create a helper function that can be exported
+export const dispatchFormUpdate = (formName: string) => {
+  const event = new CustomEvent(FORM_UPDATE_EVENT, {
+    detail: { formName }
+  });
+  window.dispatchEvent(event);
+};
+
+function AuditFormRenderer({ formName }: { formName: string }) {
+  const [form, setForm] = useState<AuditForm | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [remarks, setRemarks] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [formVersion, setFormVersion] = useState<number>(0);
+  const [formUpdateMessage, setFormUpdateMessage] = useState<string | null>(null);
+  const formRef = useRef<AuditForm | null>(null);
+  
+  // Update ref when form changes
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+  
+  // Manual refresh function
+  const refreshForm = () => {
+    setFormUpdateMessage("Form has been updated. Refreshing with latest changes...");
+    setFormVersion(prev => prev + 1);
+    setTimeout(() => setFormUpdateMessage(null), 5000);
+  };
+  
+  // This will reload the form whenever localStorage changes or form update event is fired
+  useEffect(() => {
+    // Handle storage events (cross-tab updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'qa-audit-forms') {
+        console.log("Forms updated in localStorage, reloading form data");
+        refreshForm();
+      }
+    };
+    
+    // Handle custom form update events (same-tab updates)
+    const handleFormUpdate = (e: Event) => {
+      const updateEvent = e as FormUpdateEvent;
+      // Only refresh if our form was updated
+      if (updateEvent.detail.formName === formName || updateEvent.detail.formName === '*') {
+        console.log(`Form "${formName}" updated via event, refreshing data`);
+        refreshForm();
+      }
+    };
+    
+    // Add event listeners
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener(FORM_UPDATE_EVENT, handleFormUpdate);
+    
+    // Polling for changes (as backup)
+    const intervalId = setInterval(() => {
+      try {
+        const currentForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
+        const currentForm = currentForms.find((f: AuditForm) => f.name === formName);
+        
+        if (currentForm && formRef.current && 
+            JSON.stringify(currentForm) !== JSON.stringify(formRef.current)) {
+          console.log("Form updated during polling, refreshing data");
+          refreshForm();
+        }
+      } catch (error) {
+        console.error("Error checking for form updates:", error);
+      }
+    }, 2000);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener(FORM_UPDATE_EVENT, handleFormUpdate);
+      clearInterval(intervalId);
+    };
+  }, [formName]);
+
+  // Load the form data when formName or formVersion changes
+  useEffect(() => {
+    setLoading(true);
+    try {
+      // Load forms from localStorage
+      const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
+      console.log(`Loading form "${formName}" (version ${formVersion})`);
+      
+      // Find the form that matches the formName
+      const matchedForm = savedForms.find((f: AuditForm) => f.name === formName);
+      
+      if (matchedForm) {
+        setForm(matchedForm);
+        // Initialize answers for all questions
+        const initialAnswers: Record<string, string> = {};
+        const initialRemarks: Record<string, string> = {};
+        
+        matchedForm.sections.forEach((section) => {
+          section.questions.forEach((question) => {
+            initialAnswers[question.id] = '';
+            if (question.enableRemarks) {
+              initialRemarks[question.id] = '';
+            }
+          });
+        });
+        
+        setAnswers(initialAnswers);
+        setRemarks(initialRemarks);
+        setError(null);
+      } else {
+        // If form not found, set error
+        setError(`Form "${formName}" not found`);
+      }
+    } catch (err) {
+      console.error('Error loading form:', err);
+      setError('Error loading form. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [formName, formVersion]);
+  
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+  
+  const handleRemarksChange = (questionId: string, value: string) => {
+    setRemarks(prev => ({
+      ...prev,
+      [questionId]: value
+    }));
+  };
+  
+  if (loading) {
+    return (
+      <div className="border rounded-md p-4 bg-muted/30 text-center">
+        <p>Loading audit form...</p>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="border rounded-md p-4 bg-red-50 text-red-800">
+        <h3 className="font-medium mb-2">Error</h3>
+        <p>{error}</p>
+        <p className="text-sm mt-2">Using default form instead.</p>
+        <div className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="q1">Was the greeting appropriate?</Label>
+            <Select defaultValue="yes">
+              <SelectTrigger id="q1">
+                <SelectValue placeholder="Select option" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Yes</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+                <SelectItem value="na">N/A</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!form) {
+    return (
+      <div className="border rounded-md p-4 bg-muted/30 text-center">
+        <p>No form found</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-6">
+      {formUpdateMessage && (
+        <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-md p-3 flex items-center mb-4 animate-in fade-in slide-in-from-top-5 duration-300">
+          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+          {formUpdateMessage}
+        </div>
+      )}
+      {form.sections.map((section, sectionIndex) => (
+        <div key={sectionIndex} className="border rounded-md p-4 bg-muted/30">
+          <h3 className="font-medium mb-4 text-lg">{section.name}</h3>
+          <div className="space-y-5">
+            {section.questions.map((question) => (
+              <div key={question.id} className="space-y-2 pb-4 border-b border-dashed border-gray-200 last:border-0">
+                <div className="flex items-start gap-2">
+                  <Label htmlFor={question.id} className={`text-sm ${question.mandatory ? 'font-medium' : ''}`}>
+                    {question.text}
+                    {question.mandatory && <span className="text-red-500 ml-1">*</span>}
+                    {question.isFatal && <Badge variant="destructive" className="ml-2 text-xs">Fatal</Badge>}
+                  </Label>
+                </div>
+                
+                {question.type === 'dropdown' && (
+                  <div className="space-y-3">
+                    <Select 
+                      value={answers[question.id]} 
+                      onValueChange={(value) => handleAnswerChange(question.id, value)}
+                    >
+                      <SelectTrigger id={question.id}>
+                        <SelectValue placeholder="Select option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <div className="px-2 py-2 sticky top-0 bg-background z-10 border-b">
+                          <Input 
+                            placeholder="Search options..." 
+                            className="h-8"
+                            onChange={(e) => {
+                              const searchValue = e.target.value.toLowerCase();
+                              // Get the parent for this dropdown
+                              const dropdownId = `dropdown-search-${question.id}`;
+                              const optionsDiv = document.getElementById(dropdownId);
+                              if (optionsDiv) {
+                                // Get all the option elements
+                                const options = optionsDiv.querySelectorAll('[data-option]');
+                                
+                                // Show/hide based on search
+                                options.forEach((option) => {
+                                  const optionText = option.textContent?.toLowerCase() || '';
+                                  if (optionText.includes(searchValue)) {
+                                    option.classList.remove('hidden');
+                                  } else {
+                                    option.classList.add('hidden');
+                                  }
+                                });
+                              }
+                            }}
+                          />
+                        </div>
+                        <div id={`dropdown-search-${question.id}`} className="max-h-[200px] overflow-y-auto">
+                          {question.options?.split(',')
+                            .map(option => option.trim())
+                            .filter(option => option !== '') // Filter out empty strings
+                            .map((option, i) => (
+                              <SelectItem key={i} value={option} data-option>
+                                {option}
+                              </SelectItem>
+                            ))}
+                        </div>
+                      </SelectContent>
+                    </Select>
+                    
+                    {/* Show conditional sub-dropdown if:
+                        1. The question has sub-dropdown configuration
+                        2. The answer is one of the trigger values */}
+                    {question.showSubDropdownOn && 
+                     question.subDropdownOptions && 
+                     question.showSubDropdownOn.includes(answers[question.id]) && (
+                      <div className="bg-muted/30 rounded-md p-3 mt-2 border border-muted">
+                        <Label htmlFor={`subdropdown-${question.id}`} className="text-sm mb-2 block">
+                          {question.subDropdownLabel || "Please specify:"}
+                        </Label>
+                        <Select 
+                          value={remarks[question.id]} 
+                          onValueChange={(value) => handleRemarksChange(question.id, value)}
+                        >
+                          <SelectTrigger id={`subdropdown-${question.id}`}>
+                            <SelectValue placeholder="Select option" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <div className="px-2 py-2 sticky top-0 bg-background z-10 border-b">
+                              <Input 
+                                placeholder="Search options..." 
+                                className="h-8"
+                                onChange={(e) => {
+                                  const searchValue = e.target.value.toLowerCase();
+                                  const dropdownId = `subdropdown-search-${question.id}`;
+                                  const optionsDiv = document.getElementById(dropdownId);
+                                  if (optionsDiv) {
+                                    const options = optionsDiv.querySelectorAll('[data-option]');
+                                    options.forEach((option) => {
+                                      const optionText = option.textContent?.toLowerCase() || '';
+                                      if (optionText.includes(searchValue)) {
+                                        option.classList.remove('hidden');
+                                      } else {
+                                        option.classList.add('hidden');
+                                      }
+                                    });
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div id={`subdropdown-search-${question.id}`} className="max-h-[200px] overflow-y-auto">
+                              {question.subDropdownOptions.split(',')
+                                .map(option => option.trim())
+                                .filter(option => option !== '')
+                                .map((option, i) => (
+                                  <SelectItem key={i} value={option} data-option>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                            </div>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {question.type === 'text' && (
+                  <Input 
+                    id={question.id}
+                    value={answers[question.id]} 
+                    onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                    placeholder="Enter your answer"
+                  />
+                )}
+                
+                {question.type === 'multiSelect' && (
+                  <div>
+                    <div className="mb-2">
+                      <Input 
+                        placeholder="Search options..." 
+                        className="h-8"
+                        onChange={(e) => {
+                          const searchValue = e.target.value.toLowerCase();
+                          const optionsDiv = document.getElementById(`multiselect-${question.id}`);
+                          if (optionsDiv) {
+                            const options = optionsDiv.querySelectorAll('[data-option-container]');
+                            options.forEach((option) => {
+                              const optionText = option.textContent?.toLowerCase() || '';
+                              if (optionText.includes(searchValue)) {
+                                option.classList.remove('hidden');
+                              } else {
+                                option.classList.add('hidden');
+                              }
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                    <div id={`multiselect-${question.id}`} className="grid gap-2 grid-cols-2 max-h-[200px] overflow-y-auto border rounded-md p-2">
+                      {question.options?.split(',')
+                        .map(option => option.trim())
+                        .filter(option => option !== '') // Filter out empty strings
+                        .map((option, i) => (
+                          <div key={i} className="flex items-center space-x-2" data-option-container>
+                            <Checkbox 
+                              id={`${question.id}-${i}`} 
+                              checked={answers[question.id]?.includes(option)}
+                              onCheckedChange={(checked) => {
+                                const currentValues = answers[question.id]?.split(',').filter(Boolean) || [];
+                                
+                                let newValues;
+                                if (checked) {
+                                  newValues = [...currentValues, option];
+                                } else {
+                                  newValues = currentValues.filter(val => val !== option);
+                                }
+                                
+                                handleAnswerChange(question.id, newValues.join(','));
+                              }}
+                            />
+                            <Label htmlFor={`${question.id}-${i}`} className="text-sm">
+                              {option}
+                            </Label>
+                          </div>
+                        ))}
+                    </div>
+                    {answers[question.id] && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {answers[question.id].split(',').filter(Boolean).map((selected, i) => (
+                          <Badge key={i} variant="secondary" className="mr-1">
+                            {selected}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 ml-1 hover:bg-muted-foreground/20"
+                              onClick={() => {
+                                const currentValues = answers[question.id].split(',').filter(Boolean);
+                                const newValues = currentValues.filter(val => val !== selected);
+                                handleAnswerChange(question.id, newValues.join(','));
+                              }}
+                            >
+                              ×
+                            </Button>
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {question.enableRemarks && (
+                  <div className="mt-2">
+                    <Label htmlFor={`${question.id}-remarks`} className="text-xs text-muted-foreground">
+                      Remarks
+                    </Label>
+                    <Textarea 
+                      id={`${question.id}-remarks`}
+                      value={remarks[question.id]} 
+                      onChange={(e) => handleRemarksChange(question.id, e.target.value)}
+                      placeholder="Enter any additional remarks"
+                      rows={2}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">
+                  <span>Weightage: {question.weightage}</span>
+                  {question.deductionPoints !== undefined && (
+                    <span>Deduction: {question.deductionPoints}</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Sample interface
+interface AuditSample {
+  id: string;
+  customerName: string;
+  ticketId: string;
+  date: number;
+  status: 'available' | 'assigned' | 'completed' | 'inProgress';
+  assignedTo?: string;
+  formType: string;
+  priority?: 'low' | 'medium' | 'high';
+  metadata?: {
+    channel?: 'call' | 'email' | 'chat';
+    duration?: number;
+    category?: string;
+  };
+}
+
+// User interface for assignment
+interface AuditorUser {
+  id: number;
+  username: string;
+  role: string;
+  workload: number; // Current number of assigned audits
+}
+
+export default function Audits() {
+  // Function to export audit data as CSV
+  const exportAuditDataAsCSV = (samples: AuditSample[]) => {
+    if (samples.length === 0) {
+      alert("No data to export");
+      return;
+    }
+    
+    // Create CSV header
+    const headers = [
+      "Customer Name", 
+      "Ticket ID", 
+      "Date", 
+      "Status", 
+      "Assigned To", 
+      "Form Type", 
+      "Priority", 
+      "Channel", 
+      "Duration", 
+      "Category"
+    ];
+    
+    // Create CSV rows
+    const rows = samples.map(sample => [
+      sample.customerName,
+      sample.ticketId,
+      new Date(sample.date).toLocaleString(),
+      sample.status,
+      sample.assignedTo || "Unassigned",
+      sample.formType,
+      sample.priority || "None",
+      sample.metadata?.channel || "N/A",
+      sample.metadata?.duration ? formatDuration(sample.metadata.duration) : "N/A",
+      sample.metadata?.category || "N/A"
+    ]);
+    
+    // Combine header and rows
+    const csvData = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+    
+    // Create a download link
+    const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `audit_data_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.display = "none";
+    document.body.appendChild(link);
+    
+    // Click the link to trigger download
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("assigned");
+  const [selectedForm, setSelectedForm] = useState("");
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [selectedSamples, setSelectedSamples] = useState<string[]>([]);
+  const [selectedAuditor, setSelectedAuditor] = useState<string>("");
+  const [auditInProgress, setAuditInProgress] = useState<AuditSample | null>(null);
+  const [sampleFilter, setSampleFilter] = useState("");
+  const [randomAssign, setRandomAssign] = useState(false);
+  const [assignCount, setAssignCount] = useState("1");
+  const [selectedFileName, setSelectedFileName] = useState("");
+  
+  // Determine user roles
+  const isAdmin = user?.rights.includes('admin');
+  const isManager = user?.rights.includes('reports') && 
+                    user?.rights.includes('dashboard') && 
+                    user?.rights.includes('createLowerUsers');
+  const isTeamLeader = user?.rights.includes('audit') && user?.rights.includes('review');
+  const isAuditor = user?.rights.includes('audit') && !isManager && !isAdmin && !isTeamLeader;
+  
+  const canManageSamples = isAdmin || isManager || isTeamLeader;
+  
+  // Initialize mock data
+  const [auditSamples, setAuditSamples] = useState<AuditSample[]>([]);
+  const [auditorUsers, setAuditorUsers] = useState<AuditorUser[]>([]);
+  
+  // Get forms from localStorage
+  const [availableForms, setAvailableForms] = useState<{ id: string, name: string }[]>([]);
+  
+  // Load forms from localStorage
+  useEffect(() => {
+    try {
+      const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
+      if (savedForms.length > 0) {
+        const mappedForms = savedForms.map((form: any) => ({
+          id: form.id,
+          name: form.name
+        }));
+        setAvailableForms(mappedForms);
+      } else {
+        // Fallback forms if none exist
+        setAvailableForms([
+          { id: "1", name: "Call Quality Assessment" },
+          { id: "2", name: "Email Response Evaluation" },
+          { id: "3", name: "Customer Service Audit" },
+          { id: "4", name: "Technical Support Evaluation" }
+        ]);
+      }
+    } catch (error) {
+      console.error("Error loading audit forms:", error);
+      // Fallback to default forms
+      setAvailableForms([
+        { id: "1", name: "Call Quality Assessment" },
+        { id: "2", name: "Email Response Evaluation" },
+        { id: "3", name: "Customer Service Audit" },
+        { id: "4", name: "Technical Support Evaluation" }
+      ]);
+    }
+  }, []);
+
+  // Mock data for draft/in-progress audits
+  const [draftAudits, setDraftAudits] = useState<AuditSample[]>([]);
+
+  // Initialize sample data
+  useEffect(() => {
+    // Load from localStorage if available
+    const storedSamples = localStorage.getItem('qa-audit-samples');
+    const storedAuditors = localStorage.getItem('qa-users');
+    
+    let parsedSamples: AuditSample[] = [];
+    if (storedSamples) {
+      try {
+        parsedSamples = JSON.parse(storedSamples);
+      } catch (e) {
+        console.error('Error parsing stored audit samples', e);
+      }
+    }
+    
+    if (parsedSamples.length === 0) {
+      // Generate mock data if no saved data exists
+      parsedSamples = [
+        {
+          id: 'sample1',
+          customerName: 'Acme Corporation',
+          ticketId: 'TKT-28945',
+          date: Date.now() - 3 * 86400000,
+          status: 'available',
+          formType: 'Call Quality Assessment',
+          priority: 'high',
+          metadata: {
+            channel: 'call',
+            duration: 487, // seconds
+            category: 'Technical Support'
+          }
+        },
+        {
+          id: 'sample2',
+          customerName: 'Johnson Family',
+          ticketId: 'TKT-29012',
+          date: Date.now() - 2 * 86400000,
+          status: 'available',
+          formType: 'Email Response Evaluation',
+          priority: 'medium',
+          metadata: {
+            channel: 'email',
+            category: 'Billing Inquiry'
+          }
+        },
+        {
+          id: 'sample3',
+          customerName: 'Global Services Ltd',
+          ticketId: 'TKT-29187',
+          date: Date.now() - 86400000,
+          status: 'available',
+          formType: 'Customer Service Audit',
+          priority: 'low',
+          metadata: {
+            channel: 'chat',
+            duration: 732,
+            category: 'Account Management'
+          }
+        }
+      ];
+      
+      // Initialize with sample data
+      localStorage.setItem('qa-audit-samples', JSON.stringify(parsedSamples));
+    }
+    
+    // Prepare auditor users data for assignment
+    if (storedAuditors) {
+      try {
+        const users = JSON.parse(storedAuditors);
+        const auditors = users
+          .filter((u: any) => u.rights.includes('audit') && !u.rights.includes('admin'))
+          .map((u: any) => ({
+            id: u.id,
+            username: u.username,
+            role: u.role || 'Auditor',
+            workload: parsedSamples.filter(s => s.assignedTo === u.username && s.status !== 'completed').length
+          }));
+        setAuditorUsers(auditors);
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    }
+    
+    // Set the fetched/generated data to state
+    setAuditSamples(parsedSamples);
+    
+    // Set drafts based on auditor role
+    if (isAuditor && user) {
+      setDraftAudits(
+        parsedSamples.filter(s => 
+          s.assignedTo === user.username && 
+          (s.status === 'assigned' || s.status === 'inProgress')
+        )
+      );
+    }
+  }, [user, isAuditor]);
+
+  // Handle file upload and Excel parsing
+  const handleFileUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Use the React state value for form selection
+    const selectedFormObj = availableForms.find(form => form.id === selectedForm);
+    const formName = selectedFormObj?.name || availableForms[0]?.name || 'Customer Service Audit';
+    
+    console.log("Uploading with form:", { selectedForm, formName });
+    
+    // Get the file input element
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      console.log("Processing uploaded file:", file.name);
+      
+      // Only proceed if it's an Excel file
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
+        // Show loading state
+        setUploading(true);
+        
+        // Use FileReader to read the file
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            if (!event.target?.result) {
+              throw new Error("Failed to read file");
+            }
+            
+            // Import xlsx dynamically
+            const XLSX = await import('xlsx');
+            
+            // Parse the Excel file
+            const data = new Uint8Array(event.target.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Get the first worksheet
+            const worksheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[worksheetName];
+            
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            console.log("Parsed Excel data:", jsonData);
+            
+            if (!Array.isArray(jsonData) || jsonData.length === 0) {
+              throw new Error("No data found in Excel file or invalid format");
+            }
+            
+            // Create samples from the Excel data
+            const newSamples: AuditSample[] = [];
+            
+            // Process each row of the Excel file
+            jsonData.forEach((row: any, i) => {
+              // Check if the required fields exist
+              if (!row.CustomerName && !row.TicketID) {
+                console.warn(`Row ${i+1} is missing required fields:`, row);
+                return; // Skip this row
+              }
+              
+              // Default values for optional fields
+              const channels = ['call', 'email', 'chat'] as const;
+              const priorities = ['low', 'medium', 'high'] as const;
+              
+              // Create a new sample from the Excel data
+              const newSample: AuditSample = {
+                id: `excel-${Date.now()}-${i}`,
+                customerName: row.CustomerName || row.Customer || row.Name || `Customer-${i+1}`,
+                ticketId: row.TicketID || row.TicketId || row.Ticket || `TKT-${30000 + i}`,
+                date: Date.now() - Math.floor(Math.random() * 7) * 86400000, // Default to recent date
+                status: 'available' as const,
+                formType: formName,
+                priority: (row.Priority as 'low' | 'medium' | 'high' | undefined) || priorities[Math.floor(Math.random() * priorities.length)],
+                metadata: {
+                  channel: (row.Channel as 'call' | 'email' | 'chat' | undefined) || channels[Math.floor(Math.random() * channels.length)],
+                  duration: row.Duration || Math.floor(Math.random() * 900) + 60, // 1-15 minutes
+                  category: row.Category || row.Type || 'General'
+                }
+              };
+              
+              // Add to newSamples array
+              newSamples.push(newSample);
+            });
+            
+            // Finalize the Excel data upload
+            const updatedSamples = [...auditSamples, ...newSamples];
+            
+            // Update state and localStorage
+            setAuditSamples(updatedSamples);
+            localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+            
+            setUploadDialogOpen(false);
+            
+            // Show success notification
+            alert(`Successfully uploaded ${newSamples.length} audit samples using the "${formName}" form.`);
+            
+            // Hide loading state
+            setUploading(false);
+          } catch (error) {
+            console.error("Error processing Excel file:", error);
+            alert(`Error processing Excel file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+            setUploading(false);
+          }
+        };
+        
+        // Read the file as an array buffer
+        reader.readAsArrayBuffer(file);
+      } else {
+        alert("Please upload a valid Excel file (.xlsx, .xls) or CSV file (.csv)");
+      }
+    } else {
+      alert("Please select a file to upload");
+    }
+  };
+
+  // Handle assignment of samples to auditors
+  const handleAssignSamples = () => {
+    if (!selectedAuditor && !randomAssign) {
+      alert("Please select an auditor or enable random assignment");
+      return;
+    }
+    
+    if (selectedSamples.length === 0) {
+      alert("Please select at least one sample to assign");
+      return;
+    }
+    
+    // Process assignment
+    const updatedSamples = auditSamples.map(sample => {
+      if (selectedSamples.includes(sample.id)) {
+        // Determine assigned auditor
+        let assignTo = selectedAuditor;
+        
+        if (randomAssign) {
+          // Simple round-robin assignment based on current workload
+          const sortedAuditors = [...auditorUsers].sort((a, b) => a.workload - b.workload);
+          assignTo = sortedAuditors[0]?.username || user?.username || '';
+          
+          // Update the workload counter for this auditor
+          setAuditorUsers(
+            auditorUsers.map(au => 
+              au.username === assignTo ? {...au, workload: au.workload + 1} : au
+            )
+          );
+        }
+        
+        return {
+          ...sample,
+          status: 'assigned',
+          assignedTo: assignTo
+        };
+      }
+      return sample;
+    });
+    
+    setAuditSamples(updatedSamples);
+    localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+    setSelectedSamples([]);
+    setAssignDialogOpen(false);
+    
+    // Show success message
+    alert(`Successfully assigned ${selectedSamples.length} samples to auditors.`);
+  };
+
+  // Handle bulk sample assignment
+  const handleBulkAssign = () => {
+    if (!selectedAuditor) {
+      alert("Please select an auditor for bulk assignment");
+      return;
+    }
+    
+    const count = parseInt(assignCount);
+    if (isNaN(count) || count < 1) {
+      alert("Please enter a valid number of samples to assign");
+      return;
+    }
+    
+    // Get available samples
+    const availableSampleIds = auditSamples
+      .filter(s => s.status === 'available')
+      .slice(0, count)
+      .map(s => s.id);
+    
+    if (availableSampleIds.length === 0) {
+      alert("No available samples to assign");
+      return;
+    }
+    
+    // Update samples
+    const updatedSamples = auditSamples.map(sample => {
+      if (availableSampleIds.includes(sample.id)) {
+        return {
+          ...sample,
+          status: 'assigned',
+          assignedTo: selectedAuditor
+        };
+      }
+      return sample;
+    });
+    
+    setAuditSamples(updatedSamples);
+    localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+    
+    // Update auditor workload
+    setAuditorUsers(
+      auditorUsers.map(au => 
+        au.username === selectedAuditor ? 
+        {...au, workload: au.workload + availableSampleIds.length} : au
+      )
+    );
+    
+    setAssignDialogOpen(false);
+    
+    // Show success message
+    alert(`Successfully assigned ${availableSampleIds.length} samples to ${selectedAuditor}.`);
+  };
+
+  // Start working on a sample
+  const startAudit = (sample: AuditSample) => {
+    const updatedSample = { ...sample, status: 'inProgress' };
+    
+    // Update the sample status
+    const updatedSamples = auditSamples.map(s => 
+      s.id === sample.id ? updatedSample : s
+    );
+    
+    setAuditSamples(updatedSamples);
+    localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+    
+    // Set as the current working audit
+    setAuditInProgress(updatedSample);
+  };
+
+  // Complete an audit
+  const completeAudit = () => {
+    if (!auditInProgress) return;
+    
+    // Update the sample status
+    const updatedSamples = auditSamples.map(s => 
+      s.id === auditInProgress.id ? 
+      { ...s, status: 'completed' } : s
+    );
+    
+    setAuditSamples(updatedSamples);
+    localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+    
+    // Clear current audit
+    setAuditInProgress(null);
+    
+    // Show success message
+    alert('Audit completed successfully!');
+  };
+
+  // Reset assigned samples
+  const resetAssignment = (sampleId: string) => {
+    const updatedSamples = auditSamples.map(s => 
+      s.id === sampleId ? 
+      { ...s, status: 'available', assignedTo: undefined } : s
+    );
+    
+    setAuditSamples(updatedSamples);
+    localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+  };
+
+  // Handle selecting all samples
+  const toggleSelectAllSamples = (checked: boolean) => {
+    if (checked) {
+      const availableSampleIds = auditSamples
+        .filter(s => s.status === 'available')
+        .map(s => s.id);
+      setSelectedSamples(availableSampleIds);
+    } else {
+      setSelectedSamples([]);
+    }
+  };
+
+  // Toggle selection of a single sample
+  const toggleSampleSelection = (sampleId: string) => {
+    setSelectedSamples(prev => 
+      prev.includes(sampleId) ? 
+      prev.filter(id => id !== sampleId) : 
+      [...prev, sampleId]
+    );
+  };
+
+  // Filter samples based on search input
+  const getFilteredSamples = (status?: AuditSample['status']) => {
+    let filtered = auditSamples;
+    
+    // Filter by status if specified
+    if (status) {
+      filtered = filtered.filter(s => s.status === status);
+    }
+    
+    // Filter by assignee if auditor
+    if (isAuditor && user) {
+      filtered = filtered.filter(s => s.assignedTo === user.username);
+    }
+    
+    // Apply search filter
+    if (sampleFilter) {
+      const lowerFilter = sampleFilter.toLowerCase();
+      filtered = filtered.filter(s => 
+        s.customerName.toLowerCase().includes(lowerFilter) ||
+        s.ticketId.toLowerCase().includes(lowerFilter) ||
+        s.formType.toLowerCase().includes(lowerFilter) ||
+        (s.metadata?.category && s.metadata.category.toLowerCase().includes(lowerFilter))
+      );
+    }
+    
+    return filtered;
+  };
+
+  // Format duration (seconds to MM:SS)
+  const formatDuration = (seconds: number = 0) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Get status badge variants
+  const getStatusBadge = (status: AuditSample['status']) => {
+    switch (status) {
+      case 'available':
+        return <Badge variant="outline">Available</Badge>;
+      case 'assigned':
+        return <Badge variant="secondary">Assigned</Badge>;
+      case 'inProgress':
+        return <Badge variant="default">In Progress</Badge>;
+      case 'completed':
+        return <Badge variant="success">Completed</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
+  // Render priority badge with color
+  const getPriorityBadge = (priority?: 'low' | 'medium' | 'high') => {
+    switch (priority) {
+      case 'high':
+        return <Badge variant="destructive">High</Badge>;
+      case 'medium':
+        return <Badge variant="default">Medium</Badge>;
+      case 'low':
+        return <Badge variant="outline">Low</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="container py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold tracking-tight">Audit Management</h1>
+        
+        {canManageSamples && (
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setUploadDialogOpen(true)}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload Samples
+            </Button>
+            
+            <Button 
+              onClick={() => setAssignDialogOpen(true)}
+              disabled={getFilteredSamples('available').length === 0}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Assign Samples
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      <Tabs defaultValue="assigned" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-4">
+          {isAuditor ? (
+            <>
+              <TabsTrigger value="assigned">
+                My Assigned Audits ({getFilteredSamples('assigned').length})
+              </TabsTrigger>
+              <TabsTrigger value="inProgress">
+                In Progress ({getFilteredSamples('inProgress').length})
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed ({getFilteredSamples('completed').length})
+              </TabsTrigger>
+            </>
+          ) : (
+            <>
+              <TabsTrigger value="available">
+                Available Pool ({getFilteredSamples('available').length})
+              </TabsTrigger>
+              <TabsTrigger value="assigned">
+                Assigned ({getFilteredSamples('assigned').length})
+              </TabsTrigger>
+              <TabsTrigger value="inProgress">
+                In Progress ({getFilteredSamples('inProgress').length})
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed ({getFilteredSamples('completed').length})
+              </TabsTrigger>
+            </>
+          )}
+        </TabsList>
+        
+        <div className="mb-4 relative">
+          <Input
+            placeholder="Search by customer name, ticket ID, or category..."
+            value={sampleFilter}
+            onChange={(e) => setSampleFilter(e.target.value)}
+            className="pr-8"
+          />
+          <Filter className="h-4 w-4 absolute right-3 top-3 text-muted-foreground" />
+        </div>
+        
+        {/* Available Pool Tab - Only visible to Admins/Managers/Team Leaders */}
+        {!isAuditor && (
+          <TabsContent value="available">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Available Audit Pool</CardTitle>
+                    <CardDescription>
+                      All unassigned audit samples ready for allocation
+                    </CardDescription>
+                  </div>
+                  {getFilteredSamples('available').length > 0 && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => exportAuditDataAsCSV(getFilteredSamples('available'))}
+                    >
+                      <FileDown className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {getFilteredSamples('available').length > 0 ? (
+                  <div className="space-y-3">
+                    {getFilteredSamples('available').map(sample => (
+                      <div 
+                        key={sample.id}
+                        className="p-3 border rounded-md hover:bg-muted transition-colors flex justify-between items-center"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Checkbox 
+                            checked={selectedSamples.includes(sample.id)}
+                            onCheckedChange={() => toggleSampleSelection(sample.id)}
+                          />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium">{sample.customerName}</h3>
+                              {getPriorityBadge(sample.priority)}
+                            </div>
+                            <p className="text-sm">
+                              Ticket: <span className="font-mono">{sample.ticketId}</span> 
+                              {sample.metadata?.channel && (
+                                <span className="ml-2 capitalize">[{sample.metadata.channel}]</span>
+                              )}
+                            </p>
+                            <div className="flex text-xs text-muted-foreground gap-3">
+                              <span>Type: {sample.formType}</span>
+                              <span>Date: {new Date(sample.date).toLocaleDateString()}</span>
+                              {sample.metadata?.duration && (
+                                <span>Duration: {formatDuration(sample.metadata.duration)}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  onClick={() => {
+                                    setSelectedSamples([sample.id]);
+                                    setAssignDialogOpen(true);
+                                  }}
+                                >
+                                  <User className="h-4 w-4 mr-1" />
+                                  Assign
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Assign this sample to an auditor</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                      <ClipboardList className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <p>No available audit samples found.</p>
+                    <p className="text-sm">Upload new samples using the "Upload Samples" button.</p>
+                  </div>
+                )}
+              </CardContent>
+              {getFilteredSamples('available').length > 0 && (
+                <CardFooter className="flex justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="select-all"
+                      onCheckedChange={(checked) => toggleSelectAllSamples(!!checked)} 
+                    />
+                    <Label htmlFor="select-all">Select All</Label>
+                  </div>
+                  
+                  <Button 
+                    variant="default" 
+                    onClick={() => setAssignDialogOpen(true)}
+                    disabled={selectedSamples.length === 0}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Assign Selected ({selectedSamples.length})
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          </TabsContent>
+        )}
+        
+        {/* Assigned Tab */}
+        <TabsContent value="assigned">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>
+                    {isAuditor ? 'My Assigned Audits' : 'Assigned Audit Samples'}
+                  </CardTitle>
+                  <CardDescription>
+                    {isAuditor 
+                      ? 'Audits that have been assigned to you'
+                      : 'Samples that have been assigned to auditors but not yet started'}
+                  </CardDescription>
+                </div>
+                {getFilteredSamples('assigned').length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exportAuditDataAsCSV(getFilteredSamples('assigned'))}
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getFilteredSamples('assigned').length > 0 ? (
+                <div className="space-y-3">
+                  {getFilteredSamples('assigned').map(sample => (
+                    <div 
+                      key={sample.id}
+                      className="p-3 border rounded-md hover:bg-muted transition-colors flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{sample.customerName}</h3>
+                          {getPriorityBadge(sample.priority)}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-mono">{sample.ticketId}</span>
+                          {!isAuditor && sample.assignedTo && (
+                            <Badge variant="outline">{sample.assignedTo}</Badge>
+                          )}
+                        </div>
+                        <div className="flex text-xs text-muted-foreground gap-3">
+                          <span>Type: {sample.formType}</span>
+                          <span>Date: {new Date(sample.date).toLocaleDateString()}</span>
+                          {sample.metadata?.duration && (
+                            <span>Duration: {formatDuration(sample.metadata.duration)}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {isAuditor ? (
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            onClick={() => startAudit(sample)}
+                          >
+                            <ClipboardList className="h-4 w-4 mr-1" />
+                            Start Audit
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => resetAssignment(sample.id)}
+                          >
+                            <Undo2 className="h-4 w-4 mr-1" />
+                            Reset
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <AlertCircle className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p>No assigned audits found.</p>
+                  {isAuditor ? (
+                    <p className="text-sm">Wait for a manager to assign audits to you.</p>
+                  ) : (
+                    <p className="text-sm">Assign samples from the Available Pool to auditors.</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* In Progress Tab */}
+        <TabsContent value="inProgress">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>In-Progress Audits</CardTitle>
+                  <CardDescription>
+                    Audits that are currently being worked on
+                  </CardDescription>
+                </div>
+                {getFilteredSamples('inProgress').length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exportAuditDataAsCSV(getFilteredSamples('inProgress'))}
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getFilteredSamples('inProgress').length > 0 ? (
+                <div className="space-y-3">
+                  {getFilteredSamples('inProgress').map(sample => (
+                    <div 
+                      key={sample.id}
+                      className="p-3 border rounded-md hover:bg-muted transition-colors flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{sample.customerName}</h3>
+                          {getPriorityBadge(sample.priority)}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-mono">{sample.ticketId}</span>
+                          {!isAuditor && sample.assignedTo && (
+                            <Badge variant="outline">{sample.assignedTo}</Badge>
+                          )}
+                        </div>
+                        <div className="flex text-xs text-muted-foreground gap-3">
+                          <span>Type: {sample.formType}</span>
+                          <span>Date: {new Date(sample.date).toLocaleDateString()}</span>
+                          {sample.metadata?.duration && (
+                            <span>Duration: {formatDuration(sample.metadata.duration)}</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {isAuditor ? (
+                        <Button 
+                          variant="default" 
+                          size="sm" 
+                          onClick={() => setAuditInProgress(sample)}
+                        >
+                          <ClipboardList className="h-4 w-4 mr-1" />
+                          Continue
+                        </Button>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary">
+                            <Clock className="h-3 w-3 mr-1" />
+                            In Progress
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <Clock className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p>No in-progress audits found.</p>
+                  {isAuditor && (
+                    <p className="text-sm">Start working on your assigned audits to see them here.</p>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Completed Tab */}
+        <TabsContent value="completed">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Completed Audits</CardTitle>
+                  <CardDescription>
+                    Audit samples that have been fully processed
+                  </CardDescription>
+                </div>
+                {getFilteredSamples('completed').length > 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exportAuditDataAsCSV(getFilteredSamples('completed'))}
+                  >
+                    <FileDown className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getFilteredSamples('completed').length > 0 ? (
+                <div className="space-y-3">
+                  {getFilteredSamples('completed').map(sample => (
+                    <div 
+                      key={sample.id}
+                      className="p-3 border rounded-md hover:bg-muted transition-colors flex justify-between items-center"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium">{sample.customerName}</h3>
+                          <Badge variant="success">Completed</Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-mono">{sample.ticketId}</span>
+                          {!isAuditor && sample.assignedTo && (
+                            <Badge variant="outline">{sample.assignedTo}</Badge>
+                          )}
+                        </div>
+                        <div className="flex text-xs text-muted-foreground gap-3">
+                          <span>Type: {sample.formType}</span>
+                          <span>Date: {new Date(sample.date).toLocaleDateString()}</span>
+                          {sample.metadata?.duration && (
+                            <span>Duration: {formatDuration(sample.metadata.duration)}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            // Find the audit in the submitted audits storage
+                            try {
+                              const submittedAudits = JSON.parse(localStorage.getItem('qa-submitted-audits') || '[]');
+                              const auditDetails = submittedAudits.find((a: any) => a.id === sample.id);
+                              
+                              if (auditDetails) {
+                                // Create an audit report if it doesn't exist already
+                                const existingReports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
+                                const reportExists = existingReports.some((r: any) => r.id === sample.id || r.auditId === sample.id);
+                                
+                                if (!reportExists) {
+                                  // Transform to report format
+                                  const newReport = {
+                                    id: auditDetails.id,
+                                    auditId: auditDetails.id,
+                                    agent: auditDetails.agent,
+                                    formName: auditDetails.formName,
+                                    score: auditDetails.score,
+                                    maxScore: auditDetails.maxScore || 100,
+                                    timestamp: auditDetails.timestamp,
+                                    auditor: auditDetails.auditorName || user?.username || 'Unknown',
+                                    answers: transformSectionAnswersToReportFormat(auditDetails.sectionAnswers || [])
+                                  };
+                                  
+                                  existingReports.push(newReport);
+                                  localStorage.setItem('qa-reports', JSON.stringify(existingReports));
+                                }
+                                
+                                // Redirect to reports page with the audit ID
+                                window.location.href = '/#/reports?id=' + sample.id;
+                              } else {
+                                alert('Audit details not found. Please try again.');
+                              }
+                            } catch (error) {
+                              console.error('Error viewing audit results:', error);
+                              alert('Error loading audit results. Please try again.');
+                            }
+                          }}
+                        >
+                          View Results
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <CheckCircle className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p>No completed audits found.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Current Audit UI - Shows when an audit is in progress */}
+      {auditInProgress && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-background border rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold">{auditInProgress.formType}</h2>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Ticket: <span className="font-mono">{auditInProgress.ticketId}</span> • 
+                    Customer: {auditInProgress.customerName}
+                  </div>
+                </div>
+                <Button variant="ghost" onClick={() => setAuditInProgress(null)}>
+                  ✕
+                </Button>
+              </div>
+              
+              <div className="space-y-6">
+                <AuditFormRenderer formName={auditInProgress.formType} />
+                
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setAuditInProgress(null)}>
+                    Save Draft
+                  </Button>
+                  <Button onClick={completeAudit}>
+                    Complete Audit
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Sample Upload Dialog */}
+      <Dialog 
+        open={uploadDialogOpen} 
+        onOpenChange={(open) => {
+          setUploadDialogOpen(open);
+          if (!open) {
+            // Reset file name when closing the dialog
+            setSelectedFileName("");
+          }
+        }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Audit Samples</DialogTitle>
+            <DialogDescription>
+              Upload a CSV or Excel file containing customer audit samples or create open samples
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs defaultValue="upload" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="upload">Upload Agent Data</TabsTrigger>
+              <TabsTrigger value="open">Create Open Samples</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="upload">
+              <form onSubmit={handleFileUpload} className="space-y-4">
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="file-upload">File</Label>
+                  <label className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer">
+                    <FileSpreadsheet className="h-8 w-8 mb-2 text-muted-foreground" />
+                    {selectedFileName ? (
+                      <div className="text-sm text-center mb-3">
+                        <p className="font-medium text-primary">{selectedFileName}</p>
+                        <p className="text-muted-foreground mt-1">Click to change file</p>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-center text-muted-foreground mb-3">
+                        <p>Drag and drop your file here, or</p>
+                        <p>click to browse</p>
+                      </div>
+                    )}
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent form submission
+                        document.getElementById('file-upload')?.click();
+                      }}
+                    >
+                      <FileUp className="h-4 w-4 mr-2" />
+                      Browse Files
+                    </Button>
+                    <input 
+                      type="file" 
+                      id="file-upload" 
+                      className="hidden" 
+                      accept=".csv,.xlsx,.xls"
+                      onChange={(e) => {
+                        // Set the file name for display
+                        if (e.target.files && e.target.files.length > 0) {
+                          setSelectedFileName(e.target.files[0].name);
+                        }
+                        // In a real implementation, you would process the file here
+                      }} 
+                    />
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    Supported formats: .csv, .xlsx (max 10MB)
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="form-type">Default Audit Form Type</Label>
+                  <Select 
+                    defaultValue={availableForms[0]?.id || ""}
+                    value={selectedForm || availableForms[0]?.id || ""}
+                    onValueChange={setSelectedForm}
+                  >
+                    <SelectTrigger id="form-type">
+                      <SelectValue placeholder="Select form type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableForms.map(form => (
+                        <SelectItem key={form.id} value={form.id || "default-form"}>{form.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    This will be used if no form type is specified in the file
+                  </p>
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" type="button" onClick={() => setUploadDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Upload Samples
+                  </Button>
+                </DialogFooter>
+              </form>
+            </TabsContent>
+            
+            <TabsContent value="open">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                // Get the sample count from the input field
+                const countInput = document.getElementById('sample-count') as HTMLInputElement;
+                const sampleCount = parseInt(countInput?.value || '5', 10); // Default to 5 if input is invalid
+                
+                // Use the React state value instead of getting from DOM
+                // This ensures we have the correct form selected
+                const selectedFormObj = availableForms.find(form => form.id === selectedForm);
+                const formName = selectedFormObj?.name || availableForms[0]?.name || 'Customer Service Audit';
+                
+                console.log("Creating samples with form:", { selectedForm, formName });
+                
+                const newSamples: AuditSample[] = [];
+                
+                for (let i = 0; i < sampleCount; i++) {
+                  const newSample: AuditSample = {
+                    id: `open-sample-${Date.now()}-${i}`,
+                    customerName: 'Open Sample',
+                    ticketId: `OPEN-${30000 + Math.floor(Math.random() * 5000)}`,
+                    date: Date.now(),
+                    status: 'available',
+                    formType: formName,
+                    priority: 'medium',
+                    metadata: {
+                      category: 'Open Sample'
+                    }
+                  };
+                  
+                  newSamples.push(newSample);
+                }
+                
+                const updatedSamples = [...auditSamples, ...newSamples];
+                
+                // Update state and localStorage
+                setAuditSamples(updatedSamples);
+                localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+                
+                setUploadDialogOpen(false);
+                
+                // Show success notification
+                alert(`Successfully created ${sampleCount} open audit samples using the "${formName}" form.`);
+              }} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="open-form-type">Audit Form Type</Label>
+                  <Select 
+                    defaultValue={availableForms[0]?.id || ""}
+                    value={selectedForm || availableForms[0]?.id || ""}
+                    onValueChange={setSelectedForm}
+                  >
+                    <SelectTrigger id="open-form-type">
+                      <SelectValue placeholder="Select form type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableForms.map(form => (
+                        <SelectItem key={form.id} value={form.id || "default-form"}>{form.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Select the audit form to use for these open samples
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="sample-count">Number of Open Samples</Label>
+                  <Input 
+                    id="sample-count" 
+                    type="number" 
+                    defaultValue="5" 
+                    min="1"
+                    max="20"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Agents will fill in details when conducting these audits
+                  </p>
+                </div>
+                
+                <div className="rounded-md bg-blue-50 p-4 mt-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-blue-800">Open Sample Mode</h3>
+                      <div className="mt-2 text-sm text-blue-700">
+                        <p>
+                          Open samples allow auditors to manually enter agent and interaction details during the audit process.
+                          This is useful when you don't have pre-populated agent data.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" type="button" onClick={() => setUploadDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Create Open Samples
+                  </Button>
+                </DialogFooter>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Sample Assignment Dialog */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              Assign Audit Samples
+              {selectedSamples.length > 0 && (
+                <Badge variant="outline" className="ml-2">
+                  {selectedSamples.length} selected
+                </Badge>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              Assign samples to auditors for processing
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 my-2">
+            <Tabs defaultValue="manual" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="manual">Manual Assignment</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk Assignment</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="manual" className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="auditor">Select Auditor</Label>
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="random-assign" className="text-sm">Random Assignment</Label>
+                      <Switch 
+                        id="random-assign"
+                        checked={randomAssign}
+                        onCheckedChange={setRandomAssign}
+                      />
+                    </div>
+                  </div>
+                  
+                  <Select 
+                    value={selectedAuditor} 
+                    onValueChange={setSelectedAuditor}
+                    disabled={randomAssign}
+                  >
+                    <SelectTrigger id="auditor">
+                      <SelectValue placeholder="Select an auditor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {auditorUsers.map(auditor => (
+                        <SelectItem key={auditor.id} value={auditor.username}>
+                          {auditor.username} ({auditor.workload} assigned)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedSamples.length > 0 ? (
+                  <div className="border rounded-md py-2">
+                    <div className="px-3 py-1 text-sm font-medium">
+                      Selected Samples ({selectedSamples.length})
+                    </div>
+                    <ScrollArea className="h-[120px]">
+                      {selectedSamples.map(id => {
+                        const sample = auditSamples.find(s => s.id === id);
+                        return sample ? (
+                          <div key={id} className="flex items-center justify-between px-3 py-1 hover:bg-muted">
+                            <div className="text-sm">
+                              <span className="font-medium">{sample.customerName}</span>
+                              <span className="text-xs text-muted-foreground ml-2">
+                                ({sample.ticketId})
+                              </span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => toggleSampleSelection(id)}
+                            >
+                              ✕
+                            </Button>
+                          </div>
+                        ) : null;
+                      })}
+                    </ScrollArea>
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-muted-foreground">
+                    No samples selected. Return to the Available Pool to select samples.
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="bulk" className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bulk-auditor">Select Auditor</Label>
+                  <Select 
+                    value={selectedAuditor} 
+                    onValueChange={setSelectedAuditor}
+                  >
+                    <SelectTrigger id="bulk-auditor">
+                      <SelectValue placeholder="Select an auditor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {auditorUsers.map(auditor => (
+                        <SelectItem key={auditor.id} value={auditor.username}>
+                          {auditor.username} ({auditor.workload} assigned)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="assign-count">Number of Samples to Assign</Label>
+                  <Input
+                    id="assign-count"
+                    type="number"
+                    placeholder="Enter number of samples"
+                    min="1"
+                    value={assignCount}
+                    onChange={(e) => setAssignCount(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {getFilteredSamples('available').length} samples available in pool
+                  </p>
+                </div>
+                
+                <div>
+                  <Label className="text-sm font-medium">Assignment Options</Label>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="priority-high" />
+                      <Label htmlFor="priority-high" className="text-sm">
+                        Prioritize high priority samples
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox id="oldest-first" defaultChecked />
+                      <Label htmlFor="oldest-first" className="text-sm">
+                        Assign oldest samples first
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={activeTab === 'bulk' ? handleBulkAssign : handleAssignSamples}
+              disabled={(selectedSamples.length === 0 && activeTab !== 'bulk') || 
+                      (!selectedAuditor && !randomAssign)}
+            >
+              Assign Samples
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
