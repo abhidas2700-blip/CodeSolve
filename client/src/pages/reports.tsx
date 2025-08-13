@@ -3710,6 +3710,8 @@ export default function ReportsPage() {
 
               <div className="space-y-6">
                 {viewingReport.answers && viewingReport.answers.length > 0 ? (
+                  // Debug: log all section names to see what's available
+                  console.log('All sections in this report:', viewingReport.answers.map(s => s.section)),
                   viewingReport.answers.map((section, sIndex) => {
                     const isInteractionSection = section.section && (
                       section.section.toLowerCase().includes('interaction') ||
@@ -3725,7 +3727,7 @@ export default function ReportsPage() {
                       }
                     }
                     
-
+                    console.log(`Section "${section.section}" - Interaction: ${isInteractionSection}, Number: ${interactionNum}`);
                     
                     return (
                       <div 
