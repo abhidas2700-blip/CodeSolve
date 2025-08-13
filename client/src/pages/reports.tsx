@@ -3710,12 +3710,122 @@ export default function ReportsPage() {
 
               <div className="space-y-6">
                 {viewingReport.answers && viewingReport.answers.length > 0 ? (
-                  viewingReport.answers.map((section, sIndex) => (
-                    <div key={sIndex} className="border rounded-md p-4">
-                      <h3 className="font-semibold text-lg mb-3">{section.section}</h3>
-                      <div className="space-y-4">
-                        {section.questions && section.questions.length > 0 ? (
-                          section.questions.map((question, qIndex) => (
+                  // Group interaction sections by interaction number
+                  (() => {
+                    const nonInteractionSections: any[] = [];
+                    const interactionGroups: Record<number, any[]> = {};
+                    
+                    // Organize sections by interaction
+                    viewingReport.answers.forEach((section, sIndex) => {
+                      const isInteractionSection = section.section && (
+                        section.section.toLowerCase().includes('interaction') ||
+                        section.section.toLowerCase().includes('agent data')
+                      );
+                      
+                      if (isInteractionSection) {
+                        // Extract interaction number from section title
+                        const match = section.section.match(/interaction\s*(\d+)/i);
+                        const interactionNum = match ? parseInt(match[1]) : 1;
+                        
+                        if (!interactionGroups[interactionNum]) {
+                          interactionGroups[interactionNum] = [];
+                        }
+                        interactionGroups[interactionNum].push({ ...section, originalIndex: sIndex });
+                      } else {
+                        nonInteractionSections.push({ ...section, originalIndex: sIndex });
+                      }
+                    });
+                    
+                    return (
+                      <>
+                        {/* Render non-interaction sections first */}
+                        {nonInteractionSections.map((section) => (
+                          <div key={section.originalIndex} className="border rounded-md p-4">
+                            <h3 className="font-semibold text-lg mb-3">{section.section}</h3>
+                            <div className="space-y-4">
+                              {section.questions && section.questions.length > 0 ? (
+                                section.questions.map((question: any, qIndex: number) => (
+                                  <div key={qIndex} className="bg-gray-50 p-3 rounded-md">
+                                    <div className="grid grid-cols-1 gap-2">
+                                      {/* Question with metadata */}
+                                      <div className="bg-white p-3 rounded border border-gray-200">
+                                        <div className="flex justify-between items-start">
+                                          <div>
+                                            <span className="text-sm text-gray-500 font-semibold">Question:</span>
+                                            <div className="font-medium mt-1">{question.text}</div>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2">
+                                            {question.questionType && (
+                                              <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                                                Type: {question.questionType}
+                                              </span>
+                                            )}
+                                            {question.weightage !== undefined && question.weightage !== null && (
+                                              <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                                                Weight: {question.weightage}
+                                              </span>
+                                            )}
+                                            {question.isFatal && (
+                                              <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">
+                                                Fatal Question
+                                              </span>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Answer */}
+                                      <div className="bg-white p-3 rounded border border-gray-200">
+                                        <span className="text-sm text-gray-500 font-semibold">Auditor's Response:</span>
+                                        <div className="font-medium mt-1">
+                                          <span className={`inline-flex px-3 py-1 ${
+                                            question.answer === 'Yes' ? 'bg-green-100 text-green-800' : 
+                                            question.answer === 'No' ? 'bg-red-100 text-red-800' : 
+                                            question.answer === 'N/A' || question.answer === 'NA' ? 'bg-gray-100 text-gray-800' : 
+                                            question.answer === 'Fatal' ? 'bg-red-100 text-red-800 font-bold' :
+                                            'bg-blue-100 text-blue-800'
+                                          } rounded-full font-medium`}>
+                                            {question.answer}
+                                          </span>
+                                        </div>
+                                      </div>
+                                      
+                                      {/* Remarks */}
+                                      {question.remarks && (
+                                        <div className="bg-white p-3 rounded border border-gray-200">
+                                          <span className="text-sm text-gray-500 font-semibold">Remarks:</span>
+                                          <div className="mt-1">{question.remarks}</div>
+                                        </div>
+                                      )}
+                                      
+                                      {/* Rating */}
+                                      {question.rating !== undefined && question.rating !== null && question.rating !== "" && (
+                                        <div className="bg-white p-3 rounded border border-gray-200">
+                                          <span className="text-sm text-gray-500 font-semibold">Rating:</span>
+                                          <div className="mt-1 font-medium">{question.rating}</div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-gray-500">No questions in this section</p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Render interaction groups */}
+                        {Object.keys(interactionGroups).sort((a, b) => parseInt(a) - parseInt(b)).map(interactionNum => (
+                          <div key={`interaction-${interactionNum}`} className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                            <h2 className="font-bold text-xl mb-4 text-blue-800">Interaction {interactionNum}</h2>
+                            <div className="space-y-4">
+                              {interactionGroups[parseInt(interactionNum)].map((section) => (
+                                <div key={section.originalIndex} className="bg-white border rounded-md p-4">
+                                  <h3 className="font-semibold text-lg mb-3">{section.section}</h3>
+                                  <div className="space-y-4">
+                                    {section.questions && section.questions.length > 0 ? (
+                                      section.questions.map((question: any, qIndex: number) => (
                             <div key={qIndex} className="bg-gray-50 p-3 rounded-md">
                               <div className="grid grid-cols-1 gap-2">
                                 {/* Question with metadata */}
@@ -3820,16 +3930,20 @@ export default function ReportsPage() {
                                   </div>
                                 )}
                               </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-gray-500">No questions in this section</p>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          ))
-                        ) : (
-                          <div className="text-center p-4 bg-gray-50 rounded">
-                            <p className="text-gray-500">No questions found in this section</p>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
+                        ))}
+                      </>
+                    );
+                  })()
                 ) : (
                   <div className="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-gray-700 mb-2">No audit data available to display</p>
