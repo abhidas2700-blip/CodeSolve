@@ -2457,81 +2457,11 @@ export default function ReportsPage() {
     return filtered;
   };
 
-  // Enhanced Export to Excel function with vertical interaction format
+  // Enhanced Export to Excel function with horizontal interaction format
   const exportToExcel = (reportsToExport: AuditReport[]) => {
     if (reportsToExport.length === 0) {
       return;
-    }
     
-    console.log(`Starting export of ${reportsToExport.length} reports`);
-    
-    // Simple approach: collect ALL questions from ALL sections and create a single header row
-    const allQuestions: Record<string, string> = {};
-    let maxInteractionCount = 0;
-    
-    // First pass - analyze all reports to understand structure
-    reportsToExport.forEach(report => {
-      console.log(`Analyzing report ${report.auditId}`);
-      
-      if (report.answers) {
-        // Count interactions to understand maximum
-        const interactions = report.answers.filter(section => 
-          section.section && (
-            section.section.toLowerCase().includes('interaction') ||
-            /interaction\s*\d+/i.test(section.section)
-          )
-        );
-        
-        maxInteractionCount = Math.max(maxInteractionCount, interactions.length);
-        console.log(`Report ${report.auditId} has ${interactions.length} interactions`);
-        
-        // Collect all unique questions
-        report.answers.forEach((section, sIndex) => {
-          if (section.questions) {
-            section.questions.forEach((question, qIndex) => {
-              const key = `${sIndex}_${qIndex}`;
-              const questionText = question.text || `Section ${sIndex+1} Question ${qIndex+1}`;
-              allQuestions[key] = questionText;
-            });
-          }
-        });
-      }
-    });
-    
-    console.log(`Max interactions found: ${maxInteractionCount}`);
-    console.log(`Total unique questions: ${Object.keys(allQuestions).length}`);
-    
-    // Create headers
-    const baseHeaders = [
-      "ID", 
-      "Audit ID", 
-      "Agent", 
-      "Auditor",
-      "Form Name", 
-      "Date", 
-      "Score",
-      "Max Score",
-      "Last Edit",
-      "Interaction Number"
-    ];
-    
-    // Add question headers (sorted by section and question order)
-    const sortedQuestionKeys = Object.keys(allQuestions).sort((a, b) => {
-      const [secA, qA] = a.split('_').map(Number);
-      const [secB, qB] = b.split('_').map(Number);
-      return secA === secB ? qA - qB : secA - secB;
-    });
-    
-    const questionHeaders: string[] = [];
-    sortedQuestionKeys.forEach(key => {
-      const questionText = allQuestions[key];
-      questionHeaders.push(`${questionText} - Answer`);
-      questionHeaders.push(`${questionText} - Remarks`);
-      questionHeaders.push(`${questionText} - Rating`);
-    });
-    
-    const allHeaders = [...baseHeaders, ...questionHeaders];
-    let csvContent = allHeaders.map(h => `"${h}"`).join(",") + "\n";
     
     // Process each report and create multiple rows for interactions
     reportsToExport.forEach(report => {
