@@ -2532,30 +2532,14 @@ export default function ReportsPage() {
           }
         });
         
-        // Process interaction sections - collect unique questions
+        // Process interaction sections - create single combined column
         if (interactionSections.length > 0) {
-          const interactionQuestions = new Set<string>();
-          
-          interactionSections.forEach(section => {
-            if (section.questions) {
-              section.questions.forEach(question => {
-                const questionText = question.text || `Question`;
-                interactionQuestions.add(questionText);
-              });
-            }
-          });
-          
-          // Add interaction questions to header map starting after non-interaction sections
           const startIndex = nonInteractionSections.length;
-          let qIndex = 0;
+          const questionKey = `S${startIndex+1}-Q1`;
           
-          [...interactionQuestions].forEach(questionText => {
-            const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
-            if (!questionMap[questionKey]) {
-              questionMap[questionKey] = `${questionText} (All Interactions)`;
-            }
-            qIndex++;
-          });
+          if (!questionMap[questionKey]) {
+            questionMap[questionKey] = "All Interactions";
+          }
         }
       }
     });
@@ -2688,26 +2672,47 @@ export default function ReportsPage() {
             }
           });
           
-          // Map interaction questions to position keys starting after non-interaction sections
-          const startIndex = nonInteractionSections.length;
-          let qIndex = 0;
-          
-          Object.entries(interactionQuestionMap).forEach(([questionText, data]) => {
-            const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
+          // For interaction sections, create a single combined field with horizontal arrangement
+          if (interactionSections.length > 0) {
+            const startIndex = nonInteractionSections.length;
             
-            // Combine all interactions vertically with line breaks
+            // Create a single "All Interactions" field that contains horizontally formatted interactions
+            const allInteractionsData: string[] = [];
+            const allInteractionsRemarks: string[] = [];
+            const allInteractionsRatings: string[] = [];
+            
+            interactionSections.forEach((section, interactionIndex) => {
+              if (section.questions && section.questions.length > 0) {
+                // Build horizontal line for this interaction
+                const interactionAnswers: string[] = [];
+                const interactionRemarks: string[] = [];
+                const interactionRatings: string[] = [];
+                
+                section.questions.forEach((question) => {
+                  interactionAnswers.push(question.answer || "Not Answered");
+                  interactionRemarks.push(question.remarks || "");
+                  interactionRatings.push(question.rating ? String(question.rating) : "");
+                });
+                
+                // Join this interaction's data horizontally with " | " separator
+                allInteractionsData.push(interactionAnswers.join(" | "));
+                allInteractionsRemarks.push(interactionRemarks.filter(r => r.trim()).join(" | "));
+                allInteractionsRatings.push(interactionRatings.filter(r => r.trim()).join(" | "));
+              }
+            });
+            
+            // Store as single field with all interactions stacked vertically
+            const questionKey = `S${startIndex+1}-Q1`;
             questionDataMap[questionKey] = {
-              answer: data.answers.join('\n'),
-              remarks: data.remarks.filter(r => r.trim()).join('\n'),
-              rating: data.ratings.filter(r => r.trim()).join('\n'),
-              type: data.type,
-              fatal: data.fatal,
-              weightage: data.weightage,
-              id: data.id
+              answer: allInteractionsData.join('\n'),
+              remarks: allInteractionsRemarks.filter(r => r.trim()).join('\n'),
+              rating: allInteractionsRatings.filter(r => r.trim()).join('\n'),
+              type: "interactions",
+              fatal: "No",
+              weightage: "",
+              id: "all-interactions"
             };
-            
-            qIndex++;
-          });
+          }
         }
       }
       
