@@ -2536,6 +2536,7 @@ export default function ReportsPage() {
     // Process each report and create multiple rows for interactions
     reportsToExport.forEach(report => {
       console.log(`Processing report ${report.auditId}`);
+      console.log("Report sections:", report.answers?.map(s => s.section));
       
       const timestamp = new Date(report.timestamp).toLocaleString();
       const lastEdit = report.editHistory && report.editHistory.length > 0
@@ -2543,15 +2544,47 @@ export default function ReportsPage() {
         : "Not edited";
       
       if (report.answers) {
-        // Find interaction sections
-        const interactionSections = report.answers.filter(section => 
+        // Look for ANY section that might indicate multiple interactions
+        // Check for patterns like "interaction", numbered sections, or repeated question sets
+        const allSections = report.answers;
+        
+        // Try to detect interactions by looking for repeated patterns or "Was there another interaction?" answers
+        let interactionCount = 1; // Default to at least 1 interaction
+        
+        // Check if any question asks about "another interaction"
+        const hasAnotherInteractionQuestion = allSections.some(section => 
+          section.questions?.some(q => 
+            q.text?.toLowerCase().includes('another interaction') ||
+            q.text?.toLowerCase().includes('was there another')
+          )
+        );
+        
+        if (hasAnotherInteractionQuestion) {
+          // Count how many "Yes" answers there are to "another interaction" questions
+          const yesAnswers = allSections
+            .flatMap(section => section.questions || [])
+            .filter(q => 
+              (q.text?.toLowerCase().includes('another interaction') || 
+               q.text?.toLowerCase().includes('was there another')) &&
+              q.answer?.toLowerCase() === 'yes'
+            ).length;
+          
+          interactionCount = yesAnswers + 1; // +1 for the initial interaction
+        }
+        
+        // Also check for explicit interaction sections
+        const explicitInteractionSections = allSections.filter(section => 
           section.section && (
             section.section.toLowerCase().includes('interaction') ||
             /interaction\s*\d+/i.test(section.section)
           )
         );
         
-        console.log(`Found ${interactionSections.length} interaction sections for ${report.auditId}`);
+        if (explicitInteractionSections.length > 0) {
+          interactionCount = Math.max(interactionCount, explicitInteractionSections.length);
+        }
+        
+        console.log(`Detected ${interactionCount} interactions for ${report.auditId} (hasAnotherQuestion: ${hasAnotherInteractionQuestion}, explicitSections: ${explicitInteractionSections.length})`);
         
         // Create a complete question map for this report
         const reportQuestionMap: Record<string, any> = {};
@@ -2568,9 +2601,9 @@ export default function ReportsPage() {
           }
         });
         
-        if (interactionSections.length === 0) {
-          // No interactions - create single row
-          console.log(`No interactions found for ${report.auditId}, creating single row`);
+        if (interactionCount <= 1) {
+          // Single interaction - create single row
+          console.log(`Single interaction found for ${report.auditId}, creating 1 row`);
           
           const baseData = [
             report.id,
@@ -2582,7 +2615,7 @@ export default function ReportsPage() {
             report.score,
             (report as any).maxScore || 100,
             lastEdit,
-            "No Interactions"
+            "Interaction 1"
           ];
           
           // Add question data
@@ -2603,9 +2636,9 @@ export default function ReportsPage() {
           
         } else {
           // Multiple interactions - create one row per interaction
-          console.log(`Creating ${interactionSections.length} rows for ${report.auditId} interactions`);
+          console.log(`Creating ${interactionCount} rows for ${report.auditId} (multiple interactions)`);
           
-          interactionSections.forEach((interactionSection, interactionIndex) => {
+          for (let i = 0; i < interactionCount; i++) {
             const baseData = [
               report.id,
               report.auditId,
@@ -2616,7 +2649,7 @@ export default function ReportsPage() {
               report.score,
               (report as any).maxScore || 100,
               lastEdit,
-              `Interaction ${interactionIndex + 1}`
+              `Interaction ${i + 1}`
             ];
             
             // Add question data (same for all interactions within this audit)
@@ -2634,7 +2667,7 @@ export default function ReportsPage() {
             
             const fullRowData = [...baseData.map(d => `"${d}"`), ...questionData];
             csvContent += fullRowData.join(",") + "\n";
-          });
+          }
         }
       } else {
         console.log(`No answers found for report ${report.auditId}`);
