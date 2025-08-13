@@ -339,6 +339,14 @@ export default function UserAuditPage() {
     const controllingAnswer = answers[controllingQuestion.id]?.answer;
     const isVisible = controllingQuestion.visibleOnValues?.includes(controllingAnswer || '') ?? false;
     
+    console.log(`🔍 VALIDATION SECTION VISIBILITY CHECK: Section "${section.name}"`, {
+      controlledBy: section.controlledBy,
+      controllingQuestionId: controllingQuestion.id,
+      controllingAnswer,
+      visibleOnValues: controllingQuestion.visibleOnValues,
+      isVisible
+    });
+    
     return isVisible;
   };
 
@@ -355,9 +363,17 @@ export default function UserAuditPage() {
     
     const controllingAnswer = answers[controllingQuestion.id]?.answer;
     
-    // Use the controlling question's visibleOnValues to determine visibility
-    const visibleOnValues = controllingQuestion.visibleOnValues || [];
-    const isVisible = visibleOnValues.includes(controllingAnswer || '');
+    // Use the controlled question's visibleOnValues to determine visibility
+    // This should match the rendering logic exactly
+    const visibleValues = question.visibleOnValues?.split(',').map((v: string) => v.trim()) || [];
+    const isVisible = visibleValues.includes(controllingAnswer || '');
+    
+    console.log(`🔍 VALIDATION VISIBILITY CHECK: Question "${question.text}"`, {
+      controlledBy: question.controlledBy,
+      controllingAnswer,
+      visibleOnValues: visibleValues,
+      isVisible
+    });
     
     return isVisible;
   };
