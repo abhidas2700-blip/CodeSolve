@@ -2501,16 +2501,29 @@ export default function ReportsPage() {
     // First pass - collect all unique questions from all reports
     reportsToExport.forEach(report => {
       if (report.answers) {
-        report.answers.forEach((section, sIndex) => {
+        // Separate interaction sections from non-interaction sections for headers
+        const interactionSections = report.answers.filter(section => 
+          section.section && (
+            section.section.toLowerCase().includes('interaction') ||
+            section.section.toLowerCase().includes('agent data')
+          )
+        );
+        
+        const nonInteractionSections = report.answers.filter(section => 
+          !section.section || (
+            !section.section.toLowerCase().includes('interaction') &&
+            !section.section.toLowerCase().includes('agent data')
+          )
+        );
+        
+        // Process non-interaction sections normally
+        nonInteractionSections.forEach((section, sIndex) => {
           if (section.questions) {
             section.questions.forEach((question, qIndex) => {
-              // Create a position-based key for each question
               const questionKey = `S${sIndex+1}-Q${qIndex+1}`;
               const questionText = question.text || `Question ${qIndex+1}`;
               
-              // Store question text with its position key
               if (questionKey && questionText) {
-                // Only add if not already in map at this position
                 if (!questionMap[questionKey]) {
                   questionMap[questionKey] = questionText;
                 }
@@ -2518,6 +2531,32 @@ export default function ReportsPage() {
             });
           }
         });
+        
+        // Process interaction sections - collect unique questions
+        if (interactionSections.length > 0) {
+          const interactionQuestions = new Set<string>();
+          
+          interactionSections.forEach(section => {
+            if (section.questions) {
+              section.questions.forEach(question => {
+                const questionText = question.text || `Question`;
+                interactionQuestions.add(questionText);
+              });
+            }
+          });
+          
+          // Add interaction questions to header map starting after non-interaction sections
+          const startIndex = nonInteractionSections.length;
+          let qIndex = 0;
+          
+          [...interactionQuestions].forEach(questionText => {
+            const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
+            if (!questionMap[questionKey]) {
+              questionMap[questionKey] = `${questionText} (All Interactions)`;
+            }
+            qIndex++;
+          });
+        }
       }
     });
     
@@ -2568,15 +2607,29 @@ export default function ReportsPage() {
       // Create a map to store question data by position key
       const questionDataMap: Record<string, any> = {};
       
-      // Process each section and its questions
+      // Process each section and its questions - handle multiple interactions
       if (report.answers) {
-        report.answers.forEach((section, sIndex) => {
+        // Separate interaction sections from non-interaction sections
+        const interactionSections = report.answers.filter(section => 
+          section.section && (
+            section.section.toLowerCase().includes('interaction') ||
+            section.section.toLowerCase().includes('agent data')
+          )
+        );
+        
+        const nonInteractionSections = report.answers.filter(section => 
+          !section.section || (
+            !section.section.toLowerCase().includes('interaction') &&
+            !section.section.toLowerCase().includes('agent data')
+          )
+        );
+        
+        // Process non-interaction sections normally
+        nonInteractionSections.forEach((section, sIndex) => {
           if (section.questions) {
             section.questions.forEach((question, qIndex) => {
-              // Create the same position key as used in headers
               const questionKey = `S${sIndex+1}-Q${qIndex+1}`;
               
-              // Store this question's data
               questionDataMap[questionKey] = {
                 answer: question.answer || "",
                 remarks: question.remarks || "",
@@ -2589,6 +2642,73 @@ export default function ReportsPage() {
             });
           }
         });
+        
+        // Process interaction sections - combine all interactions vertically
+        if (interactionSections.length > 0) {
+          // Group questions by their text/type across all interactions
+          const interactionQuestionMap: Record<string, {
+            answers: string[],
+            remarks: string[],
+            ratings: string[],
+            type: string,
+            fatal: string,
+            weightage: string,
+            id: string
+          }> = {};
+          
+          interactionSections.forEach((section, interactionIndex) => {
+            if (section.questions) {
+              section.questions.forEach((question, qIndex) => {
+                const questionText = question.text || `Question ${qIndex+1}`;
+                const questionKey = `interaction-${questionText}`;
+                
+                if (!interactionQuestionMap[questionKey]) {
+                  interactionQuestionMap[questionKey] = {
+                    answers: [],
+                    remarks: [],
+                    ratings: [],
+                    type: question.questionType || "",
+                    fatal: question.isFatal ? "Yes" : "No",
+                    weightage: question.weightage ? String(question.weightage) : "",
+                    id: question.questionId || ""
+                  };
+                }
+                
+                // Add this interaction's data
+                interactionQuestionMap[questionKey].answers.push(
+                  question.answer || "Not Answered"
+                );
+                interactionQuestionMap[questionKey].remarks.push(
+                  question.remarks || ""
+                );
+                interactionQuestionMap[questionKey].ratings.push(
+                  question.rating ? String(question.rating) : ""
+                );
+              });
+            }
+          });
+          
+          // Map interaction questions to position keys starting after non-interaction sections
+          const startIndex = nonInteractionSections.length;
+          let qIndex = 0;
+          
+          Object.entries(interactionQuestionMap).forEach(([questionText, data]) => {
+            const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
+            
+            // Combine all interactions vertically with line breaks
+            questionDataMap[questionKey] = {
+              answer: data.answers.join('\n'),
+              remarks: data.remarks.filter(r => r.trim()).join('\n'),
+              rating: data.ratings.filter(r => r.trim()).join('\n'),
+              type: data.type,
+              fatal: data.fatal,
+              weightage: data.weightage,
+              id: data.id
+            };
+            
+            qIndex++;
+          });
+        }
       }
       
       // Prepare array for all question data that matches the headers
