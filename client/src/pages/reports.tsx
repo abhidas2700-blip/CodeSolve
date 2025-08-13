@@ -2457,14 +2457,52 @@ export default function ReportsPage() {
     return filtered;
   };
 
-  // Enhanced Export to Excel function with detailed question and answer data
+  // Enhanced Export to Excel function with vertical interaction format
   const exportToExcel = (reportsToExport: AuditReport[]) => {
     if (reportsToExport.length === 0) {
       return;
     }
     
-    // Create headers for basic report data
-    let headers = [
+    console.log(`Starting export of ${reportsToExport.length} reports`);
+    
+    // Simple approach: collect ALL questions from ALL sections and create a single header row
+    const allQuestions: Record<string, string> = {};
+    let maxInteractionCount = 0;
+    
+    // First pass - analyze all reports to understand structure
+    reportsToExport.forEach(report => {
+      console.log(`Analyzing report ${report.auditId}`);
+      
+      if (report.answers) {
+        // Count interactions to understand maximum
+        const interactions = report.answers.filter(section => 
+          section.section && (
+            section.section.toLowerCase().includes('interaction') ||
+            /interaction\s*\d+/i.test(section.section)
+          )
+        );
+        
+        maxInteractionCount = Math.max(maxInteractionCount, interactions.length);
+        console.log(`Report ${report.auditId} has ${interactions.length} interactions`);
+        
+        // Collect all unique questions
+        report.answers.forEach((section, sIndex) => {
+          if (section.questions) {
+            section.questions.forEach((question, qIndex) => {
+              const key = `${sIndex}_${qIndex}`;
+              const questionText = question.text || `Section ${sIndex+1} Question ${qIndex+1}`;
+              allQuestions[key] = questionText;
+            });
+          }
+        });
+      }
+    });
+    
+    console.log(`Max interactions found: ${maxInteractionCount}`);
+    console.log(`Total unique questions: ${Object.keys(allQuestions).length}`);
+    
+    // Create headers
+    const baseHeaders = [
       "ID", 
       "Audit ID", 
       "Agent", 
@@ -2477,89 +2515,27 @@ export default function ReportsPage() {
       "Interaction Number"
     ];
     
-    // Map to track questions by their position
-    const questionMap: Record<string, string> = {};
-    
-    // First pass - collect all unique questions from all reports
-    reportsToExport.forEach(report => {
-      if (report.answers) {
-        // Separate interaction sections from non-interaction sections for headers
-        const interactionSections = report.answers.filter(section => 
-          section.section && (
-            section.section.toLowerCase().includes('interaction') ||
-            section.section.toLowerCase().includes('agent data')
-          )
-        );
-        
-        const nonInteractionSections = report.answers.filter(section => 
-          !section.section || (
-            !section.section.toLowerCase().includes('interaction') &&
-            !section.section.toLowerCase().includes('agent data')
-          )
-        );
-        
-        // Process non-interaction sections normally
-        nonInteractionSections.forEach((section, sIndex) => {
-          if (section.questions) {
-            section.questions.forEach((question, qIndex) => {
-              const questionKey = `S${sIndex+1}-Q${qIndex+1}`;
-              const questionText = question.text || `Question ${qIndex+1}`;
-              
-              if (questionKey && questionText) {
-                if (!questionMap[questionKey]) {
-                  questionMap[questionKey] = questionText;
-                }
-              }
-            });
-          }
-        });
-        
-        // Process interaction sections - collect unique interaction questions
-        if (interactionSections.length > 0) {
-          // Get the first interaction to determine question structure
-          const firstInteraction = interactionSections[0];
-          if (firstInteraction && firstInteraction.questions) {
-            const startIndex = nonInteractionSections.length;
-            firstInteraction.questions.forEach((question, qIndex) => {
-              const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
-              const questionText = question.text || `Interaction Question ${qIndex+1}`;
-              
-              if (!questionMap[questionKey]) {
-                questionMap[questionKey] = questionText;
-              }
-            });
-          }
-        }
-      }
+    // Add question headers (sorted by section and question order)
+    const sortedQuestionKeys = Object.keys(allQuestions).sort((a, b) => {
+      const [secA, qA] = a.split('_').map(Number);
+      const [secB, qB] = b.split('_').map(Number);
+      return secA === secB ? qA - qB : secA - secB;
     });
     
-    // Create a sorted array of position keys
-    const sortedKeys = Object.keys(questionMap).sort((a, b) => {
-      // Extract section and question numbers for proper numeric sorting
-      const [, secA, qA] = a.match(/S(\d+)-Q(\d+)/) || [0, 0, 0];
-      const [, secB, qB] = b.match(/S(\d+)-Q(\d+)/) || [0, 0, 0];
-      
-      // First sort by section, then by question
-      return Number(secA) === Number(secB) 
-        ? Number(qA) - Number(qB) 
-        : Number(secA) - Number(secB);
+    const questionHeaders: string[] = [];
+    sortedQuestionKeys.forEach(key => {
+      const questionText = allQuestions[key];
+      questionHeaders.push(`${questionText} - Answer`);
+      questionHeaders.push(`${questionText} - Remarks`);
+      questionHeaders.push(`${questionText} - Rating`);
     });
     
-    // Add headers for each question - only essential information
-    sortedKeys.forEach(key => {
-      const questionText = questionMap[key];
-      headers.push(`${questionText} - Answer`);
-      headers.push(`${questionText} - Remarks`);
-      // Only include rating as it's important for audit scoring
-      headers.push(`${questionText} - Rating`);
-    });
-    
-    // Create CSV content with headers
-    let csvContent = headers.map(h => `"${h}"`).join(",") + "\n";
+    const allHeaders = [...baseHeaders, ...questionHeaders];
+    let csvContent = allHeaders.map(h => `"${h}"`).join(",") + "\n";
     
     // Process each report and create multiple rows for interactions
     reportsToExport.forEach(report => {
-      console.log(`Processing report ${report.auditId}, sections:`, report.answers?.map(s => s.section));
+      console.log(`Processing report ${report.auditId}`);
       
       const timestamp = new Date(report.timestamp).toLocaleString();
       const lastEdit = report.editHistory && report.editHistory.length > 0
@@ -2567,46 +2543,35 @@ export default function ReportsPage() {
         : "Not edited";
       
       if (report.answers) {
-        // Separate interaction sections from non-interaction sections
+        // Find interaction sections
         const interactionSections = report.answers.filter(section => 
           section.section && (
             section.section.toLowerCase().includes('interaction') ||
-            section.section.toLowerCase().includes('agent data')
+            /interaction\s*\d+/i.test(section.section)
           )
         );
         
-        const nonInteractionSections = report.answers.filter(section => 
-          !section.section || (
-            !section.section.toLowerCase().includes('interaction') &&
-            !section.section.toLowerCase().includes('agent data')
-          )
-        );
+        console.log(`Found ${interactionSections.length} interaction sections for ${report.auditId}`);
         
-        console.log(`Found ${interactionSections.length} interaction sections:`, interactionSections.map(s => s.section));
-        console.log(`Found ${nonInteractionSections.length} non-interaction sections:`, nonInteractionSections.map(s => s.section));
-        
-        // Process non-interaction data (same for all rows of this audit)
-        const nonInteractionDataMap: Record<string, any> = {};
-        nonInteractionSections.forEach((section, sIndex) => {
+        // Create a complete question map for this report
+        const reportQuestionMap: Record<string, any> = {};
+        report.answers.forEach((section, sIndex) => {
           if (section.questions) {
             section.questions.forEach((question, qIndex) => {
-              const questionKey = `S${sIndex+1}-Q${qIndex+1}`;
-              
-              nonInteractionDataMap[questionKey] = {
+              const key = `${sIndex}_${qIndex}`;
+              reportQuestionMap[key] = {
                 answer: question.answer || "",
                 remarks: question.remarks || "",
-                rating: question.rating ? String(question.rating) : "",
-                type: question.questionType || "",
-                fatal: question.isFatal ? "Yes" : "No",
-                weightage: question.weightage ? String(question.weightage) : "",
-                id: question.questionId || ""
+                rating: question.rating ? String(question.rating) : ""
               };
             });
           }
         });
         
-        // If no interactions, create single row with non-interaction data
         if (interactionSections.length === 0) {
+          // No interactions - create single row
+          console.log(`No interactions found for ${report.auditId}, creating single row`);
+          
           const baseData = [
             report.id,
             report.auditId,
@@ -2620,23 +2585,26 @@ export default function ReportsPage() {
             "No Interactions"
           ];
           
+          // Add question data
           const questionData: string[] = [];
-          sortedKeys.forEach(key => {
-            const data = nonInteractionDataMap[key];
+          sortedQuestionKeys.forEach(key => {
+            const data = reportQuestionMap[key];
             if (data) {
               questionData.push(`"${data.answer}"`);
               questionData.push(`"${data.remarks}"`);
               questionData.push(`"${data.rating}"`);
             } else {
-              questionData.push('""');
-              questionData.push('""');
-              questionData.push('""');
+              questionData.push('""', '""', '""');
             }
           });
           
-          csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+          const fullRowData = [...baseData.map(d => `"${d}"`), ...questionData];
+          csvContent += fullRowData.join(",") + "\n";
+          
         } else {
-          // Create one row per interaction
+          // Multiple interactions - create one row per interaction
+          console.log(`Creating ${interactionSections.length} rows for ${report.auditId} interactions`);
+          
           interactionSections.forEach((interactionSection, interactionIndex) => {
             const baseData = [
               report.id,
@@ -2651,68 +2619,25 @@ export default function ReportsPage() {
               `Interaction ${interactionIndex + 1}`
             ];
             
-            // Combine non-interaction data with this specific interaction data
-            const combinedDataMap = { ...nonInteractionDataMap };
-            
-            // Add this interaction's questions
-            if (interactionSection.questions) {
-              const startIndex = nonInteractionSections.length;
-              interactionSection.questions.forEach((question, qIndex) => {
-                const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
-                
-                combinedDataMap[questionKey] = {
-                  answer: question.answer || "",
-                  remarks: question.remarks || "",
-                  rating: question.rating ? String(question.rating) : "",
-                  type: question.questionType || "",
-                  fatal: question.isFatal ? "Yes" : "No",
-                  weightage: question.weightage ? String(question.weightage) : "",
-                  id: question.questionId || ""
-                };
-              });
-            }
-            
-            // Build question data for this row
+            // Add question data (same for all interactions within this audit)
             const questionData: string[] = [];
-            sortedKeys.forEach(key => {
-              const data = combinedDataMap[key];
+            sortedQuestionKeys.forEach(key => {
+              const data = reportQuestionMap[key];
               if (data) {
                 questionData.push(`"${data.answer}"`);
                 questionData.push(`"${data.remarks}"`);
                 questionData.push(`"${data.rating}"`);
               } else {
-                questionData.push('""');
-                questionData.push('""');
-                questionData.push('""');
+                questionData.push('""', '""', '""');
               }
             });
             
-            csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+            const fullRowData = [...baseData.map(d => `"${d}"`), ...questionData];
+            csvContent += fullRowData.join(",") + "\n";
           });
         }
       } else {
-        // No answers data - create single row with basic data
-        const baseData = [
-          report.id,
-          report.auditId,
-          report.agent,
-          report.auditor || "Not specified",
-          report.formName,
-          timestamp,
-          report.score,
-          (report as any).maxScore || 100,
-          lastEdit,
-          "No Data"
-        ];
-        
-        const questionData: string[] = [];
-        sortedKeys.forEach(() => {
-          questionData.push('""');
-          questionData.push('""');
-          questionData.push('""');
-        });
-        
-        csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+        console.log(`No answers found for report ${report.auditId}`);
       }
     });
     
