@@ -2559,6 +2559,8 @@ export default function ReportsPage() {
     
     // Process each report and create multiple rows for interactions
     reportsToExport.forEach(report => {
+      console.log(`Processing report ${report.auditId}, sections:`, report.answers?.map(s => s.section));
+      
       const timestamp = new Date(report.timestamp).toLocaleString();
       const lastEdit = report.editHistory && report.editHistory.length > 0
         ? `${new Date(report.editHistory[report.editHistory.length - 1].timestamp).toLocaleString()} by ${report.editHistory[report.editHistory.length - 1].editor}`
@@ -2579,6 +2581,9 @@ export default function ReportsPage() {
             !section.section.toLowerCase().includes('agent data')
           )
         );
+        
+        console.log(`Found ${interactionSections.length} interaction sections:`, interactionSections.map(s => s.section));
+        console.log(`Found ${nonInteractionSections.length} non-interaction sections:`, nonInteractionSections.map(s => s.section));
         
         // Process non-interaction data (same for all rows of this audit)
         const nonInteractionDataMap: Record<string, any> = {};
