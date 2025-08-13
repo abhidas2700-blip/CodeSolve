@@ -2486,7 +2486,15 @@ export default function Audits() {
       // Prepare sections and answers for the draft
       const sectionAnswers: { sectionName: string; answers: any[] }[] = [];
       
-      activeFormDef.sections.forEach(section => {
+      // Get all sections including dynamic ones from the global form state
+      const { form: globalFormDef } = globalFormState;
+      const allSections = globalFormDef ? 
+        [...globalFormDef.sections, ...(globalFormState.dynamicSections || [])] : 
+        activeFormDef.sections;
+      
+      console.log('Processing sections for draft:', allSections.map(s => s.name));
+      
+      allSections.forEach(section => {
         const sectionResult = {
           sectionName: section.name,
           answers: []

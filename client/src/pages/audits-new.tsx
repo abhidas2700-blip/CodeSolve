@@ -197,21 +197,53 @@ export default function UserAuditPage() {
     console.log("=== RECALCULATING SCORE IN USER AUDIT PAGE (NEW 100% DEDUCTION APPROACH) ===");
     console.log(`Total questions with answers: ${Object.keys(answers).length}`);
     
-    // STEP 1: Calculate total weightage from all questions
-    for (const section of form.sections) {
+    // STEP 1: Calculate total weightage from all questions including dynamic sections
+    // Get all sections including dynamic interaction sections
+    const allSectionsForScore = [...form.sections];
+    
+    // Add dynamic sections based on answered questions
+    const interactionSections = new Set<number>();
+    Object.keys(answers).forEach(questionId => {
+      if (questionId.includes('_repeat_')) {
+        const parts = questionId.split('_repeat_');
+        if (parts.length === 2) {
+          const repeatIndex = parseInt(parts[1]);
+          if (repeatIndex > 1) {
+            interactionSections.add(repeatIndex);
+          }
+        }
+      }
+    });
+    
+    // Add dynamic sections for score calculation
+    interactionSections.forEach(repeatIndex => {
+      const templateSection = form.sections.find(s => s.isRepeatable);
+      if (templateSection) {
+        allSectionsForScore.push({
+          ...templateSection,
+          name: `Interaction ${repeatIndex}`,
+          questions: templateSection.questions.map(q => ({
+            ...q,
+            id: `${q.id}_repeat_${repeatIndex}`
+          }))
+        });
+      }
+    });
+    
+    for (const section of allSectionsForScore) {
       for (const question of section.questions) {
         // Include all questions with weightage > 0
         if (question.weightage > 0) {
           totalWeightage += question.weightage;
-          console.log(`Adding ${question.weightage} to total weightage for question: "${question.text}"`);
+          console.log(`Adding ${question.weightage} to total weightage for question: "${question.text}" in section: ${section.name}`);
         }
       }
     }
     
-    console.log(`Total weightage from all questions: ${totalWeightage}`);
+    console.log(`Total weightage from all questions (including dynamic sections): ${totalWeightage}`);
     
     // STEP 2: Process answers and calculate deductions
-    for (const section of form.sections) {
+    for (const section of allSectionsForScore) {
       console.log(`Processing section: ${section.name} with ${section.questions.length} questions`);
       for (const question of section.questions) {
         // Skip text-only questions that don't affect score
@@ -423,7 +455,54 @@ export default function UserAuditPage() {
     // Using the logic provided to create section answers
     const finalAnswers: SectionAnswers[] = [];
     
-    form.sections.forEach(section => {
+    // Process all sections: original form sections + any dynamic sections created during form filling
+    const allSections = [...form.sections];
+    
+    // Add any dynamic sections that were created (like additional interactions)
+    // Check if there are any dynamic sections stored in component state or context
+    // For now, we'll check for additional interaction sections by looking for pattern in answers
+    const interactionSectionNames = new Set<string>();
+    
+    // Analyze answers to identify which interaction sections have data
+    Object.keys(answers).forEach(questionId => {
+      if (questionId.includes('_repeat_')) {
+        const parts = questionId.split('_repeat_');
+        if (parts.length === 2) {
+          const repeatIndex = parseInt(parts[1]);
+          if (repeatIndex > 1) {
+            // Find the original section name and create interaction section name
+            const originalQuestionId = parts[0];
+            const originalSection = form.sections.find(s => 
+              s.questions.some(q => q.id === originalQuestionId)
+            );
+            if (originalSection) {
+              interactionSectionNames.add(`Interaction ${repeatIndex}`);
+            }
+          }
+        }
+      }
+    });
+    
+    // Add dynamic interaction sections
+    interactionSectionNames.forEach(sectionName => {
+      const repeatIndex = parseInt(sectionName.split(' ')[1]);
+      const templateSection = form.sections.find(s => s.isRepeatable);
+      
+      if (templateSection) {
+        allSections.push({
+          ...templateSection,
+          name: sectionName,
+          questions: templateSection.questions.map(q => ({
+            ...q,
+            id: `${q.id}_repeat_${repeatIndex}`
+          }))
+        });
+      }
+    });
+    
+    console.log('Processing sections for final audit:', allSections.map(s => s.name));
+    
+    allSections.forEach(section => {
       const sectionAnswers: SectionAnswers = {
         sectionName: section.name,
         answers: []
