@@ -2596,18 +2596,7 @@ export default function ReportsPage() {
         reportInteractionCount += yesAnswers;
         console.log(`Report ${report.auditId} has ${reportInteractionCount} interactions`);
         
-        // Organize data by section type and interaction
-        // Use a simpler approach: track sections by their occurrence order
-        let interactionSectionIndex = 0;
-        const interactionSectionsPerReport = Math.max(1, Math.ceil(
-          report.answers.filter(s => s.section && (
-            s.section.toLowerCase().includes('interaction') ||
-            s.section.toLowerCase().includes('agent data')
-          )).length / reportInteractionCount
-        ));
-        
-        console.log(`Report ${report.auditId}: ${reportInteractionCount} interactions, ${interactionSectionsPerReport} sections per interaction`);
-        
+        // Simple approach: organize data exactly as it appears in the audit
         report.answers.forEach((section, sIndex) => {
           if (section.questions) {
             const isInteractionSection = section.section && (
@@ -2616,13 +2605,14 @@ export default function ReportsPage() {
               /interaction\s*\d+/i.test(section.section)
             );
             
+            // Extract interaction number from section title
             let interactionNumber = 1;
-            if (isInteractionSection) {
-              // Calculate which interaction this section belongs to
-              interactionNumber = Math.floor(interactionSectionIndex / interactionSectionsPerReport) + 1;
-              interactionSectionIndex++;
-              
-              console.log(`Section ${sIndex} "${section.section}" belongs to interaction ${interactionNumber}`);
+            if (isInteractionSection && section.section) {
+              // Look for "Interaction 2", "Interaction 3", etc.
+              const match = section.section.match(/interaction\s*(\d+)/i);
+              if (match) {
+                interactionNumber = parseInt(match[1]);
+              }
             }
             
             section.questions.forEach((question, qIndex) => {
@@ -2644,6 +2634,8 @@ export default function ReportsPage() {
             });
           }
         });
+        
+        console.log(`Report ${report.auditId} interaction data:`, Object.keys(interactionData).map(k => `${k}: ${Object.keys(interactionData[k]).length} questions`));
         
         // Add non-interaction question data
         sortedNonInteractionKeys.forEach(key => {
