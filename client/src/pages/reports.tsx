@@ -2596,7 +2596,16 @@ export default function ReportsPage() {
         reportInteractionCount += yesAnswers;
         console.log(`Report ${report.auditId} has ${reportInteractionCount} interactions`);
         
-        // Organize data by section type and interaction
+        // First, let's debug the actual structure to understand how interactions are stored
+        console.log(`DEBUG: Report ${report.auditId} structure:`, JSON.stringify(report.answers.map(s => ({
+          section: s.section,
+          questionCount: s.questions?.length || 0
+        })), null, 2));
+        
+        // Organize data by section type and interaction 
+        // We need to identify interaction sections by their position and structure
+        let interactionSectionCounter = 0;
+        
         report.answers.forEach((section, sIndex) => {
           if (section.questions) {
             const isInteractionSection = section.section && (
@@ -2604,6 +2613,11 @@ export default function ReportsPage() {
               section.section.toLowerCase().includes('agent data') ||
               /interaction\s*\d+/i.test(section.section)
             );
+            
+            // For interaction sections, increment counter to track which interaction this belongs to
+            if (isInteractionSection) {
+              interactionSectionCounter++;
+            }
             
             section.questions.forEach((question, qIndex) => {
               const key = `${sIndex}_${qIndex}`;
@@ -2614,11 +2628,12 @@ export default function ReportsPage() {
               };
               
               if (isInteractionSection) {
-                // For interaction questions, duplicate data for each interaction
-                for (let i = 1; i <= reportInteractionCount; i++) {
-                  if (!interactionData[i]) interactionData[i] = {};
-                  interactionData[i][key] = questionData;
-                }
+                // Map each interaction section to its corresponding interaction number
+                const interactionNumber = Math.min(interactionSectionCounter, reportInteractionCount);
+                if (!interactionData[interactionNumber]) interactionData[interactionNumber] = {};
+                interactionData[interactionNumber][key] = questionData;
+                
+                console.log(`DEBUG: Mapped section ${sIndex} question ${qIndex} to interaction ${interactionNumber}`);
               } else {
                 nonInteractionData[key] = questionData;
               }
