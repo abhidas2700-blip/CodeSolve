@@ -322,6 +322,46 @@ export default function UserAuditPage() {
     }
   };
 
+  // Helper function to determine if a section should be visible based on controlling question answers
+  const isSectionVisible = (section: any): boolean => {
+    if (!section.controlledBy) return true;
+    
+    // Find the controlling question across all sections
+    const form = availableForms[selectedFormIndex!];
+    const controllingQuestion = form.sections
+      .flatMap((s: any) => s.questions)
+      .find((q: any) => q.controlsSection && q.controlledSectionId === section.id);
+    
+    if (!controllingQuestion) {
+      return true;
+    }
+    
+    const controllingAnswer = answers[controllingQuestion.id]?.answer;
+    const isVisible = controllingQuestion.visibleOnValues?.includes(controllingAnswer || '') ?? false;
+    
+    return isVisible;
+  };
+
+  // Helper function to determine if a question should be visible based on controlling question answers
+  const isQuestionVisible = (question: any, section: any): boolean => {
+    if (!question.controlledBy) return true;
+    
+    // Find the controlling question within the same section
+    const controllingQuestion = section.questions.find((q: any) => q.id === question.controlledBy);
+    
+    if (!controllingQuestion) {
+      return true;
+    }
+    
+    const controllingAnswer = answers[controllingQuestion.id]?.answer;
+    
+    // Use the controlling question's visibleOnValues to determine visibility
+    const visibleOnValues = controllingQuestion.visibleOnValues || [];
+    const isVisible = visibleOnValues.includes(controllingAnswer || '');
+    
+    return isVisible;
+  };
+
   const checkMandatoryQuestions = (): { isValid: boolean; missingQuestions: string[] } => {
     if (selectedFormIndex === null) {
       return { isValid: false, missingQuestions: [] };
@@ -330,11 +370,25 @@ export default function UserAuditPage() {
     const form = availableForms[selectedFormIndex];
     const missingQuestions: string[] = [];
 
-    // Using for...of instead of forEach
+    // Check all sections and questions, but only validate visible ones
     for (const section of form.sections) {
+      // Skip entire section if it's not visible
+      if (!isSectionVisible(section)) {
+        console.log(`Skipping validation for hidden section: ${section.name}`);
+        continue;
+      }
+
       for (const question of section.questions) {
+        // Skip question if it's not visible due to nested controlling logic
+        if (!isQuestionVisible(question, section)) {
+          console.log(`Skipping validation for hidden question: ${question.text}`);
+          continue;
+        }
+
+        // Only check mandatory requirement for visible questions
         if (question.mandatory && (!answers[question.id] || !answers[question.id].answer)) {
-          missingQuestions.push(question.text);
+          missingQuestions.push(`${question.text} (${question.id})`);
+          console.log(`Missing mandatory visible question: ${question.text}`);
         }
       }
     }
