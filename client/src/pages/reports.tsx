@@ -3716,16 +3716,22 @@ export default function ReportsPage() {
                     const interactionGroups: Record<number, any[]> = {};
                     
                     // Organize sections by interaction
+                    console.log('Report sections for interaction grouping:', viewingReport.answers.map(s => s.section));
+                    
                     viewingReport.answers.forEach((section, sIndex) => {
                       const isInteractionSection = section.section && (
                         section.section.toLowerCase().includes('interaction') ||
                         section.section.toLowerCase().includes('agent data')
                       );
                       
+                      console.log(`Section "${section.section}" is interaction section: ${isInteractionSection}`);
+                      
                       if (isInteractionSection) {
                         // Extract interaction number from section title
                         const match = section.section.match(/interaction\s*(\d+)/i);
                         const interactionNum = match ? parseInt(match[1]) : 1;
+                        
+                        console.log(`Extracted interaction number: ${interactionNum} from "${section.section}"`);
                         
                         if (!interactionGroups[interactionNum]) {
                           interactionGroups[interactionNum] = [];
@@ -3735,6 +3741,9 @@ export default function ReportsPage() {
                         nonInteractionSections.push({ ...section, originalIndex: sIndex });
                       }
                     });
+                    
+                    console.log('Interaction groups:', Object.keys(interactionGroups));
+                    console.log('Non-interaction sections:', nonInteractionSections.length);
                     
                     return (
                       <>
