@@ -48,13 +48,15 @@ The system is designed for multiple deployment scenarios including Docker contai
 
 ## Recent Changes
 
-### January 2025 - Complete Database Integration & Deployment Setup
+### January 2025 - Complete Database Integration & Export Functionality
 - **PostgreSQL Integration**: Successfully migrated from localStorage to Neon PostgreSQL database with full CRUD operations. All data is now persisted in the database with no risk of data loss.
 - **Deployment Ready**: Created comprehensive deployment configurations for Render and manual server deployment with render.yaml, proper .gitignore, and deployment guide.
 - **Database Services**: Implemented DatabaseService class with complete user management, audit forms, reports, samples, and statistics functionality.
 - **Health Monitoring**: Added /api/health endpoint for database connectivity monitoring and /api/stats for system statistics.
 - **Security**: Implemented bcrypt password hashing, secure session management, and proper environment variable handling.
 - **Repeatable Sections**: Completed implementation of "Was there another interaction?" functionality in both preview and auditing forms with dynamic section creation/removal.
+- **Export Functionality**: Completely rewrote CSV export to handle multiple interactions horizontally (side-by-side columns) instead of vertically (separate rows). Each audit appears as one row with interaction questions displayed as "Interaction 1 - Question", "Interaction 2 - Question" column groups.
+- **Conditional Validation**: Fixed form validation to properly skip mandatory validation for hidden questions controlled by conditional logic.
 
 ### Database Architecture
 - **Primary Storage**: PostgreSQL via Neon with connection pooling and SSL encryption
