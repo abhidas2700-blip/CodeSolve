@@ -2692,9 +2692,56 @@ export default function Audits() {
       console.log("Checking required fields in form:", formDefinition.name);
       console.log("Current answers:", answers);
       
+      // Helper functions for visibility (same logic as audits-new.tsx)
+      const isSectionVisible = (section: any): boolean => {
+        if (!section.controlledBy) return true;
+        
+        const controllingQuestion = formDefinition.sections
+          .flatMap((s: any) => s.questions)
+          .find((q: any) => q.controlsSection && q.controlledSectionId === section.id);
+        
+        if (!controllingQuestion) {
+          return true;
+        }
+        
+        const controllingAnswer = answers[controllingQuestion.id];
+        const isVisible = controllingQuestion.visibleOnValues?.includes(controllingAnswer || '') ?? false;
+        
+        return isVisible;
+      };
+
+      const isQuestionVisible = (question: any, section: any): boolean => {
+        if (!question.controlledBy) return true;
+        
+        const controllingQuestion = section.questions.find((q: any) => q.id === question.controlledBy);
+        
+        if (!controllingQuestion) {
+          return true;
+        }
+        
+        const controllingAnswer = answers[controllingQuestion.id];
+        const visibleValues = question.visibleOnValues?.split(',').map((v: string) => v.trim()) || [];
+        const isVisible = visibleValues.includes(controllingAnswer || '');
+        
+        return isVisible;
+      };
+      
       formDefinition.sections.forEach((section: any) => {
         console.log(`Checking section: ${section.name}`);
+        
+        // Skip entire section if it's not visible
+        if (!isSectionVisible(section)) {
+          console.log(`Skipping validation for hidden section: ${section.name}`);
+          return;
+        }
+        
         section.questions.forEach((question: any) => {
+          // Skip question if it's not visible due to nested controlling logic
+          if (!isQuestionVisible(question, section)) {
+            console.log(`Skipping validation for hidden question: ${question.text}`);
+            return;
+          }
+          
           // Check if answer is empty, null, undefined, or just whitespace
           const answerValue = answers[question.id];
           const isEmpty = answerValue === undefined || answerValue === null || 
