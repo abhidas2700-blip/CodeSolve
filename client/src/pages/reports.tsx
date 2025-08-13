@@ -2463,25 +2463,6 @@ export default function ReportsPage() {
       return;
     }
     
-    // Count maximum number of questions across all reports for header generation
-    let maxQuestionsPerSection = 0;
-    let maxSections = 0;
-    
-    reportsToExport.forEach(report => {
-      if (report.answers) {
-        maxSections = Math.max(maxSections, report.answers.length);
-        report.answers.forEach(section => {
-          if (section.questions) {
-            maxQuestionsPerSection = Math.max(maxQuestionsPerSection, section.questions.length);
-          }
-        });
-      }
-    });
-    
-    // Ensure we have at least one section and question for header generation
-    maxSections = Math.max(maxSections, 1);
-    maxQuestionsPerSection = Math.max(maxQuestionsPerSection, 1);
-    
     // Create headers for basic report data
     let headers = [
       "ID", 
@@ -2492,7 +2473,8 @@ export default function ReportsPage() {
       "Date", 
       "Score",
       "Max Score",
-      "Last Edit"
+      "Last Edit",
+      "Interaction Number"
     ];
     
     // Map to track questions by their position
@@ -2532,13 +2514,20 @@ export default function ReportsPage() {
           }
         });
         
-        // Process interaction sections - create single combined column
+        // Process interaction sections - collect unique interaction questions
         if (interactionSections.length > 0) {
-          const startIndex = nonInteractionSections.length;
-          const questionKey = `S${startIndex+1}-Q1`;
-          
-          if (!questionMap[questionKey]) {
-            questionMap[questionKey] = "All Interactions";
+          // Get the first interaction to determine question structure
+          const firstInteraction = interactionSections[0];
+          if (firstInteraction && firstInteraction.questions) {
+            const startIndex = nonInteractionSections.length;
+            firstInteraction.questions.forEach((question, qIndex) => {
+              const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
+              const questionText = question.text || `Interaction Question ${qIndex+1}`;
+              
+              if (!questionMap[questionKey]) {
+                questionMap[questionKey] = questionText;
+              }
+            });
           }
         }
       }
@@ -2568,30 +2557,13 @@ export default function ReportsPage() {
     // Create CSV content with headers
     let csvContent = headers.map(h => `"${h}"`).join(",") + "\n";
     
-    // Add data for each report
+    // Process each report and create multiple rows for interactions
     reportsToExport.forEach(report => {
       const timestamp = new Date(report.timestamp).toLocaleString();
       const lastEdit = report.editHistory && report.editHistory.length > 0
         ? `${new Date(report.editHistory[report.editHistory.length - 1].timestamp).toLocaleString()} by ${report.editHistory[report.editHistory.length - 1].editor}`
         : "Not edited";
       
-      // Create an array for the base report data
-      const baseData = [
-        report.id,
-        report.auditId,
-        report.agent,
-        report.auditor || "Not specified",
-        report.formName,
-        timestamp,
-        report.score,
-        report.maxScore || 100,
-        lastEdit
-      ];
-      
-      // Create a map to store question data by position key
-      const questionDataMap: Record<string, any> = {};
-      
-      // Process each section and its questions - handle multiple interactions
       if (report.answers) {
         // Separate interaction sections from non-interaction sections
         const interactionSections = report.answers.filter(section => 
@@ -2608,13 +2580,14 @@ export default function ReportsPage() {
           )
         );
         
-        // Process non-interaction sections normally
+        // Process non-interaction data (same for all rows of this audit)
+        const nonInteractionDataMap: Record<string, any> = {};
         nonInteractionSections.forEach((section, sIndex) => {
           if (section.questions) {
             section.questions.forEach((question, qIndex) => {
               const questionKey = `S${sIndex+1}-Q${qIndex+1}`;
               
-              questionDataMap[questionKey] = {
+              nonInteractionDataMap[questionKey] = {
                 answer: question.answer || "",
                 remarks: question.remarks || "",
                 rating: question.rating ? String(question.rating) : "",
@@ -2627,126 +2600,115 @@ export default function ReportsPage() {
           }
         });
         
-        // Process interaction sections - combine all interactions vertically
-        if (interactionSections.length > 0) {
-          // Group questions by their text/type across all interactions
-          const interactionQuestionMap: Record<string, {
-            answers: string[],
-            remarks: string[],
-            ratings: string[],
-            type: string,
-            fatal: string,
-            weightage: string,
-            id: string
-          }> = {};
+        // If no interactions, create single row with non-interaction data
+        if (interactionSections.length === 0) {
+          const baseData = [
+            report.id,
+            report.auditId,
+            report.agent,
+            report.auditor || "Not specified",
+            report.formName,
+            timestamp,
+            report.score,
+            (report as any).maxScore || 100,
+            lastEdit,
+            "No Interactions"
+          ];
           
-          interactionSections.forEach((section, interactionIndex) => {
-            if (section.questions) {
-              section.questions.forEach((question, qIndex) => {
-                const questionText = question.text || `Question ${qIndex+1}`;
-                const questionKey = `interaction-${questionText}`;
-                
-                if (!interactionQuestionMap[questionKey]) {
-                  interactionQuestionMap[questionKey] = {
-                    answers: [],
-                    remarks: [],
-                    ratings: [],
-                    type: question.questionType || "",
-                    fatal: question.isFatal ? "Yes" : "No",
-                    weightage: question.weightage ? String(question.weightage) : "",
-                    id: question.questionId || ""
-                  };
-                }
-                
-                // Add this interaction's data
-                interactionQuestionMap[questionKey].answers.push(
-                  question.answer || "Not Answered"
-                );
-                interactionQuestionMap[questionKey].remarks.push(
-                  question.remarks || ""
-                );
-                interactionQuestionMap[questionKey].ratings.push(
-                  question.rating ? String(question.rating) : ""
-                );
-              });
+          const questionData: string[] = [];
+          sortedKeys.forEach(key => {
+            const data = nonInteractionDataMap[key];
+            if (data) {
+              questionData.push(`"${data.answer}"`);
+              questionData.push(`"${data.remarks}"`);
+              questionData.push(`"${data.rating}"`);
+            } else {
+              questionData.push('""');
+              questionData.push('""');
+              questionData.push('""');
             }
           });
           
-          // For interaction sections, create a single combined field with horizontal arrangement
-          if (interactionSections.length > 0) {
-            const startIndex = nonInteractionSections.length;
+          csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+        } else {
+          // Create one row per interaction
+          interactionSections.forEach((interactionSection, interactionIndex) => {
+            const baseData = [
+              report.id,
+              report.auditId,
+              report.agent,
+              report.auditor || "Not specified",
+              report.formName,
+              timestamp,
+              report.score,
+              (report as any).maxScore || 100,
+              lastEdit,
+              `Interaction ${interactionIndex + 1}`
+            ];
             
-            // Create a single "All Interactions" field that contains horizontally formatted interactions
-            const allInteractionsData: string[] = [];
-            const allInteractionsRemarks: string[] = [];
-            const allInteractionsRatings: string[] = [];
+            // Combine non-interaction data with this specific interaction data
+            const combinedDataMap = { ...nonInteractionDataMap };
             
-            interactionSections.forEach((section, interactionIndex) => {
-              if (section.questions && section.questions.length > 0) {
-                // Build horizontal line for this interaction
-                const interactionAnswers: string[] = [];
-                const interactionRemarks: string[] = [];
-                const interactionRatings: string[] = [];
+            // Add this interaction's questions
+            if (interactionSection.questions) {
+              const startIndex = nonInteractionSections.length;
+              interactionSection.questions.forEach((question, qIndex) => {
+                const questionKey = `S${startIndex+1}-Q${qIndex+1}`;
                 
-                section.questions.forEach((question) => {
-                  interactionAnswers.push(question.answer || "Not Answered");
-                  interactionRemarks.push(question.remarks || "");
-                  interactionRatings.push(question.rating ? String(question.rating) : "");
-                });
-                
-                // Join this interaction's data horizontally with " | " separator
-                allInteractionsData.push(interactionAnswers.join(" | "));
-                allInteractionsRemarks.push(interactionRemarks.filter(r => r.trim()).join(" | "));
-                allInteractionsRatings.push(interactionRatings.filter(r => r.trim()).join(" | "));
+                combinedDataMap[questionKey] = {
+                  answer: question.answer || "",
+                  remarks: question.remarks || "",
+                  rating: question.rating ? String(question.rating) : "",
+                  type: question.questionType || "",
+                  fatal: question.isFatal ? "Yes" : "No",
+                  weightage: question.weightage ? String(question.weightage) : "",
+                  id: question.questionId || ""
+                };
+              });
+            }
+            
+            // Build question data for this row
+            const questionData: string[] = [];
+            sortedKeys.forEach(key => {
+              const data = combinedDataMap[key];
+              if (data) {
+                questionData.push(`"${data.answer}"`);
+                questionData.push(`"${data.remarks}"`);
+                questionData.push(`"${data.rating}"`);
+              } else {
+                questionData.push('""');
+                questionData.push('""');
+                questionData.push('""');
               }
             });
             
-            // Store as single field with all interactions stacked vertically
-            const questionKey = `S${startIndex+1}-Q1`;
-            questionDataMap[questionKey] = {
-              answer: allInteractionsData.join('\n'),
-              remarks: allInteractionsRemarks.filter(r => r.trim()).join('\n'),
-              rating: allInteractionsRatings.filter(r => r.trim()).join('\n'),
-              type: "interactions",
-              fatal: "No",
-              weightage: "",
-              id: "all-interactions"
-            };
-          }
+            csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+          });
         }
-      }
-      
-      // Prepare array for all question data that matches the headers
-      const allQuestionData: string[] = [];
-      
-      // Loop through the same question keys in the same order as the headers
-      const questionData: string[] = [];
-      
-      // Loop through sorted keys to match header order
-      sortedKeys.forEach(questionKey => {
-        // Get data for this question position if it exists
-        const qData = questionDataMap[questionKey] || {
-          answer: "",
-          remarks: "",
-          rating: "",
-          type: "",
-          fatal: "No",
-          weightage: "",
-          id: ""
-        };
+      } else {
+        // No answers data - create single row with basic data
+        const baseData = [
+          report.id,
+          report.auditId,
+          report.agent,
+          report.auditor || "Not specified",
+          report.formName,
+          timestamp,
+          report.score,
+          (report as any).maxScore || 100,
+          lastEdit,
+          "No Data"
+        ];
         
-        // Add only the essential data in the same order as headers
-        allQuestionData.push(qData.answer);
-        allQuestionData.push(qData.remarks);
-        allQuestionData.push(qData.rating);
-      });
-      
-      // Combine base data and question data
-      const fullRow = [...baseData, ...allQuestionData]
-        .map(cell => `"${String(cell).replace(/"/g, '""')}"`)
-        .join(",");
-      
-      csvContent += fullRow + "\n";
+        const questionData: string[] = [];
+        sortedKeys.forEach(() => {
+          questionData.push('""');
+          questionData.push('""');
+          questionData.push('""');
+        });
+        
+        csvContent += baseData.map(d => `"${d}"`).join(",") + "," + questionData.join(",") + "\n";
+      }
     });
     
     // Create a blob and download link
