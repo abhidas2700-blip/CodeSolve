@@ -382,7 +382,8 @@ export default function Users() {
         },
         body: JSON.stringify({
           rights: rights,
-          isInactive: newStatus === 'inactive'
+          isInactive: newStatus === 'inactive',
+          email: newEmail || editingUser.email
         }),
         credentials: 'include'
       });

@@ -202,6 +202,7 @@ export class MemoryStorage implements IStorage {
       id: this.userIdCounter++,
       username: insertUser.username,
       password: insertUser.password,
+      email: (insertUser as any).email || null,
       rights: insertUser.rights,
       isInactive: insertUser.isInactive || false
     };
@@ -253,6 +254,7 @@ export class MemoryStorage implements IStorage {
               id: updatedUser.id,
               username: updatedUser.username,
               password: updatedUser.password,
+              email: updatedUser.email,
               rights: updatedUser.rights,
               isInactive: updatedUser.isInactive
             });
@@ -294,6 +296,7 @@ export class MemoryStorage implements IStorage {
           id: updatedUser.id,
           username: updatedUser.username,
           password: updatedUser.password,
+          email: updatedUser.email,
           rights: updatedUser.rights,
           isInactive: updatedUser.isInactive
         });
