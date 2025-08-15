@@ -341,8 +341,11 @@ export default function UserAuditPage() {
       const form = availableForms[selectedFormIndex];
       const question = form.sections.flatMap(s => s.questions).find(q => q.id === questionId);
       
+      console.log('🔍 DEBUG: Answer changed for question:', question?.text, 'Value:', value, 'Question ID:', questionId);
+      
       if (question && question.text?.toLowerCase().includes('was there another interaction') && value.toLowerCase() === 'yes') {
-        console.log('🔄 Creating new interaction section triggered by question:', question.text);
+        console.log('🔄 TRIGGER: Creating new interaction section triggered by question:', question.text);
+        console.log('🔄 Current dynamic sections count:', dynamicSections.length);
         createNewInteractionSection();
       }
     }
@@ -352,12 +355,17 @@ export default function UserAuditPage() {
     if (selectedFormIndex === null) return;
     
     const form = availableForms[selectedFormIndex];
+    console.log('🔍 All form sections:', form.sections.map(s => ({ name: s.name, isRepeatable: s.isRepeatable })));
+    
     const interactionSection = form.sections.find(s => s.isRepeatable || s.name.toLowerCase().includes('interaction') || s.name.toLowerCase().includes('agent data'));
     
     if (!interactionSection) {
-      console.warn('No repeatable interaction section found');
+      console.warn('❌ No repeatable interaction section found in form sections');
+      console.log('Available sections:', form.sections.map(s => s.name));
       return;
     }
+
+    console.log('✅ Found interaction section template:', interactionSection.name);
 
     // Find the highest existing interaction number
     let maxInteractionNum = 1;
@@ -393,12 +401,17 @@ export default function UserAuditPage() {
       }))
     };
 
-    console.log(`✅ Created new section: ${newSectionName}`);
-    console.log('New section questions:', newSection.questions.map((q: any) => q.id));
+    console.log(`✅ CREATED: New section "${newSectionName}" with ${newSection.questions.length} questions`);
+    console.log('📝 New section question IDs:', newSection.questions.map((q: any) => q.id));
 
-    setDynamicSections(prev => [...prev, newSection]);
+    setDynamicSections(prev => {
+      const updated = [...prev, newSection];
+      console.log('📊 Updated dynamic sections count:', updated.length);
+      return updated;
+    });
     
     // Automatically switch to the new interaction tab
+    console.log('🔄 Switching to tab:', newSectionName);
     setActiveTab(newSectionName);
   };
 
@@ -566,9 +579,12 @@ export default function UserAuditPage() {
       }
     });
     
-    console.log('Processing sections for final audit:', allSections.map(s => s.name));
-    console.log('Detected interaction sections:', Array.from(interactionSectionNames));
-    console.log('All answer keys with _repeat_:', Object.keys(answers).filter(k => k.includes('_repeat_')));
+    console.log('🔍 AUDIT SUBMISSION DEBUG:');
+    console.log('📊 Processing sections for final audit:', allSections.map(s => s.name));
+    console.log('🔄 Detected interaction sections:', Array.from(interactionSectionNames));
+    console.log('📝 All answer keys with _repeat_:', Object.keys(answers).filter(k => k.includes('_repeat_')));
+    console.log('🎯 Current answers state:', Object.keys(answers));
+    console.log('🔧 Dynamic sections in state:', dynamicSections.map(s => s.name));
     
     allSections.forEach(section => {
       const sectionAnswers: SectionAnswers = {
