@@ -580,18 +580,19 @@ interface FormValuesEvent extends Event {
     answers?: Record<string, string>;
     remarks?: Record<string, string>;
     form?: AuditForm | null;
+    dynamicSections?: Section[];
   };
 }
 
 // Function to update form values across components
-function updateGlobalFormValues(answers?: Record<string, string>, remarks?: Record<string, string>, form?: AuditForm | null) {
+function updateGlobalFormValues(answers?: Record<string, string>, remarks?: Record<string, string>, form?: AuditForm | null, dynamicSections?: Section[]) {
   // Dispatch custom event with form values
   const event = new CustomEvent(FORM_VALUES_UPDATED, {
-    detail: { answers, remarks, form }
+    detail: { answers, remarks, form, dynamicSections }
   });
   window.dispatchEvent(event);
   
-  return { answers, remarks, form };
+  return { answers, remarks, form, dynamicSections };
 }
 
 // Render a simple loading state component
@@ -803,9 +804,9 @@ function AuditFormRenderer({ formName }: { formName: string }) {
   useEffect(() => {
     if (form && !loading) {
       // Only update when we have a valid form and are not loading
-      updateGlobalFormValues(answers, remarks, form);
+      updateGlobalFormValues(answers, remarks, form, dynamicSections);
     }
-  }, [answers, remarks, form, loading]);
+  }, [answers, remarks, form, loading, dynamicSections]);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setAnswers(prev => {
@@ -2250,7 +2251,7 @@ export default function Audits() {
           // Use a timeout to ensure component is ready before sending events
           setTimeout(() => {
             // Dispatch the event to update form values across components
-            updateGlobalFormValues(draftAnswers, draftRemarks, formDef || null);
+            updateGlobalFormValues(draftAnswers, draftRemarks, formDef || null, []);
             console.log('Dispatched form values update event with draft data', Object.keys(draftAnswers).length);
             
             // Also dispatch a form update event to ensure the form is properly loaded
@@ -2283,10 +2284,12 @@ export default function Audits() {
     answers: Record<string, string>;
     remarks: Record<string, string>;
     form: AuditForm | null;
+    dynamicSections?: Section[];
   }>({
     answers: {},
     remarks: {},
-    form: null
+    form: null,
+    dynamicSections: []
   });
   
   // Listen for form values updates
@@ -2299,7 +2302,8 @@ export default function Audits() {
       setGlobalFormState(prev => ({
         answers: detail.answers ? { ...detail.answers } : prev.answers,
         remarks: detail.remarks ? { ...detail.remarks } : prev.remarks,
-        form: detail.form || prev.form
+        form: detail.form || prev.form,
+        dynamicSections: detail.dynamicSections || prev.dynamicSections
       }));
     };
     
@@ -2735,7 +2739,9 @@ export default function Audits() {
       };
       
       // CRITICAL FIX: Validate ALL sections including dynamic sections
-      const allSectionsForValidation = [...formDefinition.sections, ...dynamicSections];
+      // Get dynamic sections from global form state
+      const currentDynamicSections = globalFormState.dynamicSections || [];
+      const allSectionsForValidation = [...formDefinition.sections, ...currentDynamicSections];
       console.log('🔧 Validating sections:', allSectionsForValidation.map(s => s.name));
       
       allSectionsForValidation.forEach((section: any) => {
@@ -2797,7 +2803,9 @@ export default function Audits() {
       }[] = [];
       
       // CRITICAL FIX: Process ALL sections including dynamic sections  
-      const allSections = [...formDefinition.sections, ...dynamicSections];
+      // Get dynamic sections from global form state
+      const currentDynamicSectionsForSubmission = globalFormState.dynamicSections || [];
+      const allSections = [...formDefinition.sections, ...currentDynamicSectionsForSubmission];
       console.log('🔧 Processing sections for audit submission:', allSections.map(s => s.name));
       
       // Process each section (including dynamic ones)
