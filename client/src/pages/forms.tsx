@@ -1033,31 +1033,55 @@ export default function Forms() {
   };
 
   // Delete a form
-  const deleteForm = (formId: string) => {
+  const deleteForm = async (formId: string) => {
     if (window.confirm("Are you sure you want to delete this form?")) {
       const form = savedForms.find(f => f.id === formId);
       if (form) {
-        const updatedForms = savedForms.filter(f => f.id !== formId);
-        setSavedForms(updatedForms);
-        localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
-        
-        // Dispatch event for form deletion - use '*' to refresh all forms
-        console.log(`Dispatching form update event for deletion`);
-        dispatchFormUpdate('*');
-        
-        // If the current form is being deleted, reset form state
-        if (currentFormId === formId) {
-          setFormName("New Audit Form");
-          setFormSections([{
-            id: generateId('section'),
-            name: "Section A",
-            type: 'agent',
-            questions: []
-          }]);
-          setCurrentFormId(null);
+        try {
+          // First try to delete from database via API
+          const numericId = parseInt(formId);
+          if (!isNaN(numericId)) {
+            const response = await fetch(`/api/forms/${numericId}`, {
+              method: 'DELETE',
+              credentials: 'include'
+            });
+            
+            if (response.ok) {
+              console.log(`Successfully deleted form ${formId} from database`);
+            } else {
+              console.warn(`Database deletion failed for form ${formId}, proceeding with local deletion`);
+            }
+          }
+          
+          // Update local state regardless of database result
+          const updatedForms = savedForms.filter(f => f.id !== formId);
+          setSavedForms(updatedForms);
+          localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
+          
+          // Reload forms from database to ensure consistency
+          loadSavedForms();
+          
+          // Dispatch event for form deletion - use '*' to refresh all forms
+          console.log(`Dispatching form update event for deletion`);
+          dispatchFormUpdate('*');
+          
+          // If the current form is being deleted, reset form state
+          if (currentFormId === formId) {
+            setFormName("New Audit Form");
+            setFormSections([{
+              id: generateId('section'),
+              name: "Section A",
+              type: 'agent',
+              questions: []
+            }]);
+            setCurrentFormId(null);
+          }
+          
+          alert(`Deleted form: ${form.name}`);
+        } catch (error) {
+          console.error('Error deleting form:', error);
+          alert('Failed to delete form. Please try again.');
         }
-        
-        alert(`Deleted form: ${form.name}`);
       }
     }
   };

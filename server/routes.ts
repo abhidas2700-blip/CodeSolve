@@ -334,6 +334,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update audit form
+  app.put('/api/forms/:id', async (req: Request, res: Response) => {
+    try {
+      const formId = parseInt(req.params.id);
+      const validatedData = insertAuditFormSchema.parse(req.body);
+      
+      const [updatedForm] = await db.update(auditForms)
+        .set(validatedData)
+        .where(eq(auditForms.id, formId))
+        .returning();
+
+      if (!updatedForm) {
+        return res.status(404).json({ error: 'Form not found' });
+      }
+
+      broadcast({
+        type: 'form_updated',
+        form: updatedForm
+      });
+
+      res.json(updatedForm);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error updating form:', error);
+      res.status(500).json({ error: 'Failed to update form' });
+    }
+  });
+
+  // Delete audit form
+  app.delete('/api/forms/:id', async (req: Request, res: Response) => {
+    try {
+      const formId = parseInt(req.params.id);
+      
+      const [deletedForm] = await db.delete(auditForms)
+        .where(eq(auditForms.id, formId))
+        .returning();
+
+      if (!deletedForm) {
+        return res.status(404).json({ error: 'Form not found' });
+      }
+
+      broadcast({
+        type: 'form_deleted',
+        formId: formId
+      });
+
+      res.json({ message: 'Form deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting form:', error);
+      res.status(500).json({ error: 'Failed to delete form' });
+    }
+  });
+
   // AUDIT REPORTS ROUTES
 
   // Get all audit reports
