@@ -186,8 +186,9 @@ export const insertSkippedSampleSchema = createInsertSchema(skippedSamples).pick
   auditor: true,
   auditorName: true,
   reason: true,
-  timestamp: true,
   status: true,
+}).extend({
+  timestamp: z.union([z.number(), z.string(), z.date()]).optional(),
 });
 
 // Type definitions
