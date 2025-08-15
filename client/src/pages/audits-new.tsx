@@ -90,6 +90,7 @@ export default function UserAuditPage() {
   const [showDrafts, setShowDrafts] = useState(false);
   const [skipDialogOpen, setSkipDialogOpen] = useState(false);
   const [skipReason, setSkipReason] = useState("");
+  const [dynamicSections, setDynamicSections] = useState<any[]>([]);
 
   // Load saved forms and submitted audits when component mounts
   useEffect(() => {
@@ -334,6 +335,71 @@ export default function UserAuditPage() {
         ...(prev[questionId] ? { remarks: prev[questionId].remarks } : {})
       }
     }));
+
+    // Check if this answer triggers creating a new interaction section
+    if (selectedFormIndex !== null && availableForms[selectedFormIndex]) {
+      const form = availableForms[selectedFormIndex];
+      const question = form.sections.flatMap(s => s.questions).find(q => q.id === questionId);
+      
+      if (question && question.text?.toLowerCase().includes('was there another interaction') && value.toLowerCase() === 'yes') {
+        console.log('🔄 Creating new interaction section triggered by question:', question.text);
+        createNewInteractionSection();
+      }
+    }
+  };
+
+  const createNewInteractionSection = () => {
+    if (selectedFormIndex === null) return;
+    
+    const form = availableForms[selectedFormIndex];
+    const interactionSection = form.sections.find(s => s.isRepeatable || s.name.toLowerCase().includes('interaction') || s.name.toLowerCase().includes('agent data'));
+    
+    if (!interactionSection) {
+      console.warn('No repeatable interaction section found');
+      return;
+    }
+
+    // Find the highest existing interaction number
+    let maxInteractionNum = 1;
+    const existingInteractionSections = dynamicSections.filter(s => s.name.toLowerCase().includes('interaction'));
+    existingInteractionSections.forEach(section => {
+      const match = section.name.match(/interaction\s*(\d+)/i);
+      if (match) {
+        maxInteractionNum = Math.max(maxInteractionNum, parseInt(match[1]));
+      }
+    });
+
+    // Check for dynamic interactions in answers
+    Object.keys(answers).forEach(questionId => {
+      if (questionId.includes('_repeat_')) {
+        const parts = questionId.split('_repeat_');
+        if (parts.length === 2) {
+          const repeatIndex = parseInt(parts[1]);
+          maxInteractionNum = Math.max(maxInteractionNum, repeatIndex);
+        }
+      }
+    });
+
+    const newInteractionNum = maxInteractionNum + 1;
+    const newSectionName = `Interaction ${newInteractionNum}`;
+
+    // Create new section based on the template
+    const newSection = {
+      ...interactionSection,
+      name: newSectionName,
+      questions: interactionSection.questions.map((q: any) => ({
+        ...q,
+        id: `${q.id}_repeat_${newInteractionNum}`
+      }))
+    };
+
+    console.log(`✅ Created new section: ${newSectionName}`);
+    console.log('New section questions:', newSection.questions.map((q: any) => q.id));
+
+    setDynamicSections(prev => [...prev, newSection]);
+    
+    // Automatically switch to the new interaction tab
+    setActiveTab(newSectionName);
   };
 
   const handleRemarksChange = (questionId: string, remarks: string) => {
@@ -825,6 +891,7 @@ export default function UserAuditPage() {
     setEditingDraftId(null);
     setShowScore(false);
     setShowDrafts(false);
+    setDynamicSections([]); // Clear dynamic sections when resetting
   };
 
   const handleSectionTabChange = (sectionName: string) => {
@@ -1015,6 +1082,15 @@ export default function UserAuditPage() {
                             {section.name}
                           </TabsTrigger>
                         ))}
+                        {dynamicSections.map((section) => (
+                          <TabsTrigger 
+                            key={section.name} 
+                            value={section.name}
+                            className="bg-blue-100 text-blue-800 border-blue-300"
+                          >
+                            {section.name}
+                          </TabsTrigger>
+                        ))}
                       </TabsList>
                       
                       {availableForms[selectedFormIndex].sections.map((section: any) => {
@@ -1170,6 +1246,95 @@ export default function UserAuditPage() {
                         </TabsContent>
                         );
                       })}
+                      
+                      {/* Render dynamic interaction sections */}
+                      {dynamicSections.map((section: any) => (
+                        <TabsContent key={section.name} value={section.name}>
+                          <div className="space-y-6 border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                            <h2 className="font-bold text-xl mb-4 text-blue-800">
+                              {section.name}
+                            </h2>
+                            {section.questions.map((question: any) => {
+                              return (
+                                <div key={question.id} className="p-4 border rounded-lg bg-white">
+                                  <div className="flex flex-col space-y-2">
+                                    <Label className="text-base font-medium">
+                                      {question.text}
+                                      {question.mandatory && <span className="text-red-500 ml-1">*</span>}
+                                      {question.isFatal && <span className="ml-2 text-xs text-red-500 font-normal">(Fatal)</span>}
+                                    </Label>
+                                    
+                                    {question.type === "dropdown" && (
+                                      <Select
+                                        value={answers[question.id]?.answer || ""}
+                                        onValueChange={(value) => handleAnswerChange(question.id, value)}
+                                      >
+                                        <SelectTrigger className="w-40">
+                                          <SelectValue placeholder="Select..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {(() => {
+                                            let options = question.options?.split(',').map((o: string) => o.trim()) || [];
+                                            
+                                            if (question.isFatal === true) {
+                                              if (!options.includes('Fatal')) {
+                                                options = [...options, 'Fatal'];
+                                              }
+                                            }
+                                            
+                                            return options.map((option: string, idx: number) => (
+                                              <SelectItem key={idx} value={option}>
+                                                {option}
+                                              </SelectItem>
+                                            ));
+                                          })()}
+                                        </SelectContent>
+                                      </Select>
+                                    )}
+                                    
+                                    {question.type === "text" && (
+                                      <Input
+                                        value={answers[question.id]?.answer || ""}
+                                        onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                        placeholder="Enter your response..."
+                                      />
+                                    )}
+                                    
+                                    {question.type === "textarea" && (
+                                      <Textarea
+                                        value={answers[question.id]?.answer || ""}
+                                        onChange={(e) => handleAnswerChange(question.id, e.target.value)}
+                                        placeholder="Enter your response..."
+                                        rows={3}
+                                      />
+                                    )}
+                                    
+                                    <div className="mt-2">
+                                      <Label className="text-sm text-gray-600">Remarks (Optional)</Label>
+                                      <Textarea
+                                        value={answers[question.id]?.remarks || ""}
+                                        onChange={(e) => {
+                                          const current = answers[question.id] || { questionId: question.id, answer: "", remarks: "" };
+                                          setAnswers(prev => ({
+                                            ...prev,
+                                            [question.id]: {
+                                              ...current,
+                                              remarks: e.target.value
+                                            }
+                                          }));
+                                        }}
+                                        placeholder="Add any additional comments..."
+                                        rows={2}
+                                        className="mt-1"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </TabsContent>
+                      ))}
                     </Tabs>
                   </CardContent>
                   
