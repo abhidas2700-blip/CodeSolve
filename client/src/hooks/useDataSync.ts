@@ -7,11 +7,16 @@ export const useDataSync = () => {
     try {
       console.log('🔄 Starting automatic data sync to database...');
       
-      // Sync audit reports
-      const reports = JSON.parse(localStorage.getItem('qa-submitted-audits') || '[]');
-      console.log(`Found ${reports.length} reports to sync`);
+      // Get list of deleted audit IDs to exclude from reports sync
+      const deletedAudits = JSON.parse(localStorage.getItem('qa-deleted-audits') || '[]');
+      const deletedAuditIds = new Set(deletedAudits.map(d => d.auditId || d.id));
       
-      for (const report of reports) {
+      // Sync audit reports (excluding deleted ones)
+      const reports = JSON.parse(localStorage.getItem('qa-submitted-audits') || '[]');
+      const activeReports = reports.filter(report => !deletedAuditIds.has(report.id || report.auditId));
+      console.log(`Found ${activeReports.length} active reports to sync (${reports.length - activeReports.length} excluded as deleted)`);
+      
+      for (const report of activeReports) {
         try {
           const response = await fetch('/api/reports', {
             method: 'POST',
@@ -39,8 +44,7 @@ export const useDataSync = () => {
         }
       }
       
-      // Sync deleted audits
-      const deletedAudits = JSON.parse(localStorage.getItem('qa-deleted-audits') || '[]');
+      // Sync deleted audits and mark reports as deleted in database
       console.log(`Found ${deletedAudits.length} deleted audits to sync`);
       
       for (const deleted of deletedAudits) {
@@ -66,6 +70,18 @@ export const useDataSync = () => {
           
           if (response.ok) {
             console.log(`✅ Synced deleted audit ${deleted.auditId || deleted.id}`);
+            
+            // Also mark the original report as deleted in the database
+            try {
+              await fetch(`/api/reports/${deleted.auditId || deleted.id}/delete`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+              });
+              console.log(`✅ Marked report ${deleted.auditId || deleted.id} as deleted in database`);
+            } catch (error) {
+              console.log(`❌ Failed to mark report as deleted: ${error}`);
+            }
           }
         } catch (error) {
           console.log(`❌ Failed to sync deleted audit:`, error);

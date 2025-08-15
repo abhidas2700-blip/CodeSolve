@@ -391,14 +391,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AUDIT REPORTS ROUTES
 
-  // Get all audit reports
+  // Get all audit reports (excluding deleted ones)
   app.get('/api/reports', async (req: Request, res: Response) => {
     try {
-      const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
+      const reports = await db.select().from(auditReports)
+        .where(eq(auditReports.deleted, false))
+        .orderBy(desc(auditReports.timestamp));
       res.json(reports);
     } catch (error) {
       console.error('Error fetching reports:', error);
       res.status(500).json({ error: 'Failed to fetch reports' });
+    }
+  });
+  
+  // Mark audit report as deleted (soft delete)
+  app.patch('/api/reports/:auditId/delete', async (req: Request, res: Response) => {
+    try {
+      const auditId = req.params.auditId;
+      
+      const [updatedReport] = await db.update(auditReports)
+        .set({ 
+          deleted: true, 
+          deletedBy: req.user?.id || 1,
+          deletedAt: new Date()
+        })
+        .where(eq(auditReports.auditId, auditId))
+        .returning();
+
+      if (!updatedReport) {
+        return res.status(404).json({ error: 'Report not found' });
+      }
+
+      console.log(`Marked report ${auditId} as deleted in database`);
+      res.json({ message: 'Report marked as deleted', auditId });
+    } catch (error) {
+      console.error('Error marking report as deleted:', error);
+      res.status(500).json({ error: 'Failed to mark report as deleted' });
     }
   });
 

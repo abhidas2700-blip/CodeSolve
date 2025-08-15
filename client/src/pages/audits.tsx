@@ -28,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { databaseSync } from '../services/databaseSync';
 import { useDataSync } from '../hooks/useDataSync';
+import { cleanupDeletedAuditsVisibility } from '../utils/deleteAuditHelper';
 
 // Process audit answers for display in a results modal
 // Global audit data store
@@ -1562,6 +1563,11 @@ export default function Audits() {
   const { user } = useAuth();
   const { syncToDatabase } = useDataSync(); // Enable automatic database sync
   const [activeTab, setActiveTab] = useState("assigned");
+
+  // Clean up deleted audit visibility on component mount
+  useEffect(() => {
+    cleanupDeletedAuditsVisibility();
+  }, []);
   const [selectedForm, setSelectedForm] = useState("");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
