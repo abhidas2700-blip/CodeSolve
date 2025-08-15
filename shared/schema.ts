@@ -24,14 +24,18 @@ export const auditForms = pgTable("audit_forms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   sections: json("sections").notNull(),
+  settings: json("settings"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   createdBy: integer("created_by").references(() => users.id),
 });
 
-export const insertAuditFormSchema = createInsertSchema(auditForms).pick({
-  name: true,
-  sections: true,
-  createdBy: true,
+export const insertAuditFormSchema = createInsertSchema(auditForms).omit({
+  id: true,
+  createdAt: true
+}).extend({
+  sections: z.array(z.any()).optional().default([]),
+  settings: z.record(z.any()).optional().default({}),
+  createdBy: z.number().optional()
 });
 
 // Audit reports schema
