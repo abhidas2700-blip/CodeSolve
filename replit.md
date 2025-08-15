@@ -1,118 +1,48 @@
 # ThorEye Audit Management
 
 ## Overview
-
-ThorEye is a comprehensive audit management web application designed for quality assurance processes. The system provides role-based access control for managing audit forms, conducting audits, generating reports, and tracking quality metrics. It supports multiple user roles including auditors, team leaders, managers, and administrators, each with specific permissions and capabilities. The application is built as a full-stack solution with React frontend and Express.js backend, designed for deployment on serverless platforms like Render and Netlify.
+ThorEye is a comprehensive audit management web application designed for quality assurance processes. It provides role-based access control for managing audit forms, conducting audits, generating reports, and tracking quality metrics. The system supports multiple user roles (auditors, team leaders, managers, administrators) with specific permissions. Built as a full-stack solution with React frontend and Express.js backend, it's designed for deployment on serverless platforms. The project's vision is to streamline quality assurance workflows, improve data accuracy, and provide actionable insights for businesses.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
 ### Frontend Architecture
-The frontend is built using React 18 with TypeScript, utilizing a component-based architecture with shadcn/ui components for consistent styling. The application uses Tailwind CSS for styling and implements a modern design system with custom color schemes and responsive layouts. State management is handled through React Context and local state, with React Query (@tanstack/react-query) for server state management and caching. The frontend supports real-time updates through WebSocket connections and uses React Hook Form with Zod validation for form handling.
+The frontend uses React 18 with TypeScript, employing a component-based architecture with shadcn/ui and Tailwind CSS for a consistent, responsive design. State management leverages React Context, local state, and React Query for server state. Forms are handled with React Hook Form and Zod validation.
 
 ### Backend Architecture
-The backend follows a Node.js Express architecture with TypeScript, designed for serverless deployment. The system uses a hybrid storage approach, combining PostgreSQL database operations through Drizzle ORM with localStorage-based data persistence for UI compatibility. Session management is implemented using express-session with MemoryStore for development and in-memory storage. Authentication is handled through Passport.js with local strategy, supporting role-based access control with granular permissions.
+The backend is a Node.js Express application with TypeScript, designed for serverless deployment. It uses a hybrid storage approach with PostgreSQL via Drizzle ORM and localStorage for UI compatibility. Authentication uses Passport.js with local strategy and role-based access control. Session management is handled by express-session.
 
 ### Database Design
-The application uses PostgreSQL as the primary database with Drizzle ORM for type-safe database operations. The schema includes tables for users, audit forms, audit reports, ATA reviews, deleted audits, skipped samples, and audit samples. Each table is designed with proper relationships and constraints, supporting features like soft deletes, timestamps, and JSON field storage for complex data structures. The database configuration supports both Neon serverless PostgreSQL and traditional PostgreSQL deployments.
+PostgreSQL is the primary database, managed with Drizzle ORM. The schema includes tables for users, audit forms, reports, ATA reviews, deleted audits, and audit samples, designed with relationships, soft deletes, and timestamping. JSON fields support complex data structures.
 
 ### Real-time Communication
-WebSocket integration provides real-time updates for collaborative features, enabling multiple users to see live changes in audit statuses, assignments, and report updates. The WebSocket implementation is built into the Express server and handles connection management, broadcasting, and error handling.
+WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.
 
 ### Deployment Architecture
-The system is designed for multiple deployment scenarios including Docker containerization, Render platform deployment, and Netlify serverless functions. Build processes are configured with Vite for the frontend and esbuild for the backend, supporting both development and production environments. Environment variables handle configuration for database connections, JWT secrets, and deployment-specific settings.
+The system supports deployment via Docker, Render, and Netlify serverless functions. Vite is used for frontend builds and esbuild for the backend. Environment variables manage configuration.
+
+### Conditional Visibility
+The system supports conditional visibility for questions and sections within audit forms. Questions with a `controlledBy` property are shown based on the controlling question's answer. Sections with `controlsSection: true` are displayed based on their controlling question's answer.
 
 ## External Dependencies
 
 ### Database Services
-- **Neon Database**: Serverless PostgreSQL database service with connection pooling and automatic scaling
-- **PostgreSQL**: Traditional PostgreSQL database for self-hosted deployments
+- **Neon Database**: Serverless PostgreSQL.
+- **PostgreSQL**: Traditional PostgreSQL.
 
 ### UI Component Libraries
-- **Radix UI**: Comprehensive set of accessible, unstyled UI components including dialogs, dropdowns, tooltips, and form controls
-- **shadcn/ui**: Pre-styled component library built on top of Radix UI with Tailwind CSS
-- **Lucide React**: Icon library providing consistent iconography throughout the application
+- **Radix UI**: Accessible, unstyled UI components.
+- **shadcn/ui**: Pre-styled components built on Radix UI and Tailwind CSS.
+- **Lucide React**: Icon library.
 
 ### Authentication & Session Management
-- **Passport.js**: Authentication middleware supporting local strategy with extensible authentication methods
-- **express-session**: Session management with configurable storage backends
+- **Passport.js**: Authentication middleware.
+- **express-session**: Session management.
 
 ### Development & Build Tools
-- **Vite**: Frontend build tool with hot module replacement and optimized production builds
-- **TypeScript**: Type safety across the entire application stack
-- **Tailwind CSS**: Utility-first CSS framework with custom configuration
-- **Drizzle Kit**: Database migration and schema management tools
-
-## Recent Changes
-
-### January 2025 - Complete Database Integration & Export Functionality  
-- **PostgreSQL Integration**: Successfully migrated from localStorage to Neon PostgreSQL database with full CRUD operations. All data is now persisted in the database with no risk of data loss.
-- **Deployment Ready**: Created comprehensive deployment configurations for Render and manual server deployment with render.yaml, proper .gitignore, and deployment guide.
-- **Database Services**: Implemented DatabaseService class with complete user management, audit forms, reports, samples, and statistics functionality.
-- **Health Monitoring**: Added /api/health endpoint for database connectivity monitoring and /api/stats for system statistics.
-- **Security**: Implemented bcrypt password hashing, secure session management, and proper environment variable handling.
-- **Repeatable Sections**: Completed implementation of "Was there another interaction?" functionality in both preview and auditing forms with dynamic section creation/removal.
-- **Export Functionality**: Completely rewrote CSV export to handle multiple interactions horizontally (side-by-side columns) instead of vertically (separate rows). Each audit appears as one row with interaction questions displayed as "Interaction 1 - Question", "Interaction 2 - Question" column groups.
-- **Conditional Validation**: Fixed form validation to properly skip mandatory validation for hidden questions controlled by conditional logic.
-
-### August 2025 - Critical Dynamic Sections Fix & Export Refinements
-- **Root Cause Identified**: Dynamic sections (Interaction 2, 3, etc.) were being created correctly in the UI but not saved during audit submission because they weren't included in the global form state.
-- **Audit Submission Fix**: Updated audit submission process in audits.tsx to include dynamic sections from global state in both validation and processing phases.
-- **Global State Enhancement**: Extended global form state to include dynamicSections property and updated all form value events to properly pass dynamic sections data.
-- **Export Cleanup**: Fixed CSV export to eliminate duplicate questions by using question text as unique keys instead of section indices. Initially excluded then re-included control questions ("Was there another interaction?") per user requirements.
-- **Conditional Rating Columns**: Implemented smart rating column detection - Rating columns only appear in CSV export if rating questions actually exist in the form, reducing unnecessary empty columns.
-- **Question Sequencing**: Fixed CSV export to maintain original form question sequence instead of alphabetical sorting.
-- **Controlled Export System**: Removed "Download All Reports" option and implemented mandatory form filter requirement to prevent question mismatches in exports. Added auditor filtering for more precise report selection.
-- **Data Integrity**: All multiple interaction audits now properly save and display in reports with distinct blue-bordered sections for each interaction.
-
-### August 2025 - User Permission System & Email Editing Complete Fix
-- **Critical Issues Resolved**: Fixed user permission system where assigned permissions were not granting proper access to users, and implemented full email editing functionality in admin panel.
-- **Missing PATCH Route**: Added PATCH /api/users/:id endpoint with comprehensive permission validation for user updates.
-- **Enhanced Storage Layer**: Improved storage.updateUser() method to synchronize permission changes across database, memory storage, and localStorage for complete data consistency.
-- **Route Consistency**: Updated user retrieval routes to use storage layer instead of direct database access, ensuring consistent behavior regardless of database connectivity.
-- **Permission Validation**: Implemented proper authentication and authorization checks before allowing permission modifications.
-- **Real-time Updates**: Added comprehensive logging and broadcasting for permission changes to ensure immediate effect.
-- **Data Persistence**: Permission updates now properly persist across all storage layers with fallback mechanisms for database connectivity issues.
-- **Email Field Implementation**: Added email field to User schema, updated route validation to handle email separately from schema validation, and enhanced storage layer to properly persist email data across all storage systems.
-- **Cross-Platform Compatibility**: Email updates work seamlessly across PostgreSQL database (when available) and memory storage fallback, with proper localStorage synchronization for UI consistency.
-- **Permission Rollback Fix**: Resolved critical issue where user permissions were being reset during server restarts or user login due to localStorage synchronization conflicts. Changed synchronization logic to prioritize server database as source of truth, preventing permission downgrades from stale localStorage data.
-- **Frontend Email Fix**: Fixed 5 hardcoded email patterns in users.tsx that were overriding actual database email values with `username@qualithor.com`. Email editing now displays and saves correctly from database.
-- **Complete Neon Database Integration**: Fixed malformed DATABASE_URL that contained psql wrapper, successfully established connection to Neon PostgreSQL. Added email column to database schema and migrated existing users. All user operations now write directly to Neon database with memory storage and localStorage fallback for reliability.
-- **User CRUD Operations Fix**: Updated createUser and deleteUser methods in storage layer to write directly to Neon database first, then sync to memory and localStorage. Fixed user creation and deletion to persist correctly in database. All user management operations (create, update, delete) now fully integrated with PostgreSQL database.
-- **Missing DELETE Route Fix**: Added missing DELETE /api/users/:id route in routes.ts with proper authentication, authorization, and permission checks. User deletion now works correctly through API endpoints with database persistence and real-time broadcasting.
-
-### August 2025 - Critical Database Persistence Fix for Available Pool Samples
-- **Root Cause Identified**: Available pool samples were only being stored in localStorage and not persisting to the Neon PostgreSQL database, causing complete data loss on server restarts.
-- **Comprehensive API Routes Added**: Implemented complete CRUD operations for all missing data types including skipped-samples, deleted-audits, ata-reviews, and audit-samples with proper validation schemas.
-- **Database Sync Function**: Created automatic synchronization function that saves all available pool samples to database when users log in or create new samples.
-- **Authentication Integration**: Fixed session management issues that were preventing API calls from reaching database routes, ensuring proper credentials are included in all database operations.
-- **Schema Validation Fix**: Updated insertAuditSampleSchema to handle flexible date formats and optional fields, resolving 400 validation errors that prevented sample creation.
-- **Frontend Database Integration**: Enhanced frontend components with proper credentials handling, comprehensive error handling, and automatic fallback to localStorage when database is unavailable.
-- **Production Ready**: All audit samples, skipped samples, deleted audits, and ATA reviews now persist to Neon PostgreSQL database with full CRUD operations and real-time synchronization.
-
-### August 2025 - Comprehensive Database Persistence Fix - All Data Types  
-- **Critical Issue Identified**: All database tables (audit_reports, audit_forms, skipped_samples, deleted_audits, ata_reviews) were empty despite working API routes, indicating frontend was only using localStorage without calling database APIs.
-- **Database Sync Service Created**: Built comprehensive DatabaseSyncService that automatically syncs all data types from localStorage to database including forms, reports, skipped samples, deleted audits, and ATA reviews.
-- **Complete Integration**: Updated audits.tsx to use the new database sync service that synchronizes all localStorage data to PostgreSQL on user login and data creation.
-- **Authentication Fixed**: Resolved session management issues that were causing 401 errors in database API calls.
-- **Data Persistence Verification**: All data types now properly persist to Neon PostgreSQL database with fallback to localStorage for offline functionality.
-- **Real-time Sync**: Database operations now happen in real-time when users create forms, submit audits, skip samples, delete reports, or create ATA reviews.
-
-### Database Architecture
-- **Primary Storage**: PostgreSQL via Neon with connection pooling and SSL encryption
-- **Schema Management**: Drizzle ORM with type-safe operations and automated migrations
-- **Data Persistence**: All forms, audit reports, user data, and samples stored in PostgreSQL
-- **Backup Strategy**: Automated backups managed by Neon PostgreSQL service
-
-### Deployment Configurations
-- **Render**: render.yaml with auto-scaling, health checks, and environment variable configuration
-- **Manual Deployment**: Complete deployment guide with Docker and traditional server setup instructions
-- **Environment Variables**: DATABASE_URL and SESSION_SECRET properly configured for production security
-
-### How Conditional Visibility Works
-- **Question Level**: Questions with a `controlledBy` property will only show when their controlling question's answer matches one of the values in `visibleOnValues`
-- **Section Level**: Sections with `controlsSection: true` will only show when their controlling question (identified by `controlledSectionId`) has an answer matching `visibleOnValues`
-- **Debug Output**: Console logs show detailed visibility decisions including which questions are being controlled and why they're hidden/shown
+- **Vite**: Frontend build tool.
+- **TypeScript**: Type safety.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Drizzle Kit**: Database migration and schema management.
