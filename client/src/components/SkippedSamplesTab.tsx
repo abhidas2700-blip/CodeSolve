@@ -83,54 +83,72 @@ export default function SkippedSamplesTab({
     loadSkippedSamples();
   }, [currentUser]);
 
-  const loadSkippedSamples = () => {
+  const loadSkippedSamples = async () => {
     setLoading(true);
     
-    fetch("/api/skipped-samples")
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Failed to fetch skipped samples");
+    try {
+      const response = await fetch("/api/skipped-samples", {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
         }
-        return response.json();
-      })
-      .then(data => {
-        setSkippedSamples(data);
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error("Error loading skipped samples:", error);
-        setLoading(false);
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch skipped samples");
+      }
+      
+      const data = await response.json();
+      setSkippedSamples(data);
+    } catch (error) {
+      console.error("Error loading skipped samples:", error);
+      // Fallback to localStorage if API fails
+      const localStorage = window.localStorage;
+      const stored = localStorage.getItem('qa-skipped-samples');
+      if (stored) {
+        try {
+          setSkippedSamples(JSON.parse(stored));
+        } catch (e) {
+          console.error('Error parsing stored skipped samples:', e);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeleteSkippedSample = (id: number) => {
+  const handleDeleteSkippedSample = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this skipped sample?")) {
       return;
     }
 
-    fetch(`/api/skipped-samples/${id}`, {
-      method: "DELETE"
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Failed to delete skipped sample");
+    try {
+      const response = await fetch(`/api/skipped-samples/${id}`, {
+        method: "DELETE",
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
         }
-        
-        // Remove from local state
-        setSkippedSamples(prevSamples => 
-          prevSamples.filter(sample => sample.id !== id)
-        );
-        
-        // Close dialog if the deleted sample was being viewed
-        if (selectedSample && selectedSample.id === id) {
-          setShowDetailsDialog(false);
-          setSelectedSample(null);
-        }
-      })
-      .catch(error => {
-        console.error("Error deleting skipped sample:", error);
-        alert("Failed to delete skipped sample. Please try again.");
       });
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete skipped sample");
+      }
+      
+      // Remove from local state
+      setSkippedSamples(prevSamples => 
+        prevSamples.filter(sample => sample.id !== id)
+      );
+      
+      // Close dialog if the deleted sample was being viewed
+      if (selectedSample && selectedSample.id === id) {
+        setShowDetailsDialog(false);
+        setSelectedSample(null);
+      }
+    } catch (error) {
+      console.error("Error deleting skipped sample:", error);
+      alert("Failed to delete skipped sample. Please try again.");
+    }
   };
 
   const handleViewDetails = (sample: SkippedSample) => {

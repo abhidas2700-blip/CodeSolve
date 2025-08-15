@@ -81,6 +81,75 @@ export const reportsService = {
   }
 };
 
+// Skipped Samples Management
+export const skippedSamplesService = {
+  getAllSkippedSamples: async () => {
+    const response = await apiRequest("GET", "/api/skipped-samples");
+    return await response.json();
+  },
+
+  createSkippedSample: async (sampleData: any) => {
+    const response = await apiRequest("POST", "/api/skipped-samples", sampleData);
+    return await response.json();
+  },
+
+  deleteSkippedSample: async (id: number) => {
+    await apiRequest("DELETE", `/api/skipped-samples/${id}`);
+  }
+};
+
+// Deleted Audits Management
+export const deletedAuditsService = {
+  getAllDeletedAudits: async () => {
+    const response = await apiRequest("GET", "/api/deleted-audits");
+    return await response.json();
+  },
+
+  createDeletedAudit: async (auditData: any) => {
+    const response = await apiRequest("POST", "/api/deleted-audits", auditData);
+    return await response.json();
+  }
+};
+
+// ATA Reviews Management
+export const ataReviewsService = {
+  getAllAtaReviews: async () => {
+    const response = await apiRequest("GET", "/api/ata-reviews");
+    return await response.json();
+  },
+
+  createAtaReview: async (reviewData: any) => {
+    const response = await apiRequest("POST", "/api/ata-reviews", reviewData);
+    return await response.json();
+  },
+
+  updateAtaReview: async (id: number, reviewData: any) => {
+    const response = await apiRequest("PUT", `/api/ata-reviews/${id}`, reviewData);
+    return await response.json();
+  }
+};
+
+// Audit Samples Management
+export const auditSamplesService = {
+  getAllAuditSamples: async () => {
+    const response = await apiRequest("GET", "/api/audit-samples");
+    return await response.json();
+  },
+
+  createAuditSample: async (sampleData: any) => {
+    const response = await apiRequest("POST", "/api/audit-samples", sampleData);
+    return await response.json();
+  },
+
+  deleteAuditSample: async (auditId: string) => {
+    await apiRequest("DELETE", `/api/audit-samples/${auditId}`);
+  },
+
+  deleteReport: async (id: number) => {
+    await apiRequest("DELETE", `/api/reports/${id}`);
+  }
+};
+
 // ATA Reviews Management
 export const ataService = {
   getAllReviews: async () => {

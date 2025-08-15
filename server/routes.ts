@@ -649,5 +649,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // SKIPPED SAMPLES ROUTES
+  
+  // Get all skipped samples
+  app.get('/api/skipped-samples', async (req: Request, res: Response) => {
+    console.log('GET /api/skipped-samples called');
+    if (!req.user) {
+      console.log('User not authenticated for skipped samples');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      const allSkippedSamples = await db.select().from(skippedSamples).orderBy(desc(skippedSamples.timestamp));
+      res.json(allSkippedSamples);
+    } catch (error) {
+      console.error('Error fetching skipped samples:', error);
+      res.status(500).json({ error: 'Failed to fetch skipped samples' });
+    }
+  });
+
+  // Create skipped sample
+  app.post('/api/skipped-samples', async (req: Request, res: Response) => {
+    console.log('POST /api/skipped-samples called');
+    if (!req.user) {
+      console.log('User not authenticated for creating skipped sample');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      console.log('Received skipped sample data:', req.body);
+      const validatedData = insertSkippedSampleSchema.parse(req.body);
+      console.log('Validated skipped sample data:', validatedData);
+      
+      const [newSkippedSample] = await db.insert(skippedSamples).values({
+        ...validatedData,
+        auditor: req.user?.id || null
+      }).returning();
+
+      console.log('Created skipped sample:', newSkippedSample);
+
+      broadcast({
+        type: 'skipped_sample_created',
+        sample: newSkippedSample
+      });
+
+      res.status(201).json(newSkippedSample);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error('Validation errors for skipped sample:', error.errors);
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating skipped sample:', error);
+      res.status(500).json({ error: 'Failed to create skipped sample' });
+    }
+  });
+
+  // Delete skipped sample
+  app.delete('/api/skipped-samples/:id', async (req: Request, res: Response) => {
+    try {
+      const sampleId = parseInt(req.params.id);
+      
+      const [deletedSample] = await db.delete(skippedSamples)
+        .where(eq(skippedSamples.id, sampleId))
+        .returning();
+
+      if (!deletedSample) {
+        return res.status(404).json({ error: 'Skipped sample not found' });
+      }
+
+      broadcast({
+        type: 'skipped_sample_deleted',
+        sampleId: sampleId
+      });
+
+      res.json({ message: 'Skipped sample deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting skipped sample:', error);
+      res.status(500).json({ error: 'Failed to delete skipped sample' });
+    }
+  });
+
+  // DELETED AUDITS ROUTES
+  
+  // Get all deleted audits
+  app.get('/api/deleted-audits', async (req: Request, res: Response) => {
+    try {
+      const allDeletedAudits = await db.select().from(deletedAudits).orderBy(desc(deletedAudits.deletedAt));
+      res.json(allDeletedAudits);
+    } catch (error) {
+      console.error('Error fetching deleted audits:', error);
+      res.status(500).json({ error: 'Failed to fetch deleted audits' });
+    }
+  });
+
+  // Create deleted audit record (when audit is deleted)
+  app.post('/api/deleted-audits', async (req: Request, res: Response) => {
+    try {
+      console.log('Received deleted audit data:', req.body);
+      const validatedData = insertDeletedAuditSchema.parse(req.body);
+      console.log('Validated deleted audit data:', validatedData);
+      
+      const [newDeletedAudit] = await db.insert(deletedAudits).values(validatedData).returning();
+
+      console.log('Created deleted audit:', newDeletedAudit);
+
+      broadcast({
+        type: 'audit_deleted',
+        audit: newDeletedAudit
+      });
+
+      res.status(201).json(newDeletedAudit);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        console.error('Validation errors for deleted audit:', error.errors);
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating deleted audit record:', error);
+      res.status(500).json({ error: 'Failed to create deleted audit record' });
+    }
+  });
+
+  // ATA REVIEWS ROUTES
+  
+  // Get all ATA reviews
+  app.get('/api/ata-reviews', async (req: Request, res: Response) => {
+    try {
+      const reviews = await db.select().from(ataReviews).orderBy(desc(ataReviews.timestamp));
+      res.json(reviews);
+    } catch (error) {
+      console.error('Error fetching ATA reviews:', error);
+      res.status(500).json({ error: 'Failed to fetch ATA reviews' });
+    }
+  });
+
+  // Create ATA review
+  app.post('/api/ata-reviews', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAtaReviewSchema.parse(req.body);
+      
+      const [newReview] = await db.insert(ataReviews).values({
+        ...validatedData,
+        reviewerId: req.user?.id || null
+      }).returning();
+
+      broadcast({
+        type: 'ata_review_created',
+        review: newReview
+      });
+
+      res.status(201).json(newReview);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating ATA review:', error);
+      res.status(500).json({ error: 'Failed to create ATA review' });
+    }
+  });
+
+  // Update ATA review
+  app.put('/api/ata-reviews/:id', async (req: Request, res: Response) => {
+    try {
+      const reviewId = parseInt(req.params.id);
+      const validatedData = insertAtaReviewSchema.parse(req.body);
+      
+      const [updatedReview] = await db.update(ataReviews)
+        .set(validatedData)
+        .where(eq(ataReviews.id, reviewId))
+        .returning();
+
+      if (!updatedReview) {
+        return res.status(404).json({ error: 'ATA review not found' });
+      }
+
+      broadcast({
+        type: 'ata_review_updated',
+        review: updatedReview
+      });
+
+      res.json(updatedReview);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error updating ATA review:', error);
+      res.status(500).json({ error: 'Failed to update ATA review' });
+    }
+  });
+
+  // AUDIT SAMPLES ROUTES
+  
+  // Get all audit samples
+  app.get('/api/audit-samples', async (req: Request, res: Response) => {
+    try {
+      const samples = await db.select().from(auditSamples).orderBy(desc(auditSamples.uploadedAt));
+      res.json(samples);
+    } catch (error) {
+      console.error('Error fetching audit samples:', error);
+      res.status(500).json({ error: 'Failed to fetch audit samples' });
+    }
+  });
+
+  // Create audit sample
+  app.post('/api/audit-samples', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAuditSampleSchema.parse(req.body);
+      
+      const [newSample] = await db.insert(auditSamples).values({
+        ...validatedData,
+        assignedTo: req.user?.id || null
+      }).returning();
+
+      broadcast({
+        type: 'audit_sample_created',
+        sample: newSample
+      });
+
+      res.status(201).json(newSample);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating audit sample:', error);
+      res.status(500).json({ error: 'Failed to create audit sample' });
+    }
+  });
+
+  // Delete audit sample
+  app.delete('/api/audit-samples/:auditId', async (req: Request, res: Response) => {
+    try {
+      const auditId = req.params.auditId;
+      
+      const [deletedSample] = await db.delete(auditSamples)
+        .where(eq(auditSamples.sampleId, auditId))
+        .returning();
+
+      if (!deletedSample) {
+        return res.status(404).json({ error: 'Audit sample not found' });
+      }
+
+      broadcast({
+        type: 'audit_sample_deleted',
+        auditId: auditId
+      });
+
+      res.json({ message: 'Audit sample deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting audit sample:', error);
+      res.status(500).json({ error: 'Failed to delete audit sample' });
+    }
+  });
+
   return httpServer;
 }
