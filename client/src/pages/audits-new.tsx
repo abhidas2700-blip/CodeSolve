@@ -202,7 +202,11 @@ export default function UserAuditPage() {
     // Get all sections including dynamic interaction sections
     const allSectionsForScore = [...form.sections];
     
-    // Add dynamic sections based on answered questions
+    // CRITICAL FIX: Add dynamic sections from state for score calculation  
+    console.log('🔧 Adding dynamic sections to score calculation:', dynamicSections.map(s => s.name));
+    allSectionsForScore.push(...dynamicSections);
+    
+    // Also add dynamic sections based on answered questions (backup)
     const interactionSections = new Set<number>();
     Object.keys(answers).forEach(questionId => {
       if (questionId.includes('_repeat_')) {
@@ -216,18 +220,22 @@ export default function UserAuditPage() {
       }
     });
     
-    // Add dynamic sections for score calculation
+    // Add dynamic sections for score calculation (backup check)
     interactionSections.forEach(repeatIndex => {
       const templateSection = form.sections.find(s => s.isRepeatable);
       if (templateSection) {
-        allSectionsForScore.push({
-          ...templateSection,
-          name: `Interaction ${repeatIndex}`,
-          questions: templateSection.questions.map(q => ({
-            ...q,
-            id: `${q.id}_repeat_${repeatIndex}`
-          }))
-        });
+        // Only add if not already present from dynamicSections
+        const alreadyExists = allSectionsForScore.some(s => s.name === `Interaction ${repeatIndex}`);
+        if (!alreadyExists) {
+          allSectionsForScore.push({
+            ...templateSection,
+            name: `Interaction ${repeatIndex}`,
+            questions: templateSection.questions.map(q => ({
+              ...q,
+              id: `${q.id}_repeat_${repeatIndex}`
+            }))
+          });
+        }
       }
     });
     
@@ -343,7 +351,7 @@ export default function UserAuditPage() {
       
       console.log('🔍 DEBUG: Answer changed for question:', question?.text, 'Value:', value, 'Question ID:', questionId);
       
-      if (question && question.text?.toLowerCase().includes('was there another interaction') && value.toLowerCase() === 'yes') {
+      if (question && (question.text?.toLowerCase().includes('was there another interaction') || question.text?.toLowerCase().includes('another interaction')) && value.toLowerCase() === 'yes') {
         console.log('🔄 TRIGGER: Creating new interaction section triggered by question:', question.text);
         console.log('🔄 Current dynamic sections count:', dynamicSections.length);
         createNewInteractionSection();
@@ -537,9 +545,11 @@ export default function UserAuditPage() {
     // Process all sections: original form sections + any dynamic sections created during form filling
     const allSections = [...form.sections];
     
-    // Add any dynamic sections that were created (like additional interactions)
-    // Check if there are any dynamic sections stored in component state or context
-    // For now, we'll check for additional interaction sections by looking for pattern in answers
+    // CRITICAL FIX: Add dynamic sections from state first, then check answers for missing ones
+    console.log('🔧 Adding dynamic sections from state:', dynamicSections.map(s => s.name));
+    allSections.push(...dynamicSections);
+    
+    // Also check if there are any dynamic sections we missed by looking for pattern in answers
     const interactionSectionNames = new Set<string>();
     
     // Analyze answers to identify which interaction sections have data
