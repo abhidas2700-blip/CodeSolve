@@ -27,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { databaseSync } from '../services/databaseSync';
+import { useDataSync } from '../hooks/useDataSync';
 
 // Process audit answers for display in a results modal
 // Global audit data store
@@ -1559,6 +1560,7 @@ export default function Audits() {
     URL.revokeObjectURL(url);
   };
   const { user } = useAuth();
+  const { syncToDatabase } = useDataSync(); // Enable automatic database sync
   const [activeTab, setActiveTab] = useState("assigned");
   const [selectedForm, setSelectedForm] = useState("");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
