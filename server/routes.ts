@@ -210,15 +210,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid user ID' });
       }
 
-      const validatedData = insertUserSchema.partial().parse(req.body);
+      // Parse only the fields that are in the schema
+      const { email, ...bodyWithoutEmail } = req.body;
+      const validatedData = insertUserSchema.partial().parse(bodyWithoutEmail);
+      
+      // Add email to the validated data if it exists in the request
+      const updateData = {
+        ...validatedData,
+        ...(email !== undefined ? { email: email } : {})
+      };
       
       // Hash password if provided
-      if (validatedData.password) {
-        validatedData.password = await hashPassword(validatedData.password);
+      if (updateData.password) {
+        updateData.password = await hashPassword(updateData.password);
       }
 
       // Use storage.updateUser for proper permission updates
-      const updatedUser = await storage.updateUser(userId, validatedData);
+      const updatedUser = await storage.updateUser(userId, updateData);
 
       if (!updatedUser) {
         return res.status(404).json({ error: 'User not found' });
