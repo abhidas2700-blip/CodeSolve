@@ -394,13 +394,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all audit reports (excluding deleted ones)
   app.get('/api/reports', async (req: Request, res: Response) => {
     try {
+      console.log('Fetching reports - filtering out deleted ones');
       const reports = await db.select().from(auditReports)
         .where(eq(auditReports.deleted, false))
         .orderBy(desc(auditReports.timestamp));
+      console.log(`Found ${reports.length} active reports (deleted filtered out)`);
       res.json(reports);
     } catch (error) {
       console.error('Error fetching reports:', error);
       res.status(500).json({ error: 'Failed to fetch reports' });
+    }
+  });
+
+  // Get single audit report by ID for editing
+  app.get('/api/reports/:auditId', async (req: Request, res: Response) => {
+    try {
+      const auditId = req.params.auditId;
+      const [report] = await db.select().from(auditReports)
+        .where(and(eq(auditReports.auditId, auditId), eq(auditReports.deleted, false)));
+      
+      if (!report) {
+        return res.status(404).json({ error: 'Report not found or deleted' });
+      }
+      
+      res.json(report);
+    } catch (error) {
+      console.error('Error fetching report:', error);
+      res.status(500).json({ error: 'Failed to fetch report' });
+    }
+  });
+
+  // Update audit report (edit functionality)
+  app.put('/api/reports/:auditId', async (req: Request, res: Response) => {
+    try {
+      const auditId = req.params.auditId;
+      const validatedData = insertAuditReportSchema.omit({ auditId: true }).parse(req.body);
+      
+      const [updatedReport] = await db.update(auditReports)
+        .set({
+          ...validatedData,
+          updatedAt: new Date()
+        })
+        .where(and(eq(auditReports.auditId, auditId), eq(auditReports.deleted, false)))
+        .returning();
+
+      if (!updatedReport) {
+        return res.status(404).json({ error: 'Report not found or deleted' });
+      }
+
+      console.log(`Updated report ${auditId} in database`);
+      
+      broadcast({
+        type: 'report_updated',
+        report: updatedReport
+      });
+
+      res.json(updatedReport);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error updating report:', error);
+      res.status(500).json({ error: 'Failed to update report' });
     }
   });
   
