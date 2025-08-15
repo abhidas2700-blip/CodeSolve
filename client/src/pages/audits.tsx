@@ -1592,10 +1592,8 @@ export default function Audits() {
               customerName: sample.customerName,
               ticketId: sample.ticketId,
               formType: sample.formType,
-              date: sample.date,
-              priority: sample.priority,
-              status: sample.status,
-              assignedTo: sample.assignedTo || null,
+              priority: sample.priority || 'medium',
+              status: sample.status || 'available',
               metadata: sample.metadata || {},
               uploadedBy: user?.id || 1
             })

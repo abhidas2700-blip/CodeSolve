@@ -153,14 +153,15 @@ export const insertAuditSampleSchema = createInsertSchema(auditSamples).pick({
   customerName: true,
   ticketId: true, 
   formType: true,
-  date: true,
   priority: true,
   status: true,
   assignedTo: true,
-  assignedAt: true,
   metadata: true,
   uploadedBy: true,
   batchId: true,
+}).extend({
+  date: z.union([z.number(), z.string(), z.date()]).optional(),
+  assignedAt: z.union([z.number(), z.string(), z.date()]).optional(),
 });
 
 // Skipped samples schema

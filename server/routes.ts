@@ -850,12 +850,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create audit sample
   app.post('/api/audit-samples', async (req: Request, res: Response) => {
+    console.log('POST /api/audit-samples called with data:', req.body);
+    if (!req.user) {
+      console.log('User not authenticated for creating audit sample');
+      return res.status(401).json({ error: 'Authentication required' });
+    }
     try {
       const validatedData = insertAuditSampleSchema.parse(req.body);
+      console.log('Validated audit sample data:', validatedData);
       
       const [newSample] = await db.insert(auditSamples).values({
         ...validatedData,
-        assignedTo: req.user?.id || null
+        assignedTo: validatedData.assignedTo || null
       }).returning();
 
       broadcast({
