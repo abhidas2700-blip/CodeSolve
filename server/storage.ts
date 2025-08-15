@@ -198,6 +198,36 @@ export class MemoryStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      
+      const [createdUser] = await db
+        .insert(users)
+        .values({
+          username: insertUser.username,
+          password: insertUser.password,
+          email: (insertUser as any).email || null,
+          rights: insertUser.rights,
+          isInactive: insertUser.isInactive || false
+        })
+        .returning();
+      
+      if (createdUser) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.users.findIndex(u => u.id === createdUser.id);
+        if (existingIndex === -1) {
+          this.users.push(createdUser);
+        }
+        
+        console.log(`Created user ${createdUser.username} in database with ID ${createdUser.id}`);
+        return createdUser;
+      }
+    } catch (error) {
+      console.error('Database create failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const user: User = {
       id: this.userIdCounter++,
       username: insertUser.username,
@@ -207,6 +237,7 @@ export class MemoryStorage implements IStorage {
       isInactive: insertUser.isInactive || false
     };
     this.users.push(user);
+    console.log(`Created user ${user.username} in memory storage with ID ${user.id}`);
     return user;
   }
   
