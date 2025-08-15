@@ -214,12 +214,97 @@ export class MemoryStorage implements IStorage {
   }
   
   async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    try {
+      // First, try to update in database if available
+      const { db } = await import("./db");
+      const { eq } = await import("drizzle-orm");
+      
+      const [updatedUser] = await db
+        .update(users)
+        .set(userData)
+        .where(eq(users.id, id))
+        .returning();
+      
+      if (updatedUser) {
+        // Update in-memory storage to match database
+        const index = this.users.findIndex(u => u.id === id);
+        if (index !== -1) {
+          this.users[index] = updatedUser;
+        } else {
+          // Add to memory if not found
+          this.users.push(updatedUser);
+        }
+        
+        // Also update localStorage for UI compatibility
+        try {
+          const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+          const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+          
+          if (localIndex !== -1) {
+            // Update existing user in localStorage 
+            qaUsers[localIndex] = {
+              ...qaUsers[localIndex],
+              ...userData,
+              rights: updatedUser.rights // Ensure rights are properly updated
+            };
+          } else {
+            // Add new user to localStorage
+            qaUsers.push({
+              id: updatedUser.id,
+              username: updatedUser.username,
+              password: updatedUser.password,
+              rights: updatedUser.rights,
+              isInactive: updatedUser.isInactive
+            });
+          }
+          
+          this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+          console.log(`Updated user ${updatedUser.username} permissions in localStorage:`, updatedUser.rights);
+        } catch (localStorageError) {
+          console.error('Error updating localStorage:', localStorageError);
+        }
+        
+        return updatedUser;
+      }
+    } catch (dbError) {
+      console.warn('Database update failed, using memory storage:', dbError);
+    }
+    
+    // Fallback to memory-only update
     const index = this.users.findIndex(u => u.id === id);
     if (index === -1) return undefined;
     
     const user = this.users[index];
     const updatedUser = { ...user, ...userData };
     this.users[index] = updatedUser;
+    
+    // Also update localStorage for consistency
+    try {
+      const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+      const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+      
+      if (localIndex !== -1) {
+        qaUsers[localIndex] = {
+          ...qaUsers[localIndex],
+          ...userData,
+          rights: updatedUser.rights
+        };
+      } else {
+        qaUsers.push({
+          id: updatedUser.id,
+          username: updatedUser.username,
+          password: updatedUser.password,
+          rights: updatedUser.rights,
+          isInactive: updatedUser.isInactive
+        });
+      }
+      
+      this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+      console.log(`Updated user ${updatedUser.username} permissions in memory and localStorage:`, updatedUser.rights);
+    } catch (localStorageError) {
+      console.error('Error updating localStorage in fallback:', localStorageError);
+    }
+    
     return updatedUser;
   }
   

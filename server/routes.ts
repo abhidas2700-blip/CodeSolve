@@ -140,13 +140,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Invalid user ID' });
       }
 
-      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      // Use storage layer instead of direct database access
+      const user = await storage.getUser(userId);
       
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      res.json(user);
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error('Error fetching user:', error);
       res.status(500).json({ error: 'Failed to fetch user' });
@@ -181,6 +184,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error('Error creating user:', error);
       res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
+  // Update user (PATCH)
+  app.patch('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "You must be logged in to update users" });
+      }
+      
+      const currentUser = req.user as any;
+      const userRights = Array.isArray(currentUser.rights) ? currentUser.rights : [];
+      
+      // Check if current user has permission to update users
+      if (!userRights.includes('admin') && 
+          !userRights.includes('userManage') && 
+          !userRights.includes('createLowerUsers')) {
+        return res.status(403).json({ error: "You don't have permission to update users" });
+      }
+      
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+
+      const validatedData = insertUserSchema.partial().parse(req.body);
+      
+      // Hash password if provided
+      if (validatedData.password) {
+        validatedData.password = await hashPassword(validatedData.password);
+      }
+
+      // Use storage.updateUser for proper permission updates
+      const updatedUser = await storage.updateUser(userId, validatedData);
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      broadcast({
+        type: 'user_updated',
+        user: { id: updatedUser.id, username: updatedUser.username, rights: updatedUser.rights }
+      });
+
+      // Remove password from response
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error updating user:', error);
+      res.status(500).json({ error: 'Failed to update user' });
     }
   });
 
