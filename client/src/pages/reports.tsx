@@ -3711,6 +3711,7 @@ export default function ReportsPage() {
               <div className="space-y-6">
                 {viewingReport.answers && viewingReport.answers.length > 0 ? (
                   console.log('🔍 DEBUG: All sections in report:', viewingReport.answers.map(s => s.section)),
+                  console.log('🔍 DETAILED: Full report structure:', JSON.stringify(viewingReport.answers, null, 2)),
                   viewingReport.answers.map((section, sIndex) => {
                     const isInteractionSection = section.section && (
                       section.section.toLowerCase().includes('interaction') ||
