@@ -249,6 +249,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user
+  app.delete('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "You must be logged in to delete users" });
+      }
+      
+      const currentUser = req.user as any;
+      const userRights = Array.isArray(currentUser.rights) ? currentUser.rights : [];
+      
+      // Check if current user has permission to delete users
+      if (!userRights.includes('admin') && 
+          !userRights.includes('userManage') && 
+          !userRights.includes('createLowerUsers')) {
+        return res.status(403).json({ error: "You don't have permission to delete users" });
+      }
+      
+      const userId = parseInt(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ error: 'Invalid user ID' });
+      }
+
+      // Prevent deletion of the admin user
+      if (userId === 1) {
+        return res.status(403).json({ error: 'Cannot delete admin user' });
+      }
+
+      // Use storage layer for deletion
+      const deleted = await storage.deleteUser(userId);
+
+      if (!deleted) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      broadcast({
+        type: 'user_deleted',
+        userId: userId
+      });
+
+      res.json({ message: 'User deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      res.status(500).json({ error: 'Failed to delete user' });
+    }
+  });
+
   // AUDIT FORMS ROUTES
 
   // Get all audit forms
