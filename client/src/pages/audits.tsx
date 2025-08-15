@@ -2677,7 +2677,7 @@ export default function Audits() {
   };
 
   // Complete an audit with proper data capturing
-  const completeAudit = () => {
+  const completeAudit = async () => {
     if (!auditInProgress) return;
     
     try {
@@ -2965,35 +2965,104 @@ export default function Audits() {
       setAuditSamples(updatedSamples);
       localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
       
-      // Add to reports
-      // Convert completed audit to report format and add to qa-reports
-      const newReport = {
-        id: completedAudit.id,
-        auditId: completedAudit.id,
-        agent: completedAudit.agent,
-        auditor: user?.username || "Unknown",
-        formName: completedAudit.formName,
-        timestamp: completedAudit.timestamp,
-        score: Math.round((completedAudit.score / completedAudit.maxScore) * 100),
-        answers: completedAudit.sectionAnswers.map(section => ({
-          section: section.sectionName,
-          questions: section.answers.map(answer => ({
-            text: answer.questionText,
-            answer: answer.answer,
-            remarks: answer.remarks,
-            questionType: answer.questionType,
-            isFatal: answer.isFatal,
-            weightage: answer.weightage,
-            questionId: answer.questionId,
-            options: answer.options
+      // CRITICAL DATABASE FIX: Save audit report to PostgreSQL database via API
+      try {
+        console.log('🚀 SAVING AUDIT REPORT TO DATABASE');
+        
+        const reportData = {
+          auditId: auditInProgress.id,
+          formName: auditInProgress.formType,
+          agent: auditInProgress.customerName,
+          agentId: auditInProgress.id,
+          auditorName: user?.username || 'Unknown',
+          sectionAnswers: sectionAnswers,
+          score: percentScore,
+          maxScore: 100,
+          hasFatal: hasFatal,
+          status: 'completed'
+        };
+        
+        console.log('📤 Submitting report data:', reportData);
+        
+        const response = await fetch('/api/reports', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(reportData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('❌ Database save failed:', response.status, errorData);
+          throw new Error(`Failed to save to database: ${response.status}`);
+        }
+        
+        const savedReport = await response.json();
+        console.log('✅ AUDIT REPORT SAVED TO DATABASE:', savedReport);
+        
+        // Update localStorage with database ID for consistency
+        const newReport = {
+          id: savedReport.id || auditInProgress.id,
+          auditId: auditInProgress.id,
+          agent: auditInProgress.customerName,
+          auditor: user?.username || "Unknown",
+          formName: auditInProgress.formType,
+          timestamp: completedAudit.timestamp,
+          score: percentScore,
+          answers: completedAudit.sectionAnswers.map(section => ({
+            section: section.sectionName,
+            questions: section.answers.map(answer => ({
+              text: answer.questionText,
+              answer: answer.answer,
+              remarks: answer.remarks,
+              questionType: answer.questionType,
+              isFatal: answer.isFatal,
+              weightage: answer.weightage,
+              questionId: answer.questionId,
+              options: answer.options
+            }))
           }))
-        }))
-      };
-      
-      // Get existing reports
-      const reports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
-      reports.push(newReport);
-      localStorage.setItem('qa-reports', JSON.stringify(reports));
+        };
+        
+        // Get existing reports and add new one
+        const reports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
+        reports.push(newReport);
+        localStorage.setItem('qa-reports', JSON.stringify(reports));
+        
+      } catch (error) {
+        console.error('❌ Database save error:', error);
+        alert(`Warning: Audit completed but failed to save to database: ${error.message}\n\nThe audit has been saved locally and you can retry the database sync later.`);
+        
+        // Fallback: save to localStorage only
+        const newReport = {
+          id: completedAudit.id,
+          auditId: completedAudit.id,
+          agent: completedAudit.agent,
+          auditor: user?.username || "Unknown",
+          formName: completedAudit.formName,
+          timestamp: completedAudit.timestamp,
+          score: Math.round((completedAudit.score / completedAudit.maxScore) * 100),
+          answers: completedAudit.sectionAnswers.map(section => ({
+            section: section.sectionName,
+            questions: section.answers.map(answer => ({
+              text: answer.questionText,
+              answer: answer.answer,
+              remarks: answer.remarks,
+              questionType: answer.questionType,
+              isFatal: answer.isFatal,
+              weightage: answer.weightage,
+              questionId: answer.questionId,
+              options: answer.options
+            }))
+          }))
+        };
+        
+        const reports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
+        reports.push(newReport);
+        localStorage.setItem('qa-reports', JSON.stringify(reports));
+      }
       
       // Use alert instead of toast, include timestamp and details
       const timestamp = new Date().toLocaleString();
