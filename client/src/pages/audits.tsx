@@ -3114,7 +3114,29 @@ export default function Audits() {
         return;
       }
       
-      // Call the server API to permanently delete
+      console.log('🗑️ DELETING AUDIT - Starting deletion process for:', sampleId);
+      
+      // CRITICAL: Delete associated audit report from database if it exists
+      try {
+        console.log('🔍 Checking for associated audit report to delete');
+        const reportResponse = await fetch(`/api/reports/${sampleId}/delete`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include'
+        });
+        
+        if (reportResponse.ok) {
+          console.log('✅ Associated audit report marked as deleted in database');
+        } else {
+          console.log('ℹ️ No associated audit report found to delete');
+        }
+      } catch (reportError) {
+        console.warn('Warning: Could not delete associated audit report:', reportError);
+      }
+      
+      // Call the server API to permanently delete audit sample
       const response = await fetch(`/api/audit-samples/${sampleId}`, {
         method: 'DELETE',
         headers: {
@@ -3126,6 +3148,8 @@ export default function Audits() {
       if (!response.ok) {
         throw new Error(`Failed to delete sample: ${response.statusText}`);
       }
+      
+      console.log('✅ Audit sample deleted from database');
       
       // Update the local state
       const updatedSamples = auditSamples.filter(s => s.id !== sampleId);
@@ -3141,11 +3165,11 @@ export default function Audits() {
         permanentlyDeletedIds.push(String(sample.ticketId));
       }
       localStorage.setItem('qa-permanently-deleted-ids', JSON.stringify(permanentlyDeletedIds));
-      console.log("Added to permanently deleted registry");
+      console.log("✅ Added to permanently deleted registry");
       
-      alert(`Audit sample ${sample.ticketId || sampleId} has been permanently deleted.`);
+      alert(`Audit sample ${sample.ticketId || sampleId} has been permanently deleted from database.`);
     } catch (error) {
-      console.error('Error permanently deleting sample:', error);
+      console.error('❌ Error permanently deleting sample:', error);
       alert('Failed to permanently delete the sample. Please try again.');
     }
   };
