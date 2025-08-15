@@ -26,6 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { databaseSync } from '../services/databaseSync';
 
 // Process audit answers for display in a results modal
 // Global audit data store
@@ -1931,8 +1932,8 @@ export default function Audits() {
     
     // Sync audit samples to database when user is logged in
     if (parsedSamples.length > 0 && user?.id) {
-      console.log('Scheduling database sync for audit samples...');
-      setTimeout(() => syncAuditSamplesToDatabase(parsedSamples), 1000);
+      console.log('Scheduling comprehensive database sync...');
+      setTimeout(() => databaseSync.syncAllToDatabase(), 1000);
     }
     
     // Set drafts based on auditor role
