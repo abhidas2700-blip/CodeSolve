@@ -2967,7 +2967,9 @@ export default function Audits() {
       
       // CRITICAL DATABASE FIX: Save audit report to PostgreSQL database via API
       try {
-        console.log('🚀 SAVING AUDIT REPORT TO DATABASE');
+        console.log('🚀 SAVING AUDIT REPORT TO DATABASE - USER AUDIT COMPLETION');
+        console.log('User who completed audit:', user);
+        console.log('Audit in progress details:', auditInProgress);
         
         const reportData = {
           auditId: auditInProgress.id,
@@ -2982,7 +2984,7 @@ export default function Audits() {
           status: 'completed'
         };
         
-        console.log('📤 Submitting report data:', reportData);
+        console.log('📤 USER AUDIT - Submitting report data:', reportData);
         
         const response = await fetch('/api/reports', {
           method: 'POST',
