@@ -78,6 +78,8 @@ The system is designed for multiple deployment scenarios including Docker contai
 - **Data Persistence**: Permission updates now properly persist across all storage layers with fallback mechanisms for database connectivity issues.
 - **Email Field Implementation**: Added email field to User schema, updated route validation to handle email separately from schema validation, and enhanced storage layer to properly persist email data across all storage systems.
 - **Cross-Platform Compatibility**: Email updates work seamlessly across PostgreSQL database (when available) and memory storage fallback, with proper localStorage synchronization for UI consistency.
+- **Permission Rollback Fix**: Resolved critical issue where user permissions were being reset during server restarts or user login due to localStorage synchronization conflicts. Changed synchronization logic to prioritize server database as source of truth, preventing permission downgrades from stale localStorage data.
+- **Frontend Email Fix**: Fixed 5 hardcoded email patterns in users.tsx that were overriding actual database email values with `username@qualithor.com`. Email editing now displays and saves correctly from database.
 
 ### Database Architecture
 - **Primary Storage**: PostgreSQL via Neon with connection pooling and SSL encryption

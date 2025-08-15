@@ -179,21 +179,21 @@ export function setupAuth(app: Express) {
         const qaUsers = JSON.parse(storage.getLocalStorage().getItem('qa-users') || '[]');
         const localUser = qaUsers.find((u: any) => u.id === id);
         
-        // If user exists in localStorage with different permissions, update the server model
+        // If user exists in localStorage with different permissions, we need to be careful
+        // The server database is the source of truth for permissions, not localStorage
         if (localUser && JSON.stringify(localUser.rights) !== JSON.stringify(user.rights)) {
-          console.log(`Found different permissions for user ${user.username} in localStorage, updating...`);
+          console.log(`Found different permissions for user ${user.username} in localStorage vs server`);
           console.log(`Server rights: ${JSON.stringify(user.rights)}`);
           console.log(`LocalStorage rights: ${JSON.stringify(localUser.rights)}`);
           
-          // Update the user with localStorage rights
-          const updatedUser = await storage.updateUser(id, {
-            rights: localUser.rights
-          });
-          
-          // Return the updated user if successful
-          if (updatedUser) {
-            console.log(`Updated user ${user.username} with permissions from localStorage`);
-            return done(null, updatedUser);
+          // Server database is the source of truth - update localStorage instead
+          // This prevents permission rollbacks when localStorage has stale data
+          const qaUsers = JSON.parse(storage.getLocalStorage().getItem('qa-users') || '[]');
+          const userIndex = qaUsers.findIndex((u: any) => u.id === id);
+          if (userIndex !== -1) {
+            qaUsers[userIndex].rights = user.rights;
+            storage.getLocalStorage().setItem('qa-users', JSON.stringify(qaUsers));
+            console.log(`Updated localStorage permissions for ${user.username} to match server`);
           }
         }
       } catch (err) {
@@ -441,12 +441,30 @@ export function setupAuth(app: Express) {
                   });
                   console.log(`Protected admin user rights during sync`);
                 } else {
-                  // Regular user update from localStorage
+                  // Regular user update - but check if server has newer permission data
+                  const serverUser = existingUser;
+                  
+                  // Compare rights - if different, use the more recent one
+                  // For now, we'll prefer server data over localStorage during sync
+                  // This prevents permission downgrades from stale localStorage data
+                  const rightsToUse = serverUser.rights;
+                  
                   await storage.updateUser(localUser.id, {
                     username: localUser.username,
-                    rights: localUser.rights,
+                    rights: rightsToUse, // Use server rights to prevent rollbacks
                     isInactive: localUser.isInactive || false
                   });
+                  
+                  // Also update localStorage to match server
+                  if (JSON.stringify(localUser.rights) !== JSON.stringify(rightsToUse)) {
+                    const qaUsers = JSON.parse(storage.getLocalStorage().getItem('qa-users') || '[]');
+                    const userIndex = qaUsers.findIndex((u: any) => u.id === localUser.id);
+                    if (userIndex !== -1) {
+                      qaUsers[userIndex].rights = rightsToUse;
+                      storage.getLocalStorage().setItem('qa-users', JSON.stringify(qaUsers));
+                      console.log(`Synchronized localStorage permissions for ${localUser.username} with server`);
+                    }
+                  }
                 }
                 console.log(`Updated user ${localUser.username} from localStorage`);
               } else {
