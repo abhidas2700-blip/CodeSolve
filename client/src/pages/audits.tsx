@@ -2734,7 +2734,11 @@ export default function Audits() {
         return isVisible;
       };
       
-      formDefinition.sections.forEach((section: any) => {
+      // CRITICAL FIX: Validate ALL sections including dynamic sections
+      const allSectionsForValidation = [...formDefinition.sections, ...dynamicSections];
+      console.log('🔧 Validating sections:', allSectionsForValidation.map(s => s.name));
+      
+      allSectionsForValidation.forEach((section: any) => {
         console.log(`Checking section: ${section.name}`);
         
         // Skip entire section if it's not visible
@@ -2792,8 +2796,12 @@ export default function Audits() {
         }[];
       }[] = [];
       
-      // Process each section
-      formDefinition.sections.forEach((section: any) => {
+      // CRITICAL FIX: Process ALL sections including dynamic sections  
+      const allSections = [...formDefinition.sections, ...dynamicSections];
+      console.log('🔧 Processing sections for audit submission:', allSections.map(s => s.name));
+      
+      // Process each section (including dynamic ones)
+      allSections.forEach((section: any) => {
         const sectionResult = {
           sectionName: section.name,
           answers: [] as any[]
