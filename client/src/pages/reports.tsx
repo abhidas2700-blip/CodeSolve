@@ -2495,13 +2495,22 @@ export default function ReportsPage() {
             );
             
             section.questions.forEach((question, qIndex) => {
-              const key = `${sIndex}_${qIndex}`;
+              // Use question text as unique key to avoid duplicates
               const questionText = question.text || `Question ${qIndex+1}`;
+              const uniqueKey = questionText.trim();
               
               if (isInteractionSection) {
-                interactionQuestions[key] = questionText;
+                // Skip "Was there another interaction?" question from export columns
+                if (!questionText.toLowerCase().includes('another interaction') && 
+                    !questionText.toLowerCase().includes('was there another')) {
+                  interactionQuestions[uniqueKey] = questionText;
+                }
               } else {
-                nonInteractionQuestions[key] = questionText;
+                // Skip "Was there another interaction?" question from export columns  
+                if (!questionText.toLowerCase().includes('another interaction') && 
+                    !questionText.toLowerCase().includes('was there another')) {
+                  nonInteractionQuestions[uniqueKey] = questionText;
+                }
               }
             });
           }
@@ -2524,30 +2533,20 @@ export default function ReportsPage() {
       "Last Edit"
     ];
     
-    // Add non-interaction question headers
-    const sortedNonInteractionKeys = Object.keys(nonInteractionQuestions).sort((a, b) => {
-      const [secA, qA] = a.split('_').map(Number);
-      const [secB, qB] = b.split('_').map(Number);
-      return secA === secB ? qA - qB : secA - secB;
-    });
+    // Add non-interaction question headers (sorted alphabetically for consistency)
+    const sortedNonInteractionKeys = Object.keys(nonInteractionQuestions).sort();
     
-    sortedNonInteractionKeys.forEach(key => {
-      const questionText = nonInteractionQuestions[key];
+    sortedNonInteractionKeys.forEach(questionText => {
       headers.push(`${questionText} - Answer`);
       headers.push(`${questionText} - Remarks`);
       headers.push(`${questionText} - Rating`);
     });
     
-    // Add interaction question headers for each interaction
-    const sortedInteractionKeys = Object.keys(interactionQuestions).sort((a, b) => {
-      const [secA, qA] = a.split('_').map(Number);
-      const [secB, qB] = b.split('_').map(Number);
-      return secA === secB ? qA - qB : secA - secB;
-    });
+    // Add interaction question headers for each interaction (sorted alphabetically for consistency)
+    const sortedInteractionKeys = Object.keys(interactionQuestions).sort();
     
     for (let i = 1; i <= maxInteractions; i++) {
-      sortedInteractionKeys.forEach(key => {
-        const questionText = interactionQuestions[key];
+      sortedInteractionKeys.forEach(questionText => {
         headers.push(`Interaction ${i} - ${questionText} - Answer`);
         headers.push(`Interaction ${i} - ${questionText} - Remarks`);
         headers.push(`Interaction ${i} - ${questionText} - Rating`);
@@ -2616,7 +2615,15 @@ export default function ReportsPage() {
             }
             
             section.questions.forEach((question, qIndex) => {
-              const key = `${sIndex}_${qIndex}`;
+              const questionText = question.text || `Question ${qIndex+1}`;
+              const uniqueKey = questionText.trim();
+              
+              // Skip "Was there another interaction?" question from export data
+              if (questionText.toLowerCase().includes('another interaction') || 
+                  questionText.toLowerCase().includes('was there another')) {
+                return;
+              }
+              
               const questionData = {
                 answer: question.answer || "",
                 remarks: question.remarks || "",
@@ -2627,9 +2634,9 @@ export default function ReportsPage() {
                 if (!interactionData[interactionNumber]) {
                   interactionData[interactionNumber] = {};
                 }
-                interactionData[interactionNumber][key] = questionData;
+                interactionData[interactionNumber][uniqueKey] = questionData;
               } else {
-                nonInteractionData[key] = questionData;
+                nonInteractionData[uniqueKey] = questionData;
               }
             });
           }
@@ -2638,8 +2645,8 @@ export default function ReportsPage() {
         console.log(`Report ${report.auditId} interaction data:`, Object.keys(interactionData).map(k => `${k}: ${Object.keys(interactionData[k]).length} questions`));
         
         // Add non-interaction question data
-        sortedNonInteractionKeys.forEach(key => {
-          const data = nonInteractionData[key];
+        sortedNonInteractionKeys.forEach(questionText => {
+          const data = nonInteractionData[questionText];
           if (data) {
             rowData.push(`"${data.answer}"`);
             rowData.push(`"${data.remarks}"`);
@@ -2651,8 +2658,8 @@ export default function ReportsPage() {
         
         // Add interaction question data for each interaction column
         for (let i = 1; i <= maxInteractions; i++) {
-          sortedInteractionKeys.forEach(key => {
-            const data = interactionData[i]?.[key];
+          sortedInteractionKeys.forEach(questionText => {
+            const data = interactionData[i]?.[questionText];
             if (data && i <= reportInteractionCount) {
               rowData.push(`"${data.answer}"`);
               rowData.push(`"${data.remarks}"`);
