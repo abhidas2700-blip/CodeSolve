@@ -62,20 +62,25 @@ export default function EditReportModal({ open, report, onSave, onCancel, isAdmi
     if (report) {
       setEditedReport(JSON.parse(JSON.stringify(report))); // Deep copy
       
-      // Initialize remarks from questions
+      // Initialize remarks from questions with safety checks
       const initialRemarks: Record<string, string> = {};
-      if (report.answers && report.answers.length > 0) {
+      if (report.answers && Array.isArray(report.answers) && report.answers.length > 0) {
         report.answers.forEach(section => {
-          section.questions.forEach(question => {
-            if (question.questionId) {
-              initialRemarks[question.questionId] = question.remarks || '';
-            }
-          });
+          if (section && section.questions && Array.isArray(section.questions)) {
+            section.questions.forEach(question => {
+              if (question && question.questionId) {
+                initialRemarks[question.questionId] = question.remarks || '';
+              }
+            });
+          }
         });
         
-        // Set active tab to the first section
-        setActiveTab(report.answers[0].section);
+        // Set the first section as the active tab
+        if (report.answers && Array.isArray(report.answers) && report.answers.length > 0) {
+          setActiveTab(report.answers[0].section || 'general');
+        }
       }
+      
       setRemarksByQuestionId(initialRemarks);
     }
   }, [report]);
