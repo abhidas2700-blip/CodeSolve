@@ -64,6 +64,8 @@ The system is designed for multiple deployment scenarios including Docker contai
 - **Global State Enhancement**: Extended global form state to include dynamicSections property and updated all form value events to properly pass dynamic sections data.
 - **Export Cleanup**: Fixed CSV export to eliminate duplicate questions by using question text as unique keys instead of section indices. Initially excluded then re-included control questions ("Was there another interaction?") per user requirements.
 - **Conditional Rating Columns**: Implemented smart rating column detection - Rating columns only appear in CSV export if rating questions actually exist in the form, reducing unnecessary empty columns.
+- **Question Sequencing**: Fixed CSV export to maintain original form question sequence instead of alphabetical sorting.
+- **Controlled Export System**: Removed "Download All Reports" option and implemented mandatory form filter requirement to prevent question mismatches in exports. Added auditor filtering for more precise report selection.
 - **Data Integrity**: All multiple interaction audits now properly save and display in reports with distinct blue-bordered sections for each interaction.
 
 ### Database Architecture

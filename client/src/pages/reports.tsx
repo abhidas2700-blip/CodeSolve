@@ -84,6 +84,8 @@ export default function ReportsPage() {
   const [isDateFilterActive, setIsDateFilterActive] = useState(false);
   const [formFilter, setFormFilter] = useState<string>("all");
   const [availableForms, setAvailableForms] = useState<string[]>([]);
+  const [auditorFilter, setAuditorFilter] = useState<string>("all");
+  const [availableAuditors, setAvailableAuditors] = useState<string[]>([]);
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -2058,7 +2060,7 @@ export default function ReportsPage() {
     };
   }, [loadReports]);
 
-  // Extract unique form names from reports for the form filter dropdown
+  // Extract unique form names and auditors from reports for filter dropdowns
   useEffect(() => {
     if (reports.length > 0) {
       const formNames = reports
@@ -2067,7 +2069,14 @@ export default function ReportsPage() {
         .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
         .sort(); // Sort alphabetically
       
+      const auditorNames = reports
+        .map(report => report.auditor)
+        .filter((auditor): auditor is string => !!auditor) // Filter out undefined/null values
+        .filter((value, index, self) => self.indexOf(value) === index) // Get unique values
+        .sort(); // Sort alphabetically
+      
       setAvailableForms(formNames);
+      setAvailableAuditors(auditorNames);
     }
   }, [reports]);
 
@@ -2105,19 +2114,26 @@ export default function ReportsPage() {
       console.log(`Form filter applied: ${filtered.length} reports matching form "${formFilter}"`);
     }
     
+    // Apply auditor filter if not set to "all"
+    if (auditorFilter !== "all") {
+      filtered = filtered.filter(report => report.auditor === auditorFilter);
+      console.log(`Auditor filter applied: ${filtered.length} reports matching auditor "${auditorFilter}"`);
+    }
+    
     // Then apply search term filter
     if (searchTerm.trim()) {
       filtered = filtered.filter(report =>
         report.auditId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         report.agent?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        report.formName?.toLowerCase().includes(searchTerm.toLowerCase())
+        report.formName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (report.auditor && report.auditor.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       
       console.log(`Search filter applied: ${filtered.length} reports matching "${searchTerm}"`);
     }
     
     setFilteredReports(filtered);
-  }, [reports, searchTerm, isDateFilterActive, dateFrom, dateTo, formFilter]);
+  }, [reports, searchTerm, isDateFilterActive, dateFrom, dateTo, formFilter, auditorFilter]);
 
   // Handle report edit save
   const handleSaveEdit = (updatedReport: AuditReport) => {
@@ -2457,9 +2473,24 @@ export default function ReportsPage() {
     return filtered;
   };
 
-  // Enhanced Export to Excel function with horizontal interaction format
+  // Enhanced Export to Excel function with filtering requirements
   const exportToExcel = (reportsToExport: AuditReport[]) => {
     if (reportsToExport.length === 0) {
+      toast({
+        title: "No Reports to Export",
+        description: "No reports match your current filters.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if form filter is applied (required for export)
+    if (formFilter === "all") {
+      toast({
+        title: "Form Filter Required",
+        description: "Please select a specific form before exporting to prevent question mismatches.",
+        variant: "destructive"
+      });
       return;
     }
     
@@ -3398,37 +3429,72 @@ export default function ReportsPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="form-filter" className="whitespace-nowrap">Form:</Label>
-                <Select
-                  value={formFilter}
-                  onValueChange={(value) => {
-                    console.log(`Form filter changed from "${formFilter}" to "${value}"`); 
-                    setFormFilter(value);
-                  }}
-                >
-                  <SelectTrigger id="form-filter" className="w-[200px]">
-                    <SelectValue placeholder="Select Form" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Forms</SelectItem>
-                    {availableForms.map(form => (
-                      <SelectItem key={form} value={form}>{form}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {formFilter !== "all" && (
-                  <Badge variant="outline" className="bg-blue-50 hover:bg-blue-100">
-                    {formFilter}
-                    <Button 
-                      variant="ghost" 
-                      className="h-4 w-4 p-0 ml-1"
-                      onClick={() => setFormFilter("all")}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </Badge>
-                )}
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="form-filter" className="whitespace-nowrap">Form:</Label>
+                  <Select
+                    value={formFilter}
+                    onValueChange={(value) => {
+                      console.log(`Form filter changed from "${formFilter}" to "${value}"`); 
+                      setFormFilter(value);
+                    }}
+                  >
+                    <SelectTrigger id="form-filter" className="w-[180px]">
+                      <SelectValue placeholder="Select Form" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Forms</SelectItem>
+                      {availableForms.map(form => (
+                        <SelectItem key={form} value={form}>{form}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formFilter !== "all" && (
+                    <Badge variant="outline" className="bg-blue-50 hover:bg-blue-100">
+                      {formFilter}
+                      <Button 
+                        variant="ghost" 
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => setFormFilter("all")}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  )}
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Label htmlFor="auditor-filter" className="whitespace-nowrap">Auditor:</Label>
+                  <Select
+                    value={auditorFilter}
+                    onValueChange={(value) => {
+                      console.log(`Auditor filter changed from "${auditorFilter}" to "${value}"`); 
+                      setAuditorFilter(value);
+                    }}
+                  >
+                    <SelectTrigger id="auditor-filter" className="w-[160px]">
+                      <SelectValue placeholder="Select Auditor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Auditors</SelectItem>
+                      {availableAuditors.map(auditor => (
+                        <SelectItem key={auditor} value={auditor}>{auditor}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {auditorFilter !== "all" && (
+                    <Badge variant="outline" className="bg-green-50 hover:bg-green-100">
+                      {auditorFilter}
+                      <Button 
+                        variant="ghost" 
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => setAuditorFilter("all")}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex space-x-2">
@@ -3437,7 +3503,7 @@ export default function ReportsPage() {
                 onClick={() => exportToExcel(filteredReports)}
                 className="bg-green-50 hover:bg-green-100 border-green-200"
               >
-                {formFilter !== "all" ? `Export ${formFilter} Reports` : "Export All Details"}
+                Export Filtered Reports
               </Button>
               <Button variant="outline" onClick={loadReports}>
                 Refresh
@@ -3536,7 +3602,7 @@ export default function ReportsPage() {
                   onClick={() => exportToExcel(getEditedReports())}
                   className="bg-green-50 hover:bg-green-100 border-green-200"
                 >
-                  {formFilter !== "all" ? `Export ${formFilter} Edited Reports` : "Export All Edited Reports"}
+                  Export Filtered Edited Reports
                 </Button>
                 <Button variant="outline" onClick={loadReports}>
                   Refresh
