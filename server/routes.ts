@@ -408,8 +408,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertAuditReportSchema.parse(req.body);
       
       const [newReport] = await db.insert(auditReports).values({
-        ...validatedData,
-        auditor: req.user?.id || null
+        auditId: validatedData.auditId,
+        formName: validatedData.formName,
+        agent: validatedData.agent,
+        agentId: validatedData.agentId,
+        auditorName: validatedData.auditorName,
+        sectionAnswers: validatedData.sectionAnswers || {},
+        score: validatedData.score,
+        maxScore: validatedData.maxScore,
+        hasFatal: validatedData.hasFatal,
+        status: validatedData.status
       }).returning();
 
       broadcast({

@@ -57,18 +57,15 @@ export const auditReports = pgTable("audit_reports", {
   deletedAt: timestamp("deleted_at"),
 });
 
-export const insertAuditReportSchema = createInsertSchema(auditReports).pick({
-  auditId: true,
-  formName: true,
-  agent: true,
-  agentId: true,
-  auditor: true,
-  auditorName: true,
-  sectionAnswers: true,
-  score: true,
-  maxScore: true,
-  hasFatal: true,
-  status: true,
+export const insertAuditReportSchema = createInsertSchema(auditReports).omit({
+  id: true,
+  timestamp: true,
+  deleted: true,
+  deletedBy: true,
+  deletedAt: true
+}).extend({
+  sectionAnswers: z.record(z.any()).optional().default({}),
+  auditor: z.number().optional()
 });
 
 // ATA (Master Auditor) review schema
@@ -82,12 +79,18 @@ export const ataReviews = pgTable("ata_reviews", {
   timestamp: timestamp("timestamp").notNull().defaultNow(),
 });
 
-export const insertAtaReviewSchema = createInsertSchema(ataReviews).pick({
-  auditReportId: true,
-  reviewerId: true,
-  reviewerName: true,
-  feedback: true,
-  rating: true,
+export const insertAtaReviewSchema = createInsertSchema(ataReviews).omit({
+  id: true,
+  timestamp: true
+}).extend({
+  auditReportId: z.number().optional(), // Make optional since we might pass reportId instead
+  reportId: z.number().optional(), // Allow reportId as alternative
+  auditId: z.string().optional(), // Allow auditId as identifier
+  reviewerId: z.number().optional(),
+  actionTaken: z.string().optional(), // Common field name from frontend
+  comments: z.string().optional(), // Common field name from frontend
+  feedback: z.string().optional(),
+  rating: z.number().optional().default(5)
 });
 
 // Deleted audits table to track removed reports
@@ -111,22 +114,17 @@ export const deletedAudits = pgTable("deleted_audits", {
   editHistory: json("edit_history"),
 });
 
-export const insertDeletedAuditSchema = createInsertSchema(deletedAudits).pick({
-  originalId: true,
-  auditId: true,
-  formName: true,
-  agent: true,
-  agentId: true,
-  auditor: true,
-  auditorName: true,
-  sectionAnswers: true,
-  score: true,
-  maxScore: true,
-  hasFatal: true,
-  timestamp: true,
-  deletedBy: true,
-  deletedByName: true,
-  editHistory: true,
+export const insertDeletedAuditSchema = createInsertSchema(deletedAudits).omit({
+  id: true,
+  deletedAt: true
+}).extend({
+  originalId: z.string().optional(),
+  sectionAnswers: z.record(z.any()).optional().default({}),
+  auditor: z.number().optional(),
+  timestamp: z.string().or(z.date()).optional(),
+  deletedBy: z.number().optional(),
+  editHistory: z.record(z.any()).optional(),
+  reason: z.string().optional() // Common field from frontend
 });
 
 // Audit samples schema for tracking samples to be audited

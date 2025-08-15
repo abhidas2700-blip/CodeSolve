@@ -18,20 +18,30 @@ export class DatabaseSyncService {
     }
 
     this.syncInProgress = true;
-    console.log('Starting comprehensive database sync...');
+    console.log('🔄 Starting comprehensive database sync...');
 
     try {
-      await Promise.all([
-        this.syncFormsToDatabase(),
-        this.syncReportsToDatabase(),
-        this.syncSkippedSamplesToDatabase(),
-        this.syncDeletedAuditsToDatabase(),
-        this.syncAtaReviewsToDatabase(),
-        this.syncAuditSamplesToDatabase()
-      ]);
-      console.log('Comprehensive database sync completed successfully');
+      console.log('📊 Syncing audit reports...');
+      await this.syncReportsToDatabase();
+      
+      console.log('📋 Syncing audit forms...');
+      await this.syncFormsToDatabase();
+      
+      console.log('⏩ Syncing skipped samples...');
+      await this.syncSkippedSamplesToDatabase();
+      
+      console.log('🗑️ Syncing deleted audits...');
+      await this.syncDeletedAuditsToDatabase();
+      
+      console.log('📝 Syncing ATA reviews...');
+      await this.syncAtaReviewsToDatabase();
+      
+      console.log('🎯 Syncing audit samples...');
+      await this.syncAuditSamplesToDatabase();
+      
+      console.log('✅ Comprehensive database sync completed successfully');
     } catch (error) {
-      console.error('Database sync failed:', error);
+      console.error('❌ Database sync failed:', error);
     } finally {
       this.syncInProgress = false;
     }
