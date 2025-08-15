@@ -2680,6 +2680,15 @@ export default function Audits() {
   const completeAudit = async () => {
     if (!auditInProgress) return;
     
+    // CRITICAL: Prevent duplicate submissions using a simpler approach
+    if ((window as any).auditSubmissionInProgress) {
+      console.log('⚠️ Audit submission already in progress, preventing duplicate');
+      return;
+    }
+    
+    // Mark as submitting to prevent duplicates
+    (window as any).auditSubmissionInProgress = true;
+    
     try {
       // Get current form values from the UI directly like we do in saveDraftAudit
       // This ensures we capture the most up-to-date values before completion
@@ -3090,6 +3099,9 @@ export default function Audits() {
     } catch (error) {
       console.error('Error completing audit:', error);
       alert(`Error: There was a problem completing the audit. Please try again.`);
+    } finally {
+      // CRITICAL: Always remove submitting flag
+      (window as any).auditSubmissionInProgress = false;
     }
   };
 
