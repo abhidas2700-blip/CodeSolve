@@ -2467,8 +2467,8 @@ export default function ReportsPage() {
     
     // Find maximum number of interactions across all reports
     let maxInteractions = 0;
-    const nonInteractionQuestions: Record<string, string> = {};
-    const interactionQuestions: Record<string, string> = {};
+    const nonInteractionQuestions: Array<{key: string, text: string}> = [];
+    const interactionQuestions: Array<{key: string, text: string}> = [];
     let hasRatingQuestions = false;
     
     reportsToExport.forEach(report => {
@@ -2506,9 +2506,15 @@ export default function ReportsPage() {
               }
               
               if (isInteractionSection) {
-                interactionQuestions[uniqueKey] = questionText;
+                // Add to interaction questions if not already present
+                if (!interactionQuestions.find(q => q.key === uniqueKey)) {
+                  interactionQuestions.push({key: uniqueKey, text: questionText});
+                }
               } else {
-                nonInteractionQuestions[uniqueKey] = questionText;
+                // Add to non-interaction questions if not already present
+                if (!nonInteractionQuestions.find(q => q.key === uniqueKey)) {
+                  nonInteractionQuestions.push({key: uniqueKey, text: questionText});
+                }
               }
             });
           }
@@ -2531,26 +2537,23 @@ export default function ReportsPage() {
       "Last Edit"
     ];
     
-    // Add non-interaction question headers (sorted alphabetically for consistency)
-    const sortedNonInteractionKeys = Object.keys(nonInteractionQuestions).sort();
-    
-    sortedNonInteractionKeys.forEach(questionText => {
-      headers.push(`${questionText} - Answer`);
-      headers.push(`${questionText} - Remarks`);
+    // Add non-interaction question headers (in original form sequence)
+    nonInteractionQuestions.forEach(question => {
+      headers.push(`${question.text} - Answer`);
+      headers.push(`${question.text} - Remarks`);
       if (hasRatingQuestions) {
-        headers.push(`${questionText} - Rating`);
+        headers.push(`${question.text} - Rating`);
       }
     });
     
-    // Add interaction question headers for each interaction (sorted alphabetically for consistency)
-    const sortedInteractionKeys = Object.keys(interactionQuestions).sort();
+    // Add interaction question headers for each interaction (in original form sequence)
     
     for (let i = 1; i <= maxInteractions; i++) {
-      sortedInteractionKeys.forEach(questionText => {
-        headers.push(`Interaction ${i} - ${questionText} - Answer`);
-        headers.push(`Interaction ${i} - ${questionText} - Remarks`);
+      interactionQuestions.forEach(question => {
+        headers.push(`Interaction ${i} - ${question.text} - Answer`);
+        headers.push(`Interaction ${i} - ${question.text} - Remarks`);
         if (hasRatingQuestions) {
-          headers.push(`Interaction ${i} - ${questionText} - Rating`);
+          headers.push(`Interaction ${i} - ${question.text} - Rating`);
         }
       });
     }
@@ -2642,9 +2645,9 @@ export default function ReportsPage() {
         
         console.log(`Report ${report.auditId} interaction data:`, Object.keys(interactionData).map(k => `${k}: ${Object.keys(interactionData[k]).length} questions`));
         
-        // Add non-interaction question data
-        sortedNonInteractionKeys.forEach(questionText => {
-          const data = nonInteractionData[questionText];
+        // Add non-interaction question data (in original form sequence)
+        nonInteractionQuestions.forEach(question => {
+          const data = nonInteractionData[question.key];
           if (data) {
             rowData.push(`"${data.answer}"`);
             rowData.push(`"${data.remarks}"`);
@@ -2659,10 +2662,10 @@ export default function ReportsPage() {
           }
         });
         
-        // Add interaction question data for each interaction column
+        // Add interaction question data for each interaction column (in original form sequence)
         for (let i = 1; i <= maxInteractions; i++) {
-          sortedInteractionKeys.forEach(questionText => {
-            const data = interactionData[i]?.[questionText];
+          interactionQuestions.forEach(question => {
+            const data = interactionData[i]?.[question.key];
             if (data && i <= reportInteractionCount) {
               rowData.push(`"${data.answer}"`);
               rowData.push(`"${data.remarks}"`);
@@ -2680,8 +2683,8 @@ export default function ReportsPage() {
       } else {
         // No answers - fill with empty data
         const columnsPerQuestion = hasRatingQuestions ? 3 : 2; // Answer, Remarks, and optionally Rating
-        const totalQuestionColumns = sortedNonInteractionKeys.length * columnsPerQuestion + 
-                                   sortedInteractionKeys.length * columnsPerQuestion * maxInteractions;
+        const totalQuestionColumns = nonInteractionQuestions.length * columnsPerQuestion + 
+                                   interactionQuestions.length * columnsPerQuestion * maxInteractions;
         for (let i = 0; i < totalQuestionColumns; i++) {
           rowData.push('""');
         }
