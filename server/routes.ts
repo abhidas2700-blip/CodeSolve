@@ -315,10 +315,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('=== FORM CREATION DEBUG ===');
       console.log('Authentication status:', req.isAuthenticated());
       console.log('User:', req.user);
-      console.log('Received form creation request:', JSON.stringify(req.body, null, 2));
+      console.log('Body received:', JSON.stringify(req.body, null, 2));
       
-      // Simple validation first - bypass Zod temporarily
-      if (!req.body.name) {
+      if (!req.isAuthenticated()) {
+        console.log('❌ User not authenticated');
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      if (!req.body?.name) {
         console.log('❌ Missing form name');
         return res.status(400).json({ error: 'Form name is required' });
       }
@@ -330,11 +334,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: req.user?.id || 1
       };
       
-      console.log('Inserting form data:', JSON.stringify(formData, null, 2));
+      console.log('About to insert form data:', JSON.stringify(formData, null, 2));
       
       const [newForm] = await db.insert(auditForms).values(formData).returning();
 
-      console.log('✅ Successfully created form in database:', newForm);
+      console.log('✅ Form created successfully:', newForm);
 
       broadcast({
         type: 'form_created',
