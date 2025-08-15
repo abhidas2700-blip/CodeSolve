@@ -343,10 +343,64 @@ export class MemoryStorage implements IStorage {
   }
   
   async deleteUser(id: number): Promise<boolean> {
+    try {
+      // First, try to delete from database if available
+      const { db } = await import("./db");
+      const { eq } = await import("drizzle-orm");
+      
+      const [deletedUser] = await db
+        .delete(users)
+        .where(eq(users.id, id))
+        .returning();
+      
+      if (deletedUser) {
+        // Remove from in-memory storage to match database
+        const index = this.users.findIndex(u => u.id === id);
+        if (index !== -1) {
+          this.users.splice(index, 1);
+        }
+        
+        // Also remove from localStorage for UI compatibility
+        try {
+          const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+          const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+          
+          if (localIndex !== -1) {
+            qaUsers.splice(localIndex, 1);
+            this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+          }
+        } catch (localStorageError) {
+          console.error('Error updating localStorage after deletion:', localStorageError);
+        }
+        
+        console.log(`Deleted user ${deletedUser.username} from database with ID ${deletedUser.id}`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Database delete failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage deletion
     const index = this.users.findIndex(u => u.id === id);
     if (index === -1) return false;
     
+    const user = this.users[index];
     this.users.splice(index, 1);
+    
+    // Also remove from localStorage for consistency
+    try {
+      const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+      const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+      
+      if (localIndex !== -1) {
+        qaUsers.splice(localIndex, 1);
+        this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+      }
+    } catch (localStorageError) {
+      console.error('Error updating localStorage in fallback deletion:', localStorageError);
+    }
+    
+    console.log(`Deleted user ${user.username} from memory storage with ID ${user.id}`);
     return true;
   }
   
