@@ -1269,9 +1269,7 @@ export default function Forms() {
                             enableRemarks: false,
                             grazingLogic: false,
                             isRepeatable: true,
-                            repeatableGroup: interactionId,
-                            triggersRepetition: true, // This question triggers a new section when "Yes"
-                            repeatOnValues: ["Yes"] // Repeat when "Yes" is selected
+                            repeatableGroup: interactionId
                           }
                         ]
                       };
