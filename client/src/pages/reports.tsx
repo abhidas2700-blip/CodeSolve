@@ -620,49 +620,6 @@ export default function ReportsPage() {
   const loadReports = useCallback(async () => {
     setIsLoading(true);
     try {
-      console.log('📊 LOADING REPORTS FROM DATABASE');
-      
-      // CRITICAL FIX: Load reports from database API instead of localStorage only
-      let savedReports: AuditReport[] = [];
-      
-      try {
-        console.log('🔍 Fetching reports from database API');
-        const response = await fetch('/api/reports', {
-          method: 'GET',
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const databaseReports = await response.json();
-          console.log(`✅ Loaded ${databaseReports.length} reports from database`);
-          
-          // Transform database reports to frontend format
-          savedReports = databaseReports.map((report: any) => ({
-            id: report.id,
-            auditId: report.auditId,
-            agent: report.agent,
-            auditor: report.auditorName,
-            formName: report.formName,
-            timestamp: new Date(report.timestamp).getTime(),
-            score: report.score,
-            answers: report.sectionAnswers || [],
-            editHistory: []
-          }));
-          
-          // Also update localStorage to sync with database
-          localStorage.setItem('qa-reports', JSON.stringify(savedReports));
-          console.log('✅ Synced database reports to localStorage');
-          
-        } else {
-          console.warn('Database reports fetch failed, falling back to localStorage');
-          savedReports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
-        }
-      } catch (error) {
-        console.error('Error fetching reports from database:', error);
-        console.log('Falling back to localStorage reports');
-        savedReports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
-      }
-      
       // Remove all demo data on load
       removeAllDemoData();
       
@@ -679,6 +636,9 @@ export default function ReportsPage() {
       
       console.log("Loading completed audits:", completedAudits.length);
       console.log("Loading submitted audits:", submittedAudits.length);
+      
+      // Check if we already have reports
+      let savedReports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
       
       // Filter out deleted reports using our centralized service
       const originalCount = savedReports.length;
