@@ -1576,13 +1576,51 @@ export default function Audits() {
   const [deleteConfirmDialogOpen, setDeleteConfirmDialogOpen] = useState(false);
   const [draftSaveMessage, setDraftSaveMessage] = useState<string | null>(null);
   
+  // Function to sync audit samples to database
+  const syncAuditSamplesToDatabase = async (samples: AuditSample[]) => {
+    try {
+      console.log(`Syncing ${samples.length} audit samples to database...`);
+      
+      for (const sample of samples) {
+        try {
+          const response = await fetch('/api/audit-samples', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              sampleId: sample.id,
+              customerName: sample.customerName,
+              ticketId: sample.ticketId,
+              formType: sample.formType,
+              date: sample.date,
+              priority: sample.priority,
+              status: sample.status,
+              assignedTo: sample.assignedTo || null,
+              metadata: sample.metadata || {},
+              uploadedBy: user?.id || 1
+            })
+          });
+          
+          if (response.ok) {
+            console.log(`Synced sample ${sample.id} to database`);
+          }
+        } catch (error) {
+          console.log(`Error syncing sample ${sample.id}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing audit samples to database:', error);
+    }
+  };
+
   // Determine user roles
-  const isAdmin = user?.rights.includes('admin');
-  const isManager = user?.rights.includes('reports') && 
-                    user?.rights.includes('dashboard') && 
-                    user?.rights.includes('createLowerUsers');
-  const isTeamLeader = user?.rights.includes('audit') && user?.rights.includes('review');
-  const isAuditor = user?.rights.includes('audit') && !isManager && !isAdmin && !isTeamLeader;
+  const isAdmin = user?.rights && Array.isArray(user.rights) && user.rights.includes('admin');
+  const isManager = user?.rights && Array.isArray(user.rights) && 
+                    user.rights.includes('reports') && 
+                    user.rights.includes('dashboard') && 
+                    user.rights.includes('createLowerUsers');
+  const isTeamLeader = user?.rights && Array.isArray(user.rights) && user.rights.includes('audit') && user.rights.includes('review');
+  const isAuditor = user?.rights && Array.isArray(user.rights) && user.rights.includes('audit') && !isManager && !isAdmin && !isTeamLeader;
   
   const canManageSamples = isAdmin || isManager || isTeamLeader;
   
@@ -1893,6 +1931,12 @@ export default function Audits() {
     // Set the fetched/generated data to state
     setAuditSamples(parsedSamples);
     
+    // Sync audit samples to database when user is logged in
+    if (parsedSamples.length > 0 && user?.id) {
+      console.log('Scheduling database sync for audit samples...');
+      setTimeout(() => syncAuditSamplesToDatabase(parsedSamples), 1000);
+    }
+    
     // Set drafts based on auditor role
     if (isAuditor && user) {
       setDraftAudits(
@@ -2041,6 +2085,9 @@ export default function Audits() {
             // Update state and localStorage
             setAuditSamples(updatedSamples);
             localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+            
+            // Sync updated samples to database
+            syncAuditSamplesToDatabase(updatedSamples);
             
             setUploadDialogOpen(false);
             
