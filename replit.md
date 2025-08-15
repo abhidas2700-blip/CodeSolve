@@ -58,11 +58,12 @@ The system is designed for multiple deployment scenarios including Docker contai
 - **Export Functionality**: Completely rewrote CSV export to handle multiple interactions horizontally (side-by-side columns) instead of vertically (separate rows). Each audit appears as one row with interaction questions displayed as "Interaction 1 - Question", "Interaction 2 - Question" column groups.
 - **Conditional Validation**: Fixed form validation to properly skip mandatory validation for hidden questions controlled by conditional logic.
 
-### August 2025 - Critical Dynamic Sections Fix
+### August 2025 - Critical Dynamic Sections Fix & Export Refinements
 - **Root Cause Identified**: Dynamic sections (Interaction 2, 3, etc.) were being created correctly in the UI but not saved during audit submission because they weren't included in the global form state.
 - **Audit Submission Fix**: Updated audit submission process in audits.tsx to include dynamic sections from global state in both validation and processing phases.
 - **Global State Enhancement**: Extended global form state to include dynamicSections property and updated all form value events to properly pass dynamic sections data.
-- **Export Cleanup**: Fixed CSV export to eliminate duplicate questions by using question text as unique keys instead of section indices, and excluded control questions ("Was there another interaction?") from export columns.
+- **Export Cleanup**: Fixed CSV export to eliminate duplicate questions by using question text as unique keys instead of section indices. Initially excluded then re-included control questions ("Was there another interaction?") per user requirements.
+- **Conditional Rating Columns**: Implemented smart rating column detection - Rating columns only appear in CSV export if rating questions actually exist in the form, reducing unnecessary empty columns.
 - **Data Integrity**: All multiple interaction audits now properly save and display in reports with distinct blue-bordered sections for each interaction.
 
 ### Database Architecture

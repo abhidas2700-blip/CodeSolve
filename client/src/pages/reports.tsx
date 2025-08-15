@@ -2469,6 +2469,7 @@ export default function ReportsPage() {
     let maxInteractions = 0;
     const nonInteractionQuestions: Record<string, string> = {};
     const interactionQuestions: Record<string, string> = {};
+    let hasRatingQuestions = false;
     
     reportsToExport.forEach(report => {
       if (report.answers) {
@@ -2498,6 +2499,11 @@ export default function ReportsPage() {
               // Use question text as unique key to avoid duplicates
               const questionText = question.text || `Question ${qIndex+1}`;
               const uniqueKey = questionText.trim();
+              
+              // Check if this question has a rating value
+              if (question.rating !== undefined && question.rating !== null && question.rating !== "") {
+                hasRatingQuestions = true;
+              }
               
               if (isInteractionSection) {
                 interactionQuestions[uniqueKey] = questionText;
@@ -2531,7 +2537,9 @@ export default function ReportsPage() {
     sortedNonInteractionKeys.forEach(questionText => {
       headers.push(`${questionText} - Answer`);
       headers.push(`${questionText} - Remarks`);
-      headers.push(`${questionText} - Rating`);
+      if (hasRatingQuestions) {
+        headers.push(`${questionText} - Rating`);
+      }
     });
     
     // Add interaction question headers for each interaction (sorted alphabetically for consistency)
@@ -2541,7 +2549,9 @@ export default function ReportsPage() {
       sortedInteractionKeys.forEach(questionText => {
         headers.push(`Interaction ${i} - ${questionText} - Answer`);
         headers.push(`Interaction ${i} - ${questionText} - Remarks`);
-        headers.push(`Interaction ${i} - ${questionText} - Rating`);
+        if (hasRatingQuestions) {
+          headers.push(`Interaction ${i} - ${questionText} - Rating`);
+        }
       });
     }
     
@@ -2638,9 +2648,14 @@ export default function ReportsPage() {
           if (data) {
             rowData.push(`"${data.answer}"`);
             rowData.push(`"${data.remarks}"`);
-            rowData.push(`"${data.rating}"`);
+            if (hasRatingQuestions) {
+              rowData.push(`"${data.rating}"`);
+            }
           } else {
-            rowData.push('""', '""', '""');
+            rowData.push('""', '""');
+            if (hasRatingQuestions) {
+              rowData.push('""');
+            }
           }
         });
         
@@ -2651,16 +2666,22 @@ export default function ReportsPage() {
             if (data && i <= reportInteractionCount) {
               rowData.push(`"${data.answer}"`);
               rowData.push(`"${data.remarks}"`);
-              rowData.push(`"${data.rating}"`);
+              if (hasRatingQuestions) {
+                rowData.push(`"${data.rating}"`);
+              }
             } else {
-              rowData.push('""', '""', '""');
+              rowData.push('""', '""');
+              if (hasRatingQuestions) {
+                rowData.push('""');
+              }
             }
           });
         }
       } else {
         // No answers - fill with empty data
-        const totalQuestionColumns = sortedNonInteractionKeys.length * 3 + 
-                                   sortedInteractionKeys.length * 3 * maxInteractions;
+        const columnsPerQuestion = hasRatingQuestions ? 3 : 2; // Answer, Remarks, and optionally Rating
+        const totalQuestionColumns = sortedNonInteractionKeys.length * columnsPerQuestion + 
+                                   sortedInteractionKeys.length * columnsPerQuestion * maxInteractions;
         for (let i = 0; i < totalQuestionColumns; i++) {
           rowData.push('""');
         }
