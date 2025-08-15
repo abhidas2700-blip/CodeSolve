@@ -26,9 +26,9 @@ import createMemoryStore from "memorystore";
 
 const MemoryStore = createMemoryStore(session);
 
-// DB imports commented out temporarily
-// import { db } from "./db";
-// import { eq } from "drizzle-orm";
+// DB imports - uncommented to enable database functionality
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
