@@ -501,6 +501,8 @@ export default function UserAuditPage() {
     });
     
     console.log('Processing sections for final audit:', allSections.map(s => s.name));
+    console.log('Detected interaction sections:', Array.from(interactionSectionNames));
+    console.log('All answer keys with _repeat_:', Object.keys(answers).filter(k => k.includes('_repeat_')));
     
     allSections.forEach(section => {
       const sectionAnswers: SectionAnswers = {
