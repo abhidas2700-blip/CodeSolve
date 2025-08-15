@@ -304,17 +304,69 @@ export class DatabaseSyncService {
 
       if (response.ok) {
         const newReport = await response.json();
-        console.log(`Created audit report ${newReport.auditId} in database`);
+        console.log(`✅ Created audit report ${newReport.auditId} in database`);
         
         // Update localStorage to match database
         const reports = JSON.parse(localStorage.getItem('qa-submitted-audits') || '[]');
         reports.push(newReport);
         localStorage.setItem('qa-submitted-audits', JSON.stringify(reports));
       } else {
-        console.error('Failed to create audit report in database:', response.status);
+        console.error('❌ Failed to create audit report in database:', response.status);
       }
     } catch (error) {
-      console.error('Error creating audit report:', error);
+      console.error('❌ Error creating audit report:', error);
+    }
+  }
+
+  // Create deleted audit record and sync to database
+  async createDeletedAudit(deletedData: any): Promise<void> {
+    try {
+      const response = await fetch('/api/deleted-audits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(deletedData)
+      });
+
+      if (response.ok) {
+        const newDeleted = await response.json();
+        console.log(`✅ Created deleted audit ${newDeleted.auditId} in database`);
+        
+        // Update localStorage to match database
+        const deleted = JSON.parse(localStorage.getItem('qa-deleted-audits') || '[]');
+        deleted.push(newDeleted);
+        localStorage.setItem('qa-deleted-audits', JSON.stringify(deleted));
+      } else {
+        console.error('❌ Failed to create deleted audit in database:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error creating deleted audit:', error);
+    }
+  }
+
+  // Create ATA review and sync to database
+  async createAtaReview(ataData: any): Promise<void> {
+    try {
+      const response = await fetch('/api/ata-reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(ataData)
+      });
+
+      if (response.ok) {
+        const newAta = await response.json();
+        console.log(`✅ Created ATA review ${newAta.id} in database`);
+        
+        // Update localStorage to match database
+        const atas = JSON.parse(localStorage.getItem('qa-ata-reviews') || '[]');
+        atas.push(newAta);
+        localStorage.setItem('qa-ata-reviews', JSON.stringify(atas));
+      } else {
+        console.error('❌ Failed to create ATA review in database:', response.status);
+      }
+    } catch (error) {
+      console.error('❌ Error creating ATA review:', error);
     }
   }
 

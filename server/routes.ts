@@ -755,7 +755,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertDeletedAuditSchema.parse(req.body);
       console.log('Validated deleted audit data:', validatedData);
       
-      const [newDeletedAudit] = await db.insert(deletedAudits).values(validatedData).returning();
+      const [newDeletedAudit] = await db.insert(deletedAudits).values({
+        originalId: validatedData.originalId || validatedData.auditId,
+        auditId: validatedData.auditId,
+        formName: validatedData.formName,
+        agent: validatedData.agent,
+        agentId: validatedData.agentId,
+        auditorName: validatedData.auditorName,
+        sectionAnswers: validatedData.sectionAnswers || {},
+        score: validatedData.score,
+        maxScore: validatedData.maxScore,
+        hasFatal: validatedData.hasFatal || false,
+        timestamp: validatedData.timestamp ? new Date(validatedData.timestamp) : new Date(),
+        deletedBy: req.user?.id || 1,
+        deletedByName: validatedData.deletedByName || req.user?.username || 'Unknown User',
+        editHistory: validatedData.editHistory || {}
+      }).returning();
 
       console.log('Created deleted audit:', newDeletedAudit);
 
