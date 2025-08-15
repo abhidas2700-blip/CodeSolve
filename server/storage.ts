@@ -416,6 +416,35 @@ export class MemoryStorage implements IStorage {
   }
   
   async createForm(form: InsertAuditForm): Promise<AuditForm> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      const { auditForms } = await import("../shared/schema");
+      
+      const [createdForm] = await db
+        .insert(auditForms)
+        .values({
+          name: form.name,
+          sections: form.sections,
+          createdBy: form.createdBy || null
+        })
+        .returning();
+      
+      if (createdForm) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.forms.findIndex(f => f.id === createdForm.id);
+        if (existingIndex === -1) {
+          this.forms.push(createdForm);
+        }
+        
+        console.log(`Created form ${createdForm.name} in database with ID ${createdForm.id}`);
+        return createdForm;
+      }
+    } catch (error) {
+      console.error('Database create form failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const newForm: AuditForm = {
       id: this.formIdCounter++,
       name: form.name,
@@ -424,6 +453,7 @@ export class MemoryStorage implements IStorage {
       createdBy: form.createdBy || null
     };
     this.forms.push(newForm);
+    console.log(`Created form ${newForm.name} in memory storage with ID ${newForm.id}`);
     return newForm;
   }
   
@@ -465,6 +495,43 @@ export class MemoryStorage implements IStorage {
   }
   
   async createReport(report: InsertAuditReport): Promise<AuditReport> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      const { auditReports } = await import("../shared/schema");
+      
+      const [createdReport] = await db
+        .insert(auditReports)
+        .values({
+          auditId: report.auditId,
+          formName: report.formName,
+          agent: report.agent,
+          agentId: report.agentId,
+          auditor: report.auditor || null,
+          auditorName: report.auditorName,
+          sectionAnswers: report.sectionAnswers,
+          score: report.score,
+          maxScore: report.maxScore,
+          hasFatal: report.hasFatal || false,
+          status: report.status || "completed"
+        })
+        .returning();
+      
+      if (createdReport) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.reports.findIndex(r => r.id === createdReport.id);
+        if (existingIndex === -1) {
+          this.reports.push(createdReport);
+        }
+        
+        console.log(`Created report ${createdReport.auditId} in database with ID ${createdReport.id}`);
+        return createdReport;
+      }
+    } catch (error) {
+      console.error('Database create report failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const newReport: AuditReport = {
       id: this.reportIdCounter++,
       auditId: report.auditId,
@@ -487,20 +554,120 @@ export class MemoryStorage implements IStorage {
       deletedAt: null
     };
     this.reports.push(newReport);
+    console.log(`Created report ${newReport.auditId} in memory storage with ID ${newReport.id}`);
     return newReport;
   }
   
   async updateReport(id: number, reportData: Partial<AuditReport>): Promise<AuditReport | undefined> {
+    try {
+      // First, try to update in database if available
+      const { db } = await import("./db");
+      const { auditReports } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      const [updatedReport] = await db
+        .update(auditReports)
+        .set({ ...reportData, edited: true, editedAt: new Date() })
+        .where(eq(auditReports.id, id))
+        .returning();
+      
+      if (updatedReport) {
+        // Update in-memory storage to match database
+        const index = this.reports.findIndex(r => r.id === id);
+        if (index !== -1) {
+          this.reports[index] = updatedReport;
+        } else {
+          // Add to memory if not found
+          this.reports.push(updatedReport);
+        }
+        
+        console.log(`Updated report ${updatedReport.auditId} in database with ID ${updatedReport.id}`);
+        return updatedReport;
+      }
+    } catch (error) {
+      console.error('Database update report failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage update
     const index = this.reports.findIndex(r => r.id === id);
     if (index === -1) return undefined;
     
     const report = this.reports[index];
     const updatedReport = { ...report, ...reportData, edited: true };
     this.reports[index] = updatedReport;
+    console.log(`Updated report ${updatedReport.auditId} in memory storage with ID ${updatedReport.id}`);
     return updatedReport;
   }
   
   async deleteReport(id: number, deletedBy: number): Promise<boolean> {
+    try {
+      // First, try to handle deletion in database if available
+      const { db } = await import("./db");
+      const { auditReports, deletedAudits } = await import("../shared/schema");
+      const { eq } = await import("drizzle-orm");
+      
+      // Get the report first
+      const [report] = await db
+        .select()
+        .from(auditReports)
+        .where(eq(auditReports.id, id))
+        .limit(1);
+      
+      if (report) {
+        // Get the name of the user who deleted the report
+        const userInfo = this.users.find(u => u.id === deletedBy);
+        const deletedByName = userInfo ? userInfo.username : "Administrator";
+        
+        // Create a deleted audit entry in database
+        const [createdDeletedAudit] = await db
+          .insert(deletedAudits)
+          .values({
+            originalId: report.id.toString(),
+            auditId: report.auditId,
+            formName: report.formName,
+            agent: report.agent,
+            agentId: report.agentId,
+            auditor: report.auditor,
+            auditorName: report.auditorName || "",
+            sectionAnswers: report.sectionAnswers,
+            score: report.score,
+            maxScore: report.maxScore,
+            hasFatal: report.hasFatal,
+            timestamp: report.timestamp,
+            deletedBy: deletedBy,
+            deletedByName: deletedByName,
+            editHistory: report.edited ? [
+              {
+                timestamp: new Date().getTime(),
+                editor: deletedByName,
+                action: "Deleted report"
+              }
+            ] : []
+          })
+          .returning();
+        
+        // Delete the original report from database
+        await db
+          .delete(auditReports)
+          .where(eq(auditReports.id, id));
+        
+        // Update memory storage
+        if (createdDeletedAudit) {
+          this.deletedAudits.push(createdDeletedAudit);
+        }
+        const reportIndex = this.reports.findIndex(r => r.id === id);
+        if (reportIndex !== -1) {
+          this.reports.splice(reportIndex, 1);
+        }
+        
+        console.log(`Deleted report ${report.auditId} and created deleted audit entry in database`);
+        return true;
+      }
+    } catch (error) {
+      console.error('Database delete report failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage deletion
     const index = this.reports.findIndex(r => r.id === id);
     if (index === -1) return false;
     
@@ -542,6 +709,7 @@ export class MemoryStorage implements IStorage {
     
     // Delete the original report
     this.reports.splice(index, 1);
+    console.log(`Deleted report ${report.auditId} and created deleted audit entry in memory storage`);
     return true;
   }
   
@@ -561,6 +729,37 @@ export class MemoryStorage implements IStorage {
   }
   
   async createAtaReview(review: InsertAtaReview): Promise<AtaReview> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      const { ataReviews } = await import("../shared/schema");
+      
+      const [createdReview] = await db
+        .insert(ataReviews)
+        .values({
+          auditReportId: review.auditReportId || null,
+          reviewerId: review.reviewerId || null,
+          reviewerName: review.reviewerName,
+          feedback: review.feedback,
+          rating: review.rating
+        })
+        .returning();
+      
+      if (createdReview) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.ataReviews.findIndex(r => r.id === createdReview.id);
+        if (existingIndex === -1) {
+          this.ataReviews.push(createdReview);
+        }
+        
+        console.log(`Created ATA review in database with ID ${createdReview.id}`);
+        return createdReview;
+      }
+    } catch (error) {
+      console.error('Database create ATA review failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const newReview: AtaReview = {
       id: this.ataReviewIdCounter++,
       auditReportId: review.auditReportId || null,
@@ -571,6 +770,7 @@ export class MemoryStorage implements IStorage {
       timestamp: new Date()
     };
     this.ataReviews.push(newReview);
+    console.log(`Created ATA review in memory storage with ID ${newReview.id}`);
     return newReview;
   }
   
@@ -620,6 +820,46 @@ export class MemoryStorage implements IStorage {
   }
   
   async createAuditSample(sample: InsertAuditSample): Promise<AuditSample> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      const { auditSamples } = await import("../shared/schema");
+      
+      const now = new Date();
+      const [createdSample] = await db
+        .insert(auditSamples)
+        .values({
+          sampleId: sample.sampleId,
+          customerName: sample.customerName,
+          ticketId: sample.ticketId,
+          formType: sample.formType,
+          date: sample.date || now,
+          priority: (sample.priority as "high" | "medium" | "low") || "medium",
+          status: (sample.status as "available" | "assigned" | "inProgress" | "completed") || "available",
+          assignedTo: sample.assignedTo || null,
+          assignedAt: sample.assignedTo ? now : null,
+          metadata: sample.metadata || null,
+          uploadedBy: sample.uploadedBy || null,
+          uploadedAt: now,
+          batchId: sample.batchId || `batch-${now.getTime()}`
+        })
+        .returning();
+      
+      if (createdSample) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.auditSamples.findIndex(s => s.id === createdSample.id);
+        if (existingIndex === -1) {
+          this.auditSamples.push(createdSample);
+        }
+        
+        console.log(`Created audit sample ${createdSample.sampleId} in database with ID ${createdSample.id}`);
+        return createdSample;
+      }
+    } catch (error) {
+      console.error('Database create audit sample failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const now = new Date();
     const newSample: AuditSample = {
       id: this.auditSampleIdCounter++,
@@ -638,6 +878,7 @@ export class MemoryStorage implements IStorage {
       batchId: sample.batchId || `batch-${now.getTime()}`
     };
     this.auditSamples.push(newSample);
+    console.log(`Created audit sample ${newSample.sampleId} in memory storage with ID ${newSample.id}`);
     return newSample;
   }
   
@@ -889,6 +1130,40 @@ export class MemoryStorage implements IStorage {
   }
   
   async createSkippedSample(sample: InsertSkippedSample): Promise<SkippedSample> {
+    try {
+      // First, try to create in database if available
+      const { db } = await import("./db");
+      const { skippedSamples } = await import("../shared/schema");
+      
+      const [createdSample] = await db
+        .insert(skippedSamples)
+        .values({
+          auditId: sample.auditId,
+          formName: sample.formName,
+          agent: sample.agent,
+          agentId: sample.agentId,
+          auditor: sample.auditor || null,
+          auditorName: sample.auditorName,
+          reason: sample.reason,
+          status: sample.status || "skipped"
+        })
+        .returning();
+      
+      if (createdSample) {
+        // Add to in-memory storage to match database
+        const existingIndex = this.skippedSamples.findIndex(s => s.id === createdSample.id);
+        if (existingIndex === -1) {
+          this.skippedSamples.push(createdSample);
+        }
+        
+        console.log(`Created skipped sample ${createdSample.auditId} in database with ID ${createdSample.id}`);
+        return createdSample;
+      }
+    } catch (error) {
+      console.error('Database create skipped sample failed, using memory storage:', error);
+    }
+    
+    // Fallback to memory storage
     const newSample: SkippedSample = {
       id: this.skippedSampleIdCounter++,
       auditId: sample.auditId,
@@ -902,6 +1177,7 @@ export class MemoryStorage implements IStorage {
       status: sample.status || "skipped",
     };
     this.skippedSamples.push(newSample);
+    console.log(`Created skipped sample ${newSample.auditId} in memory storage with ID ${newSample.id}`);
     return newSample;
   }
   
