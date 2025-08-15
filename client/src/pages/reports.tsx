@@ -2500,17 +2500,9 @@ export default function ReportsPage() {
               const uniqueKey = questionText.trim();
               
               if (isInteractionSection) {
-                // Skip "Was there another interaction?" question from export columns
-                if (!questionText.toLowerCase().includes('another interaction') && 
-                    !questionText.toLowerCase().includes('was there another')) {
-                  interactionQuestions[uniqueKey] = questionText;
-                }
+                interactionQuestions[uniqueKey] = questionText;
               } else {
-                // Skip "Was there another interaction?" question from export columns  
-                if (!questionText.toLowerCase().includes('another interaction') && 
-                    !questionText.toLowerCase().includes('was there another')) {
-                  nonInteractionQuestions[uniqueKey] = questionText;
-                }
+                nonInteractionQuestions[uniqueKey] = questionText;
               }
             });
           }
@@ -2618,11 +2610,7 @@ export default function ReportsPage() {
               const questionText = question.text || `Question ${qIndex+1}`;
               const uniqueKey = questionText.trim();
               
-              // Skip "Was there another interaction?" question from export data
-              if (questionText.toLowerCase().includes('another interaction') || 
-                  questionText.toLowerCase().includes('was there another')) {
-                return;
-              }
+              // Include all questions in export data
               
               const questionData = {
                 answer: question.answer || "",
