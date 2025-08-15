@@ -522,16 +522,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('🚀 INSERTING REPORT DATA:', reportData);
       
-      const [newReport] = await db.insert(auditReports).values(reportData).returning();
+      // CRITICAL DATABASE FIX: Force PostgreSQL usage, no memory fallback
+      console.log('💾 FORCING DIRECT POSTGRESQL INSERTION');
       
-      console.log('✅ REPORT CREATED SUCCESSFULLY:', newReport);
+      const [newReport] = await db.insert(auditReports).values(reportData).returning();
+      console.log('✅ REPORT SAVED TO POSTGRESQL:', newReport);
+      
+      // Immediate verification
+      const verification = await db.select().from(auditReports).where(eq(auditReports.auditId, reportData.auditId));
+      console.log('🔍 POSTGRESQL VERIFICATION:', verification);
+      
+      if (!verification.length) {
+        throw new Error('PostgreSQL report creation failed - data not found after insert');
+      }
 
+      const responseData = verification[0];
+      
       broadcast({
         type: 'report_created',
-        report: newReport
+        report: responseData
       });
 
-      res.status(201).json(newReport);
+      res.status(201).json(responseData);
     } catch (error) {
       console.error('❌ REPORT CREATION FAILED:', error);
       if (error instanceof z.ZodError) {
