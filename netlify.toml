@@ -40,4 +40,4 @@
 [build.environment]
   NODE_VERSION = "18"
   NPM_FLAGS = "--prefer-offline --no-audit"
-  DATABASE_URL = "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb"
+  DATABASE_URL = "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
