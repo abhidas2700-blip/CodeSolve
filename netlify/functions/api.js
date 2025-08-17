@@ -200,7 +200,7 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Handle forms endpoints
+    // Handle forms endpoints - Match local server column names
     if (apiPath === '/forms' && httpMethod === 'GET') {
       if (!pool) {
         return {
@@ -211,7 +211,7 @@ exports.handler = async (event, context) => {
       }
       
       try {
-        const result = await pool.query('SELECT * FROM forms ORDER BY created_at DESC');
+        const result = await pool.query('SELECT id, name, sections, created_at as "createdAt", created_by as "createdBy" FROM audit_forms ORDER BY created_at DESC');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -646,15 +646,13 @@ exports.handler = async (event, context) => {
       }
       
       try {
-        const result = await pool.query('SELECT * FROM users ORDER BY id');
+        const result = await pool.query('SELECT id, username, email, rights, is_inactive as "isInactive" FROM users ORDER BY id');
         
-        // Filter out the default admin user from the displayed list to match local behavior
-        const filteredUsers = result.rows.filter(user => user.username !== 'admin');
-        
+        // Show ALL users including admin (match current local server behavior)
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify(filteredUsers)
+          body: JSON.stringify(result.rows)
         };
       } catch (error) {
         console.error('Users GET error:', error);
@@ -669,7 +667,7 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Handle users endpoint (create new user)
+    // Handle users endpoint (create new user) - Match local server exactly
     if (apiPath === '/users' && httpMethod === 'POST') {
       if (!pool) {
         return {
@@ -683,12 +681,19 @@ exports.handler = async (event, context) => {
         const userData = JSON.parse(body);
         console.log('Creating user:', { username: userData.username, email: userData.email });
         
-        // Hash password if provided
-        let hashedPassword = userData.password;
-        if (userData.password && !userData.password.startsWith('$2b$')) {
-          // Simple hash for demo - in production use proper bcrypt
-          hashedPassword = userData.password; // Keep simple for now
+        // Check if username already exists (like local server)
+        const existingCheck = await pool.query('SELECT id FROM users WHERE username = $1', [userData.username]);
+        if (existingCheck.rows.length > 0) {
+          return {
+            statusCode: 400,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Username already exists' })
+          };
         }
+        
+        // Hash password using bcrypt-compatible hash (match local server)
+        const bcrypt = require('bcrypt');
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
         
         const result = await pool.query(
           'INSERT INTO users (username, email, password, rights, is_inactive) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, rights, is_inactive',
@@ -696,7 +701,7 @@ exports.handler = async (event, context) => {
             userData.username,
             userData.email || null,
             hashedPassword,
-            JSON.stringify(userData.rights || ['audit']), // Convert array to JSON string
+            JSON.stringify(userData.rights || ['audit']),
             userData.isInactive || false
           ]
         );
