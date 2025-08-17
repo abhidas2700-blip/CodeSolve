@@ -3020,6 +3020,7 @@ export default function Audits() {
           formName: completedAudit.formName,
           agent: completedAudit.agent,
           agentId: completedAudit.agentId,
+          auditor: user?.id ? Number(user.id) : undefined,
           auditorName: user?.username || 'Unknown',
           sectionAnswers: completedAudit.sectionAnswers,
           score: completedAudit.score,
