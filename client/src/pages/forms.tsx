@@ -989,12 +989,13 @@ export default function Forms() {
     const form = savedForms.find(f => f.id === formId);
     if (form) {
       setFormName(form.name);
-      setFormSections(form.sections);
+      setFormSections(Array.isArray(form.sections) ? form.sections : form.sections?.sections || []);
       setCurrentFormId(form.id);
       setShowTemplateSelector(false);
       
-      if (form.sections.length > 0) {
-        setCurrentSectionId(form.sections[0].id);
+      const sections = Array.isArray(form.sections) ? form.sections : form.sections?.sections || [];
+      if (sections.length > 0) {
+        setCurrentSectionId(sections[0].id);
       }
       
       setActiveTab("editor");
@@ -1342,7 +1343,7 @@ export default function Forms() {
                         setFormName(`${form.name} Copy`);
                         
                         // Ensure sections have proper types
-                        const sections = form.sections.map((section, index) => {
+                        const sections = (Array.isArray(form.sections) ? form.sections : form.sections?.sections || []).map((section, index) => {
                           let type: 'agent' | 'questionnaire' | 'custom' | undefined = undefined;
                           
                           if (index === 0) {
@@ -1366,7 +1367,7 @@ export default function Forms() {
                     >
                       <h3 className="font-medium text-lg">{form.name}</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {form.sections.length} sections • {form.sections.reduce((total, section) => total + section.questions.length, 0)} questions
+                        {(Array.isArray(form.sections) ? form.sections : form.sections?.sections || []).length} sections • {(Array.isArray(form.sections) ? form.sections : form.sections?.sections || []).reduce((total: number, section: any) => total + (section.questions?.length || 0), 0)} questions
                       </p>
                     </div>
                   ))}
@@ -2583,7 +2584,7 @@ export default function Forms() {
                       <div>
                         <h3 className="font-medium">{form.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {form.sections.length} sections | {form.sections.reduce((total, section) => total + section.questions.length, 0)} questions
+                          {(Array.isArray(form.sections) ? form.sections : form.sections?.sections || []).length} sections | {(Array.isArray(form.sections) ? form.sections : form.sections?.sections || []).reduce((total: number, section: any) => total + (section.questions?.length || 0), 0)} questions
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Created: {new Date(form.createdAt).toLocaleDateString()}
