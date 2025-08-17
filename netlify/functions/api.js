@@ -1064,6 +1064,35 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Handle /samples endpoint (alias for /audit-samples)
+    if (apiPath === '/samples' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        console.log('Fetching available samples from database (/samples endpoint)...');
+        const result = await pool.query('SELECT * FROM audit_samples ORDER BY uploaded_at DESC');
+        console.log('Available samples result (/samples):', result.rows.length, 'rows found');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Samples GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
+        };
+      }
+    }
+
     // Handle /audit-reports endpoint
     if (apiPath === '/audit-reports' && httpMethod === 'GET') {
       if (!pool) {
