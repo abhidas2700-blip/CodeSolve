@@ -227,6 +227,44 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Handle forms creation (POST) - Match local server exactly
+    if (apiPath === '/forms' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const formData = JSON.parse(body);
+        console.log('Creating form:', formData.name);
+        
+        const result = await pool.query(
+          'INSERT INTO audit_forms (name, sections, created_by) VALUES ($1, $2, $3) RETURNING id, name, sections, created_at as "createdAt", created_by as "createdBy"',
+          [formData.name, JSON.stringify(formData.sections), formData.createdBy || null]
+        );
+        
+        console.log('Form created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Forms POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create form',
+            details: error.message
+          })
+        };
+      }
+    }
+
     if (apiPath === '/forms' && httpMethod === 'POST') {
       if (!pool) {
         return {
@@ -778,22 +816,221 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Handle any PUT requests with dynamic IDs
-    if (httpMethod === 'PUT' && apiPath.match(/^\/\w+\/\d+$/)) {
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ message: 'Updated successfully' })
-      };
+    // Handle user UPDATE (PATCH) - Match local server exactly
+    if (apiPath.match(/^\/users\/\d+$/) && httpMethod === 'PATCH') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const userId = parseInt(apiPath.split('/')[2]);
+        const userData = JSON.parse(body);
+        console.log('Updating user:', userId, userData);
+        
+        // Build dynamic update query
+        let updateFields = [];
+        let values = [];
+        let paramCount = 1;
+        
+        if (userData.username) {
+          updateFields.push(`username = $${paramCount++}`);
+          values.push(userData.username);
+        }
+        if (userData.email !== undefined) {
+          updateFields.push(`email = $${paramCount++}`);
+          values.push(userData.email);
+        }
+        if (userData.password) {
+          const bcrypt = require('bcrypt');
+          const hashedPassword = await bcrypt.hash(userData.password, 10);
+          updateFields.push(`password = $${paramCount++}`);
+          values.push(hashedPassword);
+        }
+        if (userData.rights) {
+          updateFields.push(`rights = $${paramCount++}`);
+          values.push(JSON.stringify(userData.rights));
+        }
+        if (userData.isInactive !== undefined) {
+          updateFields.push(`is_inactive = $${paramCount++}`);
+          values.push(userData.isInactive);
+        }
+        
+        values.push(userId); // Add userId for WHERE clause
+        
+        const query = `UPDATE users SET ${updateFields.join(', ')} WHERE id = $${paramCount} RETURNING id, username, email, rights, is_inactive as "isInactive"`;
+        const result = await pool.query(query, values);
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'User not found' })
+          };
+        }
+        
+        console.log('User updated successfully:', result.rows[0]);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Users PATCH error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to update user',
+            details: error.message
+          })
+        };
+      }
     }
 
-    // Handle any DELETE requests with dynamic IDs
-    if (httpMethod === 'DELETE' && apiPath.match(/^\/\w+\/\d+$/)) {
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({ message: 'Deleted successfully' })
-      };
+    // Handle user DELETE - Match local server exactly
+    if (apiPath.match(/^\/users\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const userId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting user:', userId);
+        
+        // Prevent deletion of admin user (id = 1)
+        if (userId === 1) {
+          return {
+            statusCode: 403,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Cannot delete admin user' })
+          };
+        }
+        
+        const result = await pool.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'User not found' })
+          };
+        }
+        
+        console.log('User deleted successfully:', userId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'User deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Users DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete user',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle forms UPDATE (PUT) - Match local server exactly
+    if (apiPath.match(/^\/forms\/\d+$/) && httpMethod === 'PUT') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const formId = parseInt(apiPath.split('/')[2]);
+        const formData = JSON.parse(body);
+        console.log('Updating form:', formId, formData.name);
+        
+        const result = await pool.query(
+          'UPDATE audit_forms SET name = $1, sections = $2 WHERE id = $3 RETURNING id, name, sections, created_at as "createdAt", created_by as "createdBy"',
+          [formData.name, JSON.stringify(formData.sections), formId]
+        );
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Form not found' })
+          };
+        }
+        
+        console.log('Form updated successfully:', result.rows[0]);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Forms PUT error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to update form',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle forms DELETE - Match local server exactly
+    if (apiPath.match(/^\/forms\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const formId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting form:', formId);
+        
+        const result = await pool.query('DELETE FROM audit_forms WHERE id = $1 RETURNING id', [formId]);
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Form not found' })
+          };
+        }
+        
+        console.log('Form deleted successfully:', formId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'Form deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Forms DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete form',
+            details: error.message
+          })
+        };
+      }
     }
 
     // Handle /reports endpoint (alias for /audit-reports)
