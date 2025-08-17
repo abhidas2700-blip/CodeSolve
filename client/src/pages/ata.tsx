@@ -206,6 +206,22 @@ export default function Ata() {
       console.log('Loading from qa-completed-audits:', completedAudits.length);
       console.log('Loading from qa-reports (main Reports page):', reportsFromMain.length);
       
+      // DEBUG: Log detailed report structure to understand why they're not showing in ATA
+      console.log('=== DEBUGGING ATA REPORTS ===');
+      reportsFromMain.forEach((report: any, index: number) => {
+        console.log(`Report ${index + 1}:`, {
+          id: report.id,
+          agent: report.agent,
+          hasAtaReview: !!report.ataReview,
+          hasAnswers: !!report.answers,
+          formName: report.formName,
+          score: report.score,
+          auditor: report.auditor,
+          timestamp: report.timestamp
+        });
+      });
+      console.log('=== END DEBUG ===');
+      
       // Combine all audits but avoid duplicates
       const auditMap = new Map();
       
@@ -272,17 +288,45 @@ export default function Ata() {
               })(),
               auditor: report.auditor || 'Unknown Auditor',
               timestamp: report.timestamp,
-              sectionAnswers: (report.answers && Array.isArray(report.answers)) ? report.answers.map((section: any) => ({
-                sectionName: section.section || 'Unknown Section',
-                answers: (section.questions && Array.isArray(section.questions)) ? section.questions.map((q: any) => ({
-                  questionId: q.questionId || `q_${Math.random().toString(36).substring(2, 8)}`,
-                  text: q.text || 'Unknown Question',
-                  answer: q.answer || '',
-                  remarks: q.remarks || '',
-                  options: q.options || [],
-                  isFatal: q.isFatal || false
-                })) : []
-              })) : [],
+              sectionAnswers: (() => {
+                try {
+                  if (!report.answers || !Array.isArray(report.answers)) {
+                    console.warn(`Report ${report.id} has invalid answers structure:`, report.answers);
+                    return [];
+                  }
+                  return report.answers.map((section: any) => {
+                    if (!section || typeof section !== 'object') {
+                      console.warn(`Invalid section in report ${report.id}:`, section);
+                      return { sectionName: 'Unknown Section', answers: [] };
+                    }
+                    return {
+                      sectionName: section.section || 'Unknown Section',
+                      answers: (() => {
+                        if (!section.questions || !Array.isArray(section.questions)) {
+                          console.warn(`Invalid questions in section ${section.section}:`, section.questions);
+                          return [];
+                        }
+                        return section.questions.map((q: any) => {
+                          if (!q || typeof q !== 'object') {
+                            return { questionId: 'invalid', text: 'Invalid Question', answer: '', remarks: '', options: [], isFatal: false };
+                          }
+                          return {
+                            questionId: q.questionId || `q_${Math.random().toString(36).substring(2, 8)}`,
+                            text: q.text || 'Unknown Question',
+                            answer: q.answer || '',
+                            remarks: q.remarks || '',
+                            options: Array.isArray(q.options) ? q.options : [],
+                            isFatal: q.isFatal || false
+                          };
+                        });
+                      })()
+                    };
+                  });
+                } catch (err) {
+                  console.error(`Error processing sectionAnswers for report ${report.id}:`, err);
+                  return [];
+                }
+              })(),
               status: 'completed'
             });
           }
@@ -436,12 +480,28 @@ export default function Ata() {
           ...(audit.ataReview ? { ataReview: audit.ataReview } : {})
         };
         
+        console.log(`Processing audit for ATA:`, {
+          id: audit.id,
+          hasAtaReview: !!audit.ataReview,
+          willGoToPending: !audit.ataReview,
+          willGoToReviewed: !!audit.ataReview
+        });
+        
         if (audit.ataReview) {
           reviewed.push(reportObj);
+          console.log(`✅ Added to REVIEWED:`, audit.id);
         } else {
           pending.push(reportObj);
+          console.log(`✅ Added to PENDING:`, audit.id);
         }
       });
+      
+      console.log(`=== ATA FINAL RESULTS ===`);
+      console.log(`Pending reports count: ${pending.length}`);
+      console.log(`Reviewed reports count: ${reviewed.length}`);
+      console.log(`Pending report IDs:`, pending.map(r => r.id));
+      console.log(`Reviewed report IDs:`, reviewed.map(r => r.id));
+      console.log(`=== END RESULTS ===`);
       
       setReports(pending);
       setReviewedReports(reviewed);
