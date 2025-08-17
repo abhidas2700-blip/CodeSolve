@@ -1044,7 +1044,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
+        console.log('Fetching audit reports from database...');
         const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
+        console.log('Audit reports result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1055,7 +1057,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1196,7 +1198,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
+        console.log('Fetching ATA reviews from database...');
         const result = await pool.query('SELECT * FROM ata_reviews ORDER BY timestamp DESC');
+        console.log('ATA reviews result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1207,7 +1211,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1268,7 +1272,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
+        console.log('Fetching skipped samples from database...');
         const result = await pool.query('SELECT * FROM skipped_samples ORDER BY timestamp DESC');
+        console.log('Skipped samples result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1279,7 +1285,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1382,7 +1388,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
+        console.log('Fetching deleted audits from database...');
         const result = await pool.query('SELECT * FROM deleted_audits ORDER BY deleted_at DESC');
+        console.log('Deleted audits result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1393,7 +1401,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1461,7 +1469,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
+        console.log('Fetching available samples from database...');
         const result = await pool.query('SELECT * FROM audit_samples ORDER BY timestamp DESC');
+        console.log('Available samples result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1472,7 +1482,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
