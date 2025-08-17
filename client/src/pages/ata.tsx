@@ -208,21 +208,24 @@ export default function Ata() {
       
       // DEBUG: Log detailed report structure to understand why they're not showing in ATA
       console.log('=== DEBUGGING ATA REPORTS ===');
+      console.log(`Total reports in qa-reports: ${reportsFromMain.length}`);
       reportsFromMain.forEach((report: any, index: number) => {
-        console.log(`Report ${index + 1}:`, {
+        console.log(`\n--- Report ${index + 1} (ID: ${report.id}) ---`);
+        console.log('Basic Info:', {
           id: report.id,
           agent: report.agent,
-          hasAtaReview: !!report.ataReview,
-          hasAnswers: !!report.answers,
-          answersType: typeof report.answers,
           formName: report.formName,
           score: report.score,
           auditor: report.auditor,
-          timestamp: report.timestamp,
-          completeReport: report
+          timestamp: report.timestamp
         });
+        console.log('ATA Status:', {
+          hasAtaReview: !!report.ataReview,
+          ataReviewContent: report.ataReview
+        });
+        console.log('Will be processed for ATA?', !report.ataReview ? 'YES' : 'NO - has ATA review');
       });
-      console.log('=== END DEBUG ===');
+      console.log('=== END DEBUG ===\n');
       
       // Combine all audits but avoid duplicates
       const auditMap = new Map();
@@ -308,16 +311,15 @@ export default function Ata() {
       // Also get audits from completed and submitted to get original questions
       // Debug some sample reports to see their structure
       if (reportsFromMain.length > 0) {
+        const firstReport = reportsFromMain[0];
         console.log('Sample report structure from qa-reports:', 
-          JSON.stringify(reportsFromMain[0].answers ? {
-            id: reportsFromMain[0].id,
-            formName: reportsFromMain[0].formName,
-            answers: reportsFromMain[0].answers.map((section: any) => ({
-              section: section.section,
-              questionsCount: section.questions.length,
-              sampleQuestion: section.questions[0]
-            }))
-          } : 'No answers field found', null, 2)
+          firstReport.answers && Array.isArray(firstReport.answers) ? 
+          JSON.stringify({
+            id: firstReport.id,
+            formName: firstReport.formName,
+            answersCount: firstReport.answers.length,
+            sampleSection: firstReport.answers[0]
+          }, null, 2) : 'No valid answers field found'
         );
       }
       
