@@ -590,6 +590,20 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Debug endpoint to check database connection
+    if (apiPath === '/debug-db' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          hasPool: !!pool,
+          hasEnvVar: !!process.env.DATABASE_URL,
+          envVarLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+          envVarStart: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'none'
+        })
+      };
+    }
+
     // Handle user endpoint (both /user and /users for compatibility)
     if ((apiPath === '/user' || apiPath === '/users') && httpMethod === 'GET') {
       if (!pool) {
