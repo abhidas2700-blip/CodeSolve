@@ -5,17 +5,14 @@
 
 const { Pool } = require('@neondatabase/serverless');
 
-// Database pool setup for Neon
+// Database pool setup for Neon with exact URL
 let pool;
 try {
-  if (process.env.DATABASE_URL) {
-    pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
-    });
-    console.log('Neon database pool initialized');
-  } else {
-    console.error('DATABASE_URL environment variable not found');
-  }
+  const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+  pool = new Pool({
+    connectionString: DATABASE_URL,
+  });
+  console.log('Neon database pool initialized with URL:', DATABASE_URL.replace(/\/\/.*@/, '//***@'));
 } catch (error) {
   console.error('Database setup error:', error);
 }

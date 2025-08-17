@@ -9,8 +9,10 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+// Use the exact database URL with SSL parameters
+let connectionString = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+
 // Clean up malformed DATABASE_URL that might have psql wrapper
-let connectionString = process.env.DATABASE_URL;
 if (connectionString.startsWith("psql '") && connectionString.endsWith("'")) {
   connectionString = connectionString.slice(6, -1); // Remove "psql '" and "'"
   console.log("Cleaned malformed DATABASE_URL");
@@ -18,7 +20,7 @@ if (connectionString.startsWith("psql '") && connectionString.endsWith("'")) {
 
 export const pool = new Pool({ 
   connectionString: connectionString,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: { rejectUnauthorized: false }
 });
 
 export const db = drizzle(pool, { schema });
