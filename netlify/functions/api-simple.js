@@ -31,6 +31,15 @@ exports.handler = async (event, context) => {
   const { httpMethod, path, headers, body } = event;
   const apiPath = path.replace('/.netlify/functions/api-simple', '');
   
+  // Debug logging
+  console.log('Netlify Function Called:', {
+    httpMethod,
+    originalPath: path,
+    cleanedPath: apiPath,
+    hasBody: !!body,
+    bodyLength: body ? body.length : 0
+  });
+  
   // CORS headers
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -101,26 +110,40 @@ exports.handler = async (event, context) => {
 
     // Simple login for testing
     if (apiPath === '/login' && httpMethod === 'POST') {
-      const { username, password } = JSON.parse(body || '{}');
-      const user = testUsers[username];
-      
-      if (user && user.password === password) {
+      try {
+        const requestBody = JSON.parse(body || '{}');
+        const { username, password } = requestBody;
+        console.log('Login attempt:', { username, hasPassword: !!password, body: requestBody });
+        
+        const user = testUsers[username];
+        
+        if (user && user.password === password) {
+          console.log('Login successful for:', username);
+          return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify({
+              id: user.id,
+              username: user.username,
+              rights: user.rights
+            })
+          };
+        }
+        
+        console.log('Login failed for:', username, 'Available users:', Object.keys(testUsers));
         return {
-          statusCode: 200,
+          statusCode: 401,
           headers: corsHeaders,
-          body: JSON.stringify({
-            id: user.id,
-            username: user.username,
-            rights: user.rights
-          })
+          body: JSON.stringify({ error: 'Invalid credentials' })
+        };
+      } catch (parseError) {
+        console.error('Login parse error:', parseError);
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid request body' })
         };
       }
-      
-      return {
-        statusCode: 401,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Invalid credentials' })
-      };
     }
 
     // Handle forms endpoints
