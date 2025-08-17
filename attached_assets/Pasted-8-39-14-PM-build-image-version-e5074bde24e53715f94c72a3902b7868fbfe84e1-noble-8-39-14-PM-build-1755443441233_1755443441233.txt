@@ -1,0 +1,168 @@
+8:39:14 PM: build-image version: e5074bde24e53715f94c72a3902b7868fbfe84e1 (noble)
+8:39:14 PM: buildbot version: e2595138a7c5ab9f292ccfa2932733582fe0dc65
+8:39:14 PM: Fetching cached dependencies
+8:39:15 PM: Starting to download cache of 325.8MB (Last modified: 2025-08-17 15:07:09 +0000 UTC)
+8:39:15 PM: Finished downloading cache in 802ms
+8:39:15 PM: Starting to extract cache
+8:39:50 PM: Finished extracting cache in 34.416s
+8:39:50 PM: Finished fetching cache in 35.288s
+8:39:50 PM: Starting to prepare the repo for build
+8:39:50 PM: Preparing Git Reference refs/heads/main
+8:39:51 PM: Custom publish path detected. Proceeding with the specified path: 'dist/public'
+8:39:51 PM: Custom functions path detected. Proceeding with the specified path: 'netlify/functions'
+8:39:51 PM: Custom build command detected. Proceeding with the specified command: 'npm install && npm run build && cp _redirects dist/public/_redirects'
+8:39:51 PM: Starting to install dependencies
+8:39:51 PM: Started restoring cached python cache
+8:39:51 PM: Finished restoring cached python cache
+8:39:51 PM: Started restoring cached ruby cache
+8:39:52 PM: Finished restoring cached ruby cache
+8:39:52 PM: Started restoring cached go cache
+8:39:53 PM: Finished restoring cached go cache
+8:39:53 PM: Started restoring cached Node.js version
+8:39:55 PM: Finished restoring cached Node.js version
+8:39:55 PM: v18.20.8 is already installed.
+8:39:55 PM: Now using node v18.20.8 (npm v10.8.2)
+8:39:55 PM: Enabling Node.js Corepack
+8:39:55 PM: Started restoring cached build plugins
+8:39:55 PM: Finished restoring cached build plugins
+8:39:55 PM: Started restoring cached corepack dependencies
+8:39:55 PM: Finished restoring cached corepack dependencies
+8:39:55 PM: No npm workspaces detected
+8:39:55 PM: Started restoring cached node modules
+8:39:55 PM: Finished restoring cached node modules
+8:39:56 PM: Installing npm packages using npm version 10.8.2
+8:39:57 PM: up to date in 1s
+8:39:57 PM: 86 packages are looking for funding
+8:39:57 PM:   run `npm fund` for details
+8:39:57 PM: npm packages installed
+8:39:57 PM: Successfully installed dependencies
+8:39:57 PM: Starting build script
+8:39:58 PM: Detected 1 framework(s)
+8:39:58 PM: "vite" at version "5.4.14"
+8:39:58 PM: Section completed: initializing
+8:40:07 PM: Post processing done
+8:40:07 PM: Section completed: postprocessing
+8:40:08 PM: Site is live ✨
+8:40:07 PM: Skipping form detection
+8:40:07 PM: Post processing - header rules
+8:40:07 PM: Starting post processing
+8:39:59 PM: ​
+8:39:59 PM: Netlify Build                                                 
+8:39:59 PM: ────────────────────────────────────────────────────────────────
+8:39:59 PM: ​
+8:39:59 PM: ❯ Version
+8:39:59 PM:   @netlify/build 35.1.0
+8:39:59 PM: ​
+8:39:59 PM: ❯ Flags
+8:39:59 PM:   accountId: 68a1eb9fe31cceead58d909f
+8:39:59 PM:   baseRelDir: true
+8:39:59 PM:   buildId: 68a1f098a080642bc684237d
+8:39:59 PM:   deployId: 68a1f098a080642bc684237f
+8:39:59 PM: ​
+8:39:59 PM: ❯ Current directory
+8:39:59 PM:   /opt/build/repo
+8:39:59 PM: ​
+8:39:59 PM: ❯ Config file
+8:39:59 PM:   /opt/build/repo/netlify.toml
+8:39:59 PM: ​
+8:39:59 PM: ❯ Context
+8:39:59 PM:   production
+8:39:59 PM: ​
+8:39:59 PM: build.command from netlify.toml                               
+8:39:59 PM: ────────────────────────────────────────────────────────────────
+8:39:59 PM: ​
+8:39:59 PM: $ npm install && npm run build && cp _redirects dist/public/_redirects
+8:40:01 PM: up to date, audited 679 packages in 2s
+8:40:01 PM: 86 packages are looking for funding
+8:40:01 PM:   run `npm fund` for details
+8:40:01 PM: 15 vulnerabilities (6 low, 7 moderate, 2 high)
+8:40:01 PM: To address issues that do not require attention, run:
+8:40:01 PM:   npm audit fix
+8:40:01 PM: To address all issues possible (including breaking changes), run:
+8:40:01 PM:   npm audit fix --force
+8:40:01 PM: Some issues need review, and may require choosing
+8:40:01 PM: a different dependency.
+8:40:01 PM: Run `npm audit` for details.
+8:40:02 PM: > rest-express@1.0.0 build
+8:40:02 PM: > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+8:40:02 PM: vite v5.4.14 building for production...
+8:40:02 PM: transforming...
+8:40:02 PM: Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+8:40:02 PM:   npx update-browserslist-db@latest
+8:40:02 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+8:40:07 PM: Post processing - redirect rules
+8:40:06 PM: ✓ 2588 modules transformed.
+8:40:07 PM: [plugin:vite:reporter] [plugin vite:reporter]
+8:40:07 PM: (!) /opt/build/repo/node_modules/xlsx/xlsx.mjs is dynamically imported by /opt/build/repo/client/src/pages/audits.tsx but also statically imported by /opt/build/repo/client/src/components/audit/ata-reports-tab.tsx, dynamic import will not move module into another chunk.
+8:40:07 PM: 
+8:40:07 PM: rendering chunks...
+8:40:07 PM: computing gzip size...
+8:40:07 PM: ../dist/public/index.html                     0.95 kB │ gzip:   0.52 kB
+8:40:07 PM: ../dist/public/assets/index-CnAIbq48.css     79.53 kB │ gzip:  13.64 kB
+8:40:07 PM: ../dist/public/assets/index-BcoMiGOK.js   1,252.13 kB │ gzip: 369.85 kB
+8:40:07 PM: 
+8:40:07 PM: (!) Some chunks are larger than 500 kB after minification. Consider:
+8:40:07 PM: - Using dynamic import() to code-split the application
+8:40:07 PM: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+8:40:07 PM: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+8:40:07 PM: ✓ built in 4.72s
+8:40:07 PM:   dist/index.js  72.6kb
+8:40:07 PM: ⚡ Done in 6ms
+8:40:07 PM: ​
+8:40:07 PM: (build.command completed in 7.8s)
+8:40:07 PM: ​
+8:40:07 PM: Functions bundling                                            
+8:40:07 PM: ────────────────────────────────────────────────────────────────
+8:40:07 PM: ​
+8:40:07 PM: Packaging Functions from netlify/functions directory:
+8:40:07 PM:  - api.js
+8:40:07 PM:  - db-config.js
+8:40:07 PM:  - websocket.js
+8:40:07 PM: ​
+8:40:07 PM: ​
+8:40:07 PM: (Functions bundling completed in 166ms)
+8:40:07 PM: ​
+8:40:07 PM: Deploy site                                                   
+8:40:07 PM: ────────────────────────────────────────────────────────────────
+8:40:07 PM: ​
+8:40:07 PM: Starting to deploy site from 'dist/public'
+8:40:07 PM: Calculating files to upload
+8:40:07 PM: 0 new file(s) to upload
+8:40:07 PM: 0 new function(s) to upload
+8:40:07 PM: Section completed: deploying
+8:40:07 PM: Site deploy was successfully initiated
+8:40:07 PM: ​
+8:40:07 PM: (Deploy site completed in 266ms)
+8:40:07 PM: ​
+8:40:07 PM: Netlify Build Complete                                        
+8:40:07 PM: ────────────────────────────────────────────────────────────────
+8:40:07 PM: ​
+8:40:07 PM: (Netlify Build completed in 8.4s)
+8:40:08 PM: Caching artifacts
+8:40:08 PM: Started saving node modules
+8:40:08 PM: Finished saving node modules
+8:40:08 PM: Started saving build plugins
+8:40:08 PM: Finished saving build plugins
+8:40:08 PM: Started saving bun cache
+8:40:08 PM: Finished saving bun cache
+8:40:08 PM: Started saving go cache
+8:40:08 PM: Finished saving go cache
+8:40:08 PM: Started saving python cache
+8:40:08 PM: Finished saving python cache
+8:40:08 PM: Started saving ruby cache
+8:40:08 PM: Finished saving ruby cache
+8:40:08 PM: Started saving corepack cache
+8:40:08 PM: Finished saving corepack cache
+8:40:08 PM: Started saving emacs cask dependencies
+8:40:08 PM: Finished saving emacs cask dependencies
+8:40:08 PM: Started saving maven dependencies
+8:40:08 PM: Finished saving maven dependencies
+8:40:08 PM: Started saving boot dependencies
+8:40:08 PM: Finished saving boot dependencies
+8:40:08 PM: Started saving rust rustup cache
+8:40:08 PM: Finished saving rust rustup cache
+8:40:08 PM: Build script success
+8:40:08 PM: Section completed: building
+8:40:12 PM: Uploading Cache of size 325.7MB
+8:40:13 PM: Section completed: cleanup
+8:40:13 PM: Finished processing build request in 58.627s
