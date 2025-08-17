@@ -35,12 +35,18 @@ exports.handler = async (event, context) => {
   }
   
   // Debug logging
-  console.log('Netlify Function Called:', {
+  console.log('🔍 Netlify Function Called:', {
     httpMethod,
     originalPath: path,
     cleanedPath: apiPath,
     hasBody: !!body,
-    bodyLength: body ? body.length : 0
+    bodyLength: body ? body.length : 0,
+    pathMatches: {
+      '/user': apiPath === '/user',
+      '/login': apiPath === '/login', 
+      '/health': apiPath === '/health',
+      '/forms': apiPath === '/forms'
+    }
   });
   
   // CORS headers
@@ -559,25 +565,31 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Catch-all diagnostic endpoint
-    console.log('Unmatched endpoint:', {
-      path: apiPath,
+    // Catch-all diagnostic endpoint - This is where "Endpoint not found" comes from
+    console.log('⚠️ UNMATCHED ENDPOINT:', {
+      originalPath: path,
+      cleanedPath: apiPath,
       method: httpMethod,
-      allEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/health', '/database/status']
+      allAvailableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/health', '/database/status']
     });
 
-    // Default response
+    // Enhanced diagnostic response
     return {
       statusCode: 404,
       headers: corsHeaders,
       body: JSON.stringify({ 
         error: 'Endpoint not found', 
-        path: apiPath, 
+        requestedPath: apiPath,
+        originalPath: path, 
         method: httpMethod,
-        availableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits'],
+        availableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/health', '/database/status'],
         debug: {
-          originalPath: path,
-          cleanedPath: apiPath
+          functionName: 'api-simple',
+          pathProcessing: {
+            original: path,
+            afterReplace: path.replace('/.netlify/functions/api-simple', ''),
+            final: apiPath
+          }
         }
       })
     };
