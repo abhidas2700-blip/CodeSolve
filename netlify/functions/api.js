@@ -1391,6 +1391,49 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Handle regular samples deletion (from Available Pool)
+    if (apiPath.match(/^\/samples\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const sampleId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting regular sample:', sampleId);
+        
+        const result = await pool.query('DELETE FROM audit_samples WHERE id = $1 RETURNING id', [sampleId]);
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Sample not found' })
+          };
+        }
+        
+        console.log('Regular sample deleted successfully:', sampleId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'Sample deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Samples DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete sample',
+            details: error.message
+          })
+        };
+      }
+    }
+
     // Handle skipped samples deletion
     if (apiPath.match(/^\/skipped-samples\/\d+$/) && httpMethod === 'DELETE') {
       if (!pool) {
@@ -1713,6 +1756,100 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Handle audit reports deletion (DELETE /reports/:id)
+    if (apiPath.match(/^\/reports\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reportId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting audit report:', reportId);
+        
+        // Instead of hard delete, mark as deleted
+        const result = await pool.query(
+          'UPDATE audit_reports SET deleted = true, deleted_at = NOW() WHERE id = $1 RETURNING id',
+          [reportId]
+        );
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Report not found' })
+          };
+        }
+        
+        console.log('Audit report marked as deleted successfully:', reportId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'Report deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Reports DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete report',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle audit reports deletion (DELETE /audit-reports/:id)
+    if (apiPath.match(/^\/audit-reports\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reportId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting audit report (alt endpoint):', reportId);
+        
+        // Instead of hard delete, mark as deleted
+        const result = await pool.query(
+          'UPDATE audit_reports SET deleted = true, deleted_at = NOW() WHERE id = $1 RETURNING id',
+          [reportId]
+        );
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Report not found' })
+          };
+        }
+        
+        console.log('Audit report marked as deleted successfully (alt):', reportId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'Report deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Audit reports DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete report',
+            details: error.message
+          })
+        };
+      }
+    }
+
     // Catch-all diagnostic endpoint - This is where "Endpoint not found" comes from
     console.log('⚠️ UNMATCHED ENDPOINT:', {
       originalPath: path,
@@ -1730,7 +1867,7 @@ exports.handler = async (event, context) => {
         requestedPath: apiPath,
         originalPath: path, 
         method: httpMethod,
-        availableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/health', '/database/status'],
+        availableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/samples', '/skipped-samples', '/reports', '/health', '/database/status'],
         debug: {
           functionName: 'api-simple',
           pathProcessing: {
