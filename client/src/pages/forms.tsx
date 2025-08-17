@@ -929,7 +929,7 @@ export default function Forms() {
   };
 
   // Save the current form to localStorage
-  const saveForm = async () => {
+  const saveForm = () => {
     if (!formName.trim()) {
       alert("Please enter a form name");
       return;
@@ -949,59 +949,39 @@ export default function Forms() {
       if (!confirm) return;
     }
     
-    try {
-      console.log('🚀 Saving form to database:', formName);
-      
-      const formData = {
-        name: formName.trim(),
-        sections: formSections,
-        settings: {}
-      };
-      
-      // Save to database via API
-      const response = await fetch('/api/forms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Form creation failed:', response.status, errorData);
-        throw new Error(`Failed to save form: ${response.status} - ${errorData.error || 'Unknown error'}`);
-      }
-      
-      const savedForm = await response.json();
-      console.log('✅ Form saved to database:', savedForm);
-      
-      // Update local state with database response
-      const updatedForms = currentFormId
-        ? savedForms.map(form => form.id === currentFormId ? savedForm : form)
-        : [...savedForms, savedForm];
-      
-      setSavedForms(updatedForms);
-      
-      // Also update localStorage for immediate UI consistency
-      localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
-      localStorage.setItem('qa-form-definitions', JSON.stringify(updatedForms));
-      
-      // Dispatch event to notify other components
-      console.log(`Dispatching form update event for "${formName}"`);
-      dispatchFormUpdate(formName);
-      
-      setCurrentFormId(savedForm.id);
-      alert(`Form "${formName}" saved successfully to database!`);
-      
-      // Reload forms to sync with database
-      loadSavedForms();
-      
-    } catch (error) {
-      console.error('❌ Error saving form:', error);
-      alert(`Failed to save form: ${error.message}`);
-    }
+    // Create or update form
+    const timestamp = new Date().toISOString();
+    const formToSave: AuditForm = currentFormId 
+      ? {
+          ...savedForms.find(f => f.id === currentFormId)!,
+          name: formName,
+          sections: formSections,
+          lastModified: timestamp,
+          lastModifiedBy: user?.username || 'Unknown'
+        }
+      : {
+          id: generateId('form'),
+          name: formName,
+          sections: formSections,
+          createdAt: timestamp,
+          createdBy: user?.username || 'Unknown'
+        };
+    
+    // Update savedForms state
+    const updatedForms = currentFormId
+      ? savedForms.map(form => form.id === currentFormId ? formToSave : form)
+      : [...savedForms, formToSave];
+    
+    setSavedForms(updatedForms);
+    localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
+    
+    // Dispatch event to notify other components that the form has been updated
+    // This triggers the real-time update in the audit page
+    console.log(`Dispatching form update event for "${formName}"`);
+    dispatchFormUpdate(formName);
+    
+    setCurrentFormId(formToSave.id);
+    alert(`Form "${formName}" saved successfully!`);
   };
 
   // Load a form for editing

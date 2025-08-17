@@ -311,25 +311,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create audit form
   app.post('/api/forms', async (req: Request, res: Response) => {
-    console.log('🔧 FORM CREATION REQUEST RECEIVED');
-    console.log('Body:', req.body);
-    console.log('User authenticated:', req.isAuthenticated());
-    
     try {
-      const formName = req.body?.name || `Form-${Date.now()}`;
+      const validatedData = insertAuditFormSchema.parse(req.body);
       
-      const formData = {
-        name: formName,
-        sections: req.body?.sections || [],
-        settings: req.body?.settings,
-        createdBy: req.user?.id || 1
-      };
-      
-      console.log('🚀 INSERTING FORM DATA:', formData);
-      
-      const [newForm] = await db.insert(auditForms).values(formData).returning();
-      
-      console.log('✅ FORM CREATED SUCCESSFULLY:', newForm);
+      const [newForm] = await db.insert(auditForms).values({
+        ...validatedData,
+        createdBy: req.user?.id || null
+      }).returning();
 
       broadcast({
         type: 'form_created',
@@ -337,13 +325,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       res.status(201).json(newForm);
-      
     } catch (error) {
-      console.error('❌ FORM CREATION FAILED:', error);
-      res.status(500).json({ 
-        error: 'Failed to create form', 
-        details: error.message
-      });
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating form:', error);
+      res.status(500).json({ error: 'Failed to create form' });
     }
   });
 
@@ -404,14 +391,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AUDIT REPORTS ROUTES
 
-  // Get all audit reports (excluding deleted ones)
+  // Get all audit reports
   app.get('/api/reports', async (req: Request, res: Response) => {
     try {
-      console.log('Fetching reports - filtering out deleted ones');
-      const reports = await db.select().from(auditReports)
-        .where(eq(auditReports.deleted, false))
-        .orderBy(desc(auditReports.timestamp));
-      console.log(`Found ${reports.length} active reports (deleted filtered out)`);
+      const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
       res.json(reports);
     } catch (error) {
       console.error('Error fetching reports:', error);
@@ -419,112 +402,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get single audit report by ID for editing
-  app.get('/api/reports/:auditId', async (req: Request, res: Response) => {
-    try {
-      const auditId = req.params.auditId;
-      const [report] = await db.select().from(auditReports)
-        .where(and(eq(auditReports.auditId, auditId), eq(auditReports.deleted, false)));
-      
-      if (!report) {
-        return res.status(404).json({ error: 'Report not found or deleted' });
-      }
-      
-      res.json(report);
-    } catch (error) {
-      console.error('Error fetching report:', error);
-      res.status(500).json({ error: 'Failed to fetch report' });
-    }
-  });
-
-  // Update audit report (edit functionality)
-  app.put('/api/reports/:auditId', async (req: Request, res: Response) => {
-    try {
-      const auditId = req.params.auditId;
-      const validatedData = insertAuditReportSchema.omit({ auditId: true }).parse(req.body);
-      
-      const [updatedReport] = await db.update(auditReports)
-        .set({
-          ...validatedData,
-          updatedAt: new Date()
-        })
-        .where(and(eq(auditReports.auditId, auditId), eq(auditReports.deleted, false)))
-        .returning();
-
-      if (!updatedReport) {
-        return res.status(404).json({ error: 'Report not found or deleted' });
-      }
-
-      console.log(`Updated report ${auditId} in database`);
-      
-      broadcast({
-        type: 'report_updated',
-        report: updatedReport
-      });
-
-      res.json(updatedReport);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ errors: error.errors });
-      }
-      console.error('Error updating report:', error);
-      res.status(500).json({ error: 'Failed to update report' });
-    }
-  });
-  
-  // Mark audit report as deleted (soft delete)
-  app.patch('/api/reports/:auditId/delete', async (req: Request, res: Response) => {
-    try {
-      const auditId = req.params.auditId;
-      
-      const [updatedReport] = await db.update(auditReports)
-        .set({ 
-          deleted: true, 
-          deletedBy: req.user?.id || 1,
-          deletedAt: new Date()
-        })
-        .where(eq(auditReports.auditId, auditId))
-        .returning();
-
-      if (!updatedReport) {
-        return res.status(404).json({ error: 'Report not found' });
-      }
-
-      console.log(`Marked report ${auditId} as deleted in database`);
-      res.json({ message: 'Report marked as deleted', auditId });
-    } catch (error) {
-      console.error('Error marking report as deleted:', error);
-      res.status(500).json({ error: 'Failed to mark report as deleted' });
-    }
-  });
-
   // Create audit report
   app.post('/api/reports', async (req: Request, res: Response) => {
-    console.log('🔧 AUDIT REPORT CREATION REQUEST RECEIVED');
-    console.log('Body:', JSON.stringify(req.body, null, 2));
-    console.log('User authenticated:', req.isAuthenticated());
-    
     try {
-      // Bypass validation temporarily to ensure reports get saved
-      const reportData = {
-        auditId: req.body.auditId || req.body.id || `AUD-${Date.now()}`,
-        formName: req.body.formName || 'Unknown Form',
-        agent: req.body.agent || 'Unknown Agent',
-        agentId: req.body.agentId || 'UNKNOWN',
-        auditor: req.user?.id || null,
-        auditorName: req.body.auditorName || req.user?.username || 'Unknown Auditor',
-        sectionAnswers: req.body.sectionAnswers || req.body.answers || {},
-        score: req.body.score || 0,
-        maxScore: req.body.maxScore || 0,
-        hasFatal: req.body.hasFatal || false,
-        status: req.body.status || 'completed'
-      };
+      const validatedData = insertAuditReportSchema.parse(req.body);
       
-      console.log('🚀 INSERTING REPORT DATA:', reportData);
-      
-      const [newReport] = await db.insert(auditReports).values(reportData).returning();
-      
-      console.log('✅ REPORT CREATED SUCCESSFULLY:', newReport);
+      const [newReport] = await db.insert(auditReports).values({
+        auditId: validatedData.auditId,
+        formName: validatedData.formName,
+        agent: validatedData.agent,
+        agentId: validatedData.agentId,
+        auditorName: validatedData.auditorName,
+        sectionAnswers: validatedData.sectionAnswers || {},
+        score: validatedData.score,
+        maxScore: validatedData.maxScore,
+        hasFatal: validatedData.hasFatal,
+        status: validatedData.status
+      }).returning();
 
       broadcast({
         type: 'report_created',
@@ -533,12 +427,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(newReport);
     } catch (error) {
-      console.error('❌ REPORT CREATION FAILED:', error);
       if (error instanceof z.ZodError) {
-        console.error('Validation errors:', error.errors);
         return res.status(400).json({ errors: error.errors });
       }
-      res.status(500).json({ error: 'Failed to create report', details: error.message });
+      console.error('Error creating report:', error);
+      res.status(500).json({ error: 'Failed to create report' });
     }
   });
 
