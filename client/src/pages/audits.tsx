@@ -719,14 +719,24 @@ function AuditFormRenderer({ formName }: { formName: string }) {
 
   // Load the form data when formName or formVersion changes
   useEffect(() => {
-    setLoading(true);
-    try {
-      // Load forms from localStorage
-      const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
-      console.log(`Loading form "${formName}" (version ${formVersion})`);
-      
-      // Find the form that matches the formName
-      const matchedForm = savedForms.find((f: AuditForm) => f.name === formName);
+    const loadFormData = async () => {
+      setLoading(true);
+      try {
+        // Load forms from database API
+        console.log(`Loading form "${formName}" from database (version ${formVersion})`);
+        const response = await fetch('/api/forms');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch forms: ${response.status}`);
+        }
+        const dbForms = await response.json();
+        
+        // Find the form that matches the formName
+        const matchedForm = dbForms.find((f: any) => f.name === formName);
+        
+        // Handle form data structure - database stores sections as {sections: [...]}
+        if (matchedForm && matchedForm.sections && matchedForm.sections.sections) {
+          matchedForm.sections = matchedForm.sections.sections;
+        }
       
       if (matchedForm) {
         setForm(matchedForm);
@@ -769,6 +779,9 @@ function AuditFormRenderer({ formName }: { formName: string }) {
     } finally {
       setLoading(false);
     }
+    };
+
+    loadFormData();
   }, [formName, formVersion]);
   
   // Listen for FORM_VALUES_UPDATED events to update local state
