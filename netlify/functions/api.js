@@ -306,7 +306,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
-        const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
+        console.log('Fetching audit reports from database (alt endpoint)...');
+        const result = await pool.query('SELECT * FROM audit_reports WHERE deleted = false ORDER BY timestamp DESC');
+        console.log('Audit reports (alt) result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -317,7 +319,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1045,7 +1047,7 @@ exports.handler = async (event, context) => {
       
       try {
         console.log('Fetching audit reports from database...');
-        const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
+        const result = await pool.query('SELECT * FROM audit_reports WHERE deleted = false ORDER BY timestamp DESC');
         console.log('Audit reports result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
@@ -1073,7 +1075,9 @@ exports.handler = async (event, context) => {
       }
       
       try {
-        const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
+        console.log('Fetching audit reports from database (alt endpoint)...');
+        const result = await pool.query('SELECT * FROM audit_reports WHERE deleted = false ORDER BY timestamp DESC');
+        console.log('Audit reports (alt) result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1084,7 +1088,7 @@ exports.handler = async (event, context) => {
         return {
           statusCode: 500,
           headers: corsHeaders,
-          body: JSON.stringify({ error: 'Database query failed' })
+          body: JSON.stringify({ error: 'Database query failed', details: error.message })
         };
       }
     }
@@ -1470,7 +1474,7 @@ exports.handler = async (event, context) => {
       
       try {
         console.log('Fetching available samples from database...');
-        const result = await pool.query('SELECT * FROM audit_samples ORDER BY timestamp DESC');
+        const result = await pool.query('SELECT * FROM audit_samples ORDER BY uploaded_at DESC');
         console.log('Available samples result:', result.rows.length, 'rows found');
         return {
           statusCode: 200,
