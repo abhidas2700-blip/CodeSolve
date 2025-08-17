@@ -3,14 +3,36 @@
  * Handles all API requests for the ThorEye Audit System
  */
 
-const express = require('express');
-const serverless = require('serverless-http');
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const MemoryStore = require('memorystore')(session);
-const { Pool } = require('pg');
-const dbConfig = require('./db-config');
+// Import with proper error handling
+let express, serverless, session, passport, LocalStrategy, MemoryStore, Pool, dbConfig;
+
+try {
+  express = require('express');
+  serverless = require('serverless-http');
+  session = require('express-session');
+  passport = require('passport');
+  LocalStrategy = require('passport-local').Strategy;
+  MemoryStore = require('memorystore')(session);
+  Pool = require('pg').Pool;
+  dbConfig = require('./db-config');
+} catch (error) {
+  console.error('Failed to load dependencies:', error);
+  // Export a basic error handler if dependencies fail
+  module.exports.handler = async (event, context) => {
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        error: 'Server configuration error',
+        message: 'Failed to load required dependencies'
+      })
+    };
+  };
+  return;
+}
 
 // Create Express app
 const app = express();
@@ -19,12 +41,26 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Initialize database connection
-const pool = new Pool({
-  connectionString: dbConfig.DATABASE_URL,
-  ssl: dbConfig.ssl,
-  ...dbConfig.pool,
-});
+// Initialize database connection with error handling
+let pool;
+try {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
+  
+  console.log('Database pool initialized successfully');
+} catch (error) {
+  console.error('Database initialization error:', error);
+  pool = null;
+}
 
 // Setup session management
 app.use(session({
@@ -116,16 +152,23 @@ function hasAdminRights(req, res, next) {
 
 // API health check route
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    hasDatabase: !!pool,
+    hasEnvVar: !!process.env.DATABASE_URL 
+  });
 });
 
 // Authentication routes
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
-  // Update last login timestamp
-  pool.query(
-    'UPDATE users SET lastLogin = NOW() WHERE id = $1',
-    [req.user.id]
-  ).catch(err => console.error('Error updating last login:', err));
+  // Update last login timestamp (only if pool is available)
+  if (pool) {
+    pool.query(
+      'UPDATE users SET lastLogin = NOW() WHERE id = $1',
+      [req.user.id]
+    ).catch(err => console.error('Error updating last login:', err));
+  }
   
   // Return user info (except password)
   const { password, ...userInfo } = req.user;
@@ -147,21 +190,29 @@ app.get('/api/user', (req, res) => {
   res.status(401).json({ error: 'Not authenticated' });
 });
 
-// Database status check
+// Database status check  
 app.get('/api/database/status', async (req, res) => {
   try {
+    if (!pool) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Database pool not initialized',
+        hasEnvVar: !!process.env.DATABASE_URL
+      });
+    }
+    
     const result = await pool.query('SELECT NOW() as time');
     res.json({
       status: 'connected',
       timestamp: result.rows[0].time,
-      connectionString: process.env.NODE_ENV === 'production' ? undefined : dbConfig.DATABASE_URL
+      hasEnvVar: !!process.env.DATABASE_URL
     });
   } catch (error) {
     console.error('Database connection error:', error);
     res.status(500).json({
       status: 'error',
       message: error.message,
-      connectionString: process.env.NODE_ENV === 'production' ? undefined : dbConfig.DATABASE_URL
+      hasEnvVar: !!process.env.DATABASE_URL
     });
   }
 });
