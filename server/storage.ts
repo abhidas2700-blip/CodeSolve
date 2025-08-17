@@ -737,11 +737,11 @@ export class MemoryStorage implements IStorage {
       const [createdReview] = await db
         .insert(ataReviews)
         .values({
-          auditReportId: review.auditReportId || null,
+          auditReportId: (review as any).auditReportId || (review as any).reportId || null,
           reviewerId: review.reviewerId || null,
-          reviewerName: review.reviewerName,
-          feedback: review.feedback,
-          rating: review.rating
+          reviewerName: review.reviewerName || "",
+          feedback: review.feedback || (review as any).comments || "",
+          rating: review.rating || 5
         })
         .returning();
       
@@ -762,11 +762,11 @@ export class MemoryStorage implements IStorage {
     // Fallback to memory storage
     const newReview: AtaReview = {
       id: this.ataReviewIdCounter++,
-      auditReportId: review.auditReportId || null,
+      auditReportId: (review as any).auditReportId || (review as any).reportId || null,
       reviewerId: review.reviewerId || null,
-      reviewerName: review.reviewerName,
-      feedback: review.feedback,
-      rating: review.rating,
+      reviewerName: review.reviewerName || "",
+      feedback: review.feedback || (review as any).comments || "",
+      rating: review.rating || 5,
       timestamp: new Date()
     };
     this.ataReviews.push(newReview);
@@ -833,7 +833,7 @@ export class MemoryStorage implements IStorage {
           customerName: sample.customerName,
           ticketId: sample.ticketId,
           formType: sample.formType,
-          date: sample.date || now,
+          date: sample.date ? new Date(sample.date) : now,
           priority: (sample.priority as "high" | "medium" | "low") || "medium",
           status: (sample.status as "available" | "assigned" | "inProgress" | "completed") || "available",
           assignedTo: sample.assignedTo || null,
@@ -894,7 +894,7 @@ export class MemoryStorage implements IStorage {
         customerName: sample.customerName,
         ticketId: sample.ticketId,
         formType: sample.formType,
-        date: sample.date || now,
+        date: sample.date ? new Date(sample.date) : now,
         priority: (sample.priority as "high" | "medium" | "low") || "medium",
         status: (sample.status as "available" | "assigned" | "inProgress" | "completed") || "available",
         assignedTo: sample.assignedTo || null,
@@ -1200,5 +1200,594 @@ export class MemoryStorage implements IStorage {
   }
 }
 
-// Use in-memory storage for local preview
-export const storage = new MemoryStorage();
+// Database Storage implementation - replaces MemoryStorage with actual PostgreSQL connection
+export class DatabaseStorage implements IStorage {
+  // Session store for authentication
+  readonly sessionStore = new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  });
+  
+  // LocalStorage emulator for UI compatibility
+  private localStorageEmulator = new BrowserLocalStorageEmulator();
+  
+  // Get access to the localStorage emulator
+  getLocalStorage(): any {
+    return this.localStorageEmulator;
+  }
+  
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user || undefined;
+    } catch (error) {
+      console.error('Error getting user:', error);
+      return undefined;
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      return user || undefined;
+    } catch (error) {
+      console.error('Error getting user by username:', error);
+      return undefined;
+    }
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        username: insertUser.username,
+        password: insertUser.password,
+        email: (insertUser as any).email || null,
+        rights: insertUser.rights,
+        isInactive: insertUser.isInactive || false
+      })
+      .returning();
+    return user;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    try {
+      const allUsers = await db.select().from(users).orderBy(users.id);
+      return allUsers;
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      return [];
+    }
+  }
+  
+  async updateUser(id: number, userData: Partial<User>): Promise<User | undefined> {
+    try {
+      const [updatedUser] = await db
+        .update(users)
+        .set(userData)
+        .where(eq(users.id, id))
+        .returning();
+      
+      // Also update localStorage for UI compatibility
+      try {
+        const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+        const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+        
+        if (localIndex !== -1) {
+          qaUsers[localIndex] = { ...qaUsers[localIndex], ...userData, rights: updatedUser.rights };
+        } else {
+          qaUsers.push({
+            id: updatedUser.id,
+            username: updatedUser.username,
+            password: updatedUser.password,
+            email: updatedUser.email,
+            rights: updatedUser.rights,
+            isInactive: updatedUser.isInactive
+          });
+        }
+        
+        this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+      } catch (localStorageError) {
+        console.error('Error updating localStorage:', localStorageError);
+      }
+      
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const [deletedUser] = await db.delete(users).where(eq(users.id, id)).returning();
+      
+      if (deletedUser) {
+        // Also remove from localStorage
+        try {
+          const qaUsers = JSON.parse(this.localStorageEmulator.getItem('qa-users') || '[]');
+          const localIndex = qaUsers.findIndex((u: any) => u.id === id);
+          if (localIndex !== -1) {
+            qaUsers.splice(localIndex, 1);
+            this.localStorageEmulator.setItem('qa-users', JSON.stringify(qaUsers));
+          }
+        } catch (localStorageError) {
+          console.error('Error updating localStorage after deletion:', localStorageError);
+        }
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      return false;
+    }
+  }
+  
+  // Form methods
+  async getForm(id: number): Promise<AuditForm | undefined> {
+    try {
+      const [form] = await db.select().from(auditForms).where(eq(auditForms.id, id));
+      return form || undefined;
+    } catch (error) {
+      console.error('Error getting form:', error);
+      return undefined;
+    }
+  }
+  
+  async getAllForms(): Promise<AuditForm[]> {
+    try {
+      return await db.select().from(auditForms).orderBy(auditForms.createdAt);
+    } catch (error) {
+      console.error('Error getting all forms:', error);
+      return [];
+    }
+  }
+  
+  async createForm(form: InsertAuditForm): Promise<AuditForm> {
+    const [createdForm] = await db
+      .insert(auditForms)
+      .values({
+        name: form.name,
+        sections: form.sections,
+        createdBy: form.createdBy || null
+      })
+      .returning();
+    return createdForm;
+  }
+  
+  async updateForm(id: number, formData: Partial<AuditForm>): Promise<AuditForm | undefined> {
+    try {
+      const [updatedForm] = await db
+        .update(auditForms)
+        .set(formData)
+        .where(eq(auditForms.id, id))
+        .returning();
+      return updatedForm;
+    } catch (error) {
+      console.error('Error updating form:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteForm(id: number): Promise<boolean> {
+    try {
+      const [deletedForm] = await db.delete(auditForms).where(eq(auditForms.id, id)).returning();
+      return !!deletedForm;
+    } catch (error) {
+      console.error('Error deleting form:', error);
+      return false;
+    }
+  }
+  
+  // Audit report methods
+  async getReport(id: number): Promise<AuditReport | undefined> {
+    try {
+      const [report] = await db.select().from(auditReports).where(eq(auditReports.id, id));
+      return report || undefined;
+    } catch (error) {
+      console.error('Error getting report:', error);
+      return undefined;
+    }
+  }
+  
+  async getAllReports(): Promise<AuditReport[]> {
+    try {
+      return await db.select().from(auditReports).where(eq(auditReports.deleted, false)).orderBy(auditReports.timestamp);
+    } catch (error) {
+      console.error('Error getting all reports:', error);
+      return [];
+    }
+  }
+  
+  async getReportsByAuditor(auditorId: number): Promise<AuditReport[]> {
+    try {
+      return await db.select().from(auditReports)
+        .where(eq(auditReports.auditor, auditorId))
+        .orderBy(auditReports.timestamp);
+    } catch (error) {
+      console.error('Error getting reports by auditor:', error);
+      return [];
+    }
+  }
+  
+  async createReport(report: InsertAuditReport): Promise<AuditReport> {
+    const [createdReport] = await db
+      .insert(auditReports)
+      .values({
+        auditId: report.auditId,
+        formName: report.formName,
+        agent: report.agent,
+        agentId: report.agentId,
+        auditor: report.auditor || null,
+        auditorName: report.auditorName,
+        sectionAnswers: report.sectionAnswers,
+        score: report.score,
+        maxScore: report.maxScore,
+        hasFatal: report.hasFatal || false,
+        status: report.status || "completed",
+        edited: report.edited || false,
+        editedBy: report.editedBy || null,
+        editedAt: report.editedAt || null
+      })
+      .returning();
+    return createdReport;
+  }
+  
+  async updateReport(id: number, reportData: Partial<AuditReport>): Promise<AuditReport | undefined> {
+    try {
+      const [updatedReport] = await db
+        .update(auditReports)
+        .set(reportData)
+        .where(eq(auditReports.id, id))
+        .returning();
+      return updatedReport;
+    } catch (error) {
+      console.error('Error updating report:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteReport(id: number, deletedBy: number): Promise<boolean> {
+    try {
+      // Get the report first to store in deleted_audits
+      const reportToDelete = await this.getReport(id);
+      if (!reportToDelete) return false;
+      
+      // Get the deleting user's name
+      const deletingUser = await this.getUser(deletedBy);
+      const deletedByName = deletingUser?.username || 'Unknown';
+      
+      // Move to deleted_audits table
+      await db.insert(deletedAudits).values({
+        originalId: reportToDelete.id.toString(),
+        auditId: reportToDelete.auditId,
+        formName: reportToDelete.formName,
+        agent: reportToDelete.agent,
+        agentId: reportToDelete.agentId,
+        auditor: reportToDelete.auditor,
+        auditorName: reportToDelete.auditorName,
+        sectionAnswers: reportToDelete.sectionAnswers,
+        score: reportToDelete.score,
+        maxScore: reportToDelete.maxScore,
+        hasFatal: reportToDelete.hasFatal,
+        timestamp: reportToDelete.timestamp,
+        deletedBy: deletedBy,
+        deletedByName: deletedByName,
+        editHistory: reportToDelete.edited ? { editedBy: reportToDelete.editedBy, editedAt: reportToDelete.editedAt } : null
+      });
+      
+      // Delete from audit_reports
+      const [deletedReport] = await db.delete(auditReports).where(eq(auditReports.id, id)).returning();
+      return !!deletedReport;
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      return false;
+    }
+  }
+  
+  // ATA review methods
+  async getAtaReview(id: number): Promise<AtaReview | undefined> {
+    try {
+      const [review] = await db.select().from(ataReviews).where(eq(ataReviews.id, id));
+      return review || undefined;
+    } catch (error) {
+      console.error('Error getting ATA review:', error);
+      return undefined;
+    }
+  }
+  
+  async getAtaReviewByReportId(reportId: number): Promise<AtaReview | undefined> {
+    try {
+      const [review] = await db.select().from(ataReviews).where(eq(ataReviews.auditReportId, reportId));
+      return review || undefined;
+    } catch (error) {
+      console.error('Error getting ATA review by report ID:', error);
+      return undefined;
+    }
+  }
+  
+  async getAllAtaReviews(): Promise<AtaReview[]> {
+    try {
+      return await db.select().from(ataReviews).orderBy(ataReviews.timestamp);
+    } catch (error) {
+      console.error('Error getting all ATA reviews:', error);
+      return [];
+    }
+  }
+  
+  async createAtaReview(review: InsertAtaReview): Promise<AtaReview> {
+    const [createdReview] = await db
+      .insert(ataReviews)
+      .values({
+        auditReportId: (review as any).auditReportId || (review as any).reportId || null,
+        reviewerId: review.reviewerId || null,
+        reviewerName: review.reviewerName || "",
+        feedback: review.feedback || (review as any).comments || "",
+        rating: review.rating || 5
+      })
+      .returning();
+    return createdReview;
+  }
+  
+  async updateAtaReview(id: number, reviewData: Partial<AtaReview>): Promise<AtaReview | undefined> {
+    try {
+      const [updatedReview] = await db
+        .update(ataReviews)
+        .set(reviewData)
+        .where(eq(ataReviews.id, id))
+        .returning();
+      return updatedReview;
+    } catch (error) {
+      console.error('Error updating ATA review:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteAtaReview(id: number): Promise<boolean> {
+    try {
+      const [deletedReview] = await db.delete(ataReviews).where(eq(ataReviews.id, id)).returning();
+      return !!deletedReview;
+    } catch (error) {
+      console.error('Error deleting ATA review:', error);
+      return false;
+    }
+  }
+  
+  // Audit samples methods
+  async getAuditSample(id: number): Promise<AuditSample | undefined> {
+    try {
+      const [sample] = await db.select().from(auditSamples).where(eq(auditSamples.id, id));
+      return sample || undefined;
+    } catch (error) {
+      console.error('Error getting audit sample:', error);
+      return undefined;
+    }
+  }
+  
+  async getAllAuditSamples(): Promise<AuditSample[]> {
+    try {
+      return await db.select().from(auditSamples).orderBy(auditSamples.uploadedAt);
+    } catch (error) {
+      console.error('Error getting all audit samples:', error);
+      return [];
+    }
+  }
+  
+  async getAuditSamplesByStatus(status: string): Promise<AuditSample[]> {
+    try {
+      return await db.select().from(auditSamples)
+        .where(eq(auditSamples.status, status as any))
+        .orderBy(auditSamples.uploadedAt);
+    } catch (error) {
+      console.error('Error getting audit samples by status:', error);
+      return [];
+    }
+  }
+  
+  async getAuditSamplesByAuditor(auditorId: number): Promise<AuditSample[]> {
+    try {
+      return await db.select().from(auditSamples)
+        .where(eq(auditSamples.assignedTo, auditorId))
+        .orderBy(auditSamples.assignedAt);
+    } catch (error) {
+      console.error('Error getting audit samples by auditor:', error);
+      return [];
+    }
+  }
+  
+  async createAuditSample(sample: InsertAuditSample): Promise<AuditSample> {
+    const [createdSample] = await db
+      .insert(auditSamples)
+      .values({
+        sampleId: sample.sampleId,
+        customerName: sample.customerName,
+        ticketId: sample.ticketId,
+        formType: sample.formType,
+        date: sample.date ? new Date(sample.date) : new Date(),
+        priority: (sample.priority || "medium") as "high" | "medium" | "low",
+        status: (sample.status || "available") as "available" | "assigned" | "inProgress" | "completed",
+        assignedTo: sample.assignedTo || null,
+        assignedAt: sample.assignedAt ? new Date(sample.assignedAt) : null,
+        metadata: sample.metadata || null,
+        uploadedBy: sample.uploadedBy || null,
+        batchId: sample.batchId || null
+      })
+      .returning();
+    return createdSample;
+  }
+  
+  async createBulkAuditSamples(samples: InsertAuditSample[]): Promise<AuditSample[]> {
+    const sampleValues = samples.map(sample => ({
+      sampleId: sample.sampleId,
+      customerName: sample.customerName,
+      ticketId: sample.ticketId,
+      formType: sample.formType,
+      date: sample.date ? new Date(sample.date) : new Date(),
+      priority: (sample.priority || "medium") as "high" | "medium" | "low",
+      status: (sample.status || "available") as "available" | "assigned" | "inProgress" | "completed",
+      assignedTo: sample.assignedTo || null,
+      assignedAt: sample.assignedAt ? new Date(sample.assignedAt) : null,
+      metadata: sample.metadata || null,
+      uploadedBy: sample.uploadedBy || null,
+      batchId: sample.batchId || null
+    }));
+    
+    const createdSamples = await db.insert(auditSamples).values(sampleValues).returning();
+    return createdSamples;
+  }
+  
+  async updateAuditSample(id: number, sampleData: Partial<AuditSample>): Promise<AuditSample | undefined> {
+    try {
+      const updateData: any = { ...sampleData };
+      if (updateData.assignedAt && typeof updateData.assignedAt !== 'object') {
+        updateData.assignedAt = new Date(updateData.assignedAt);
+      }
+      if (updateData.date && typeof updateData.date !== 'object') {
+        updateData.date = new Date(updateData.date);
+      }
+      
+      const [updatedSample] = await db
+        .update(auditSamples)
+        .set(updateData)
+        .where(eq(auditSamples.id, id))
+        .returning();
+      return updatedSample;
+    } catch (error) {
+      console.error('Error updating audit sample:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteAuditSample(id: number): Promise<boolean> {
+    try {
+      const [deletedSample] = await db.delete(auditSamples).where(eq(auditSamples.id, id)).returning();
+      return !!deletedSample;
+    } catch (error) {
+      console.error('Error deleting audit sample:', error);
+      return false;
+    }
+  }
+  
+  async assignAuditSampleToAuditor(sampleId: number, auditorId: number): Promise<AuditSample | undefined> {
+    return this.updateAuditSample(sampleId, {
+      assignedTo: auditorId,
+      status: "assigned",
+      assignedAt: new Date()
+    });
+  }
+  
+  async bulkAssignSamplesToAuditors(sampleIds: number[], auditorIds: number[]): Promise<{assigned: number, errors: any[]}> {
+    let assignedCount = 0;
+    const errors: any[] = [];
+    
+    if (!sampleIds.length || !auditorIds.length) {
+      return { assigned: 0, errors: [{ message: "No samples or auditors provided" }] };
+    }
+    
+    // Get samples and validate they're available
+    const samples = await Promise.all(sampleIds.map(id => this.getAuditSample(id)));
+    const availableSamples = samples.filter((sample): sample is AuditSample => 
+      !!sample && sample.status === "available"
+    );
+    
+    if (!availableSamples.length) {
+      return { assigned: 0, errors: [{ message: "No available samples found" }] };
+    }
+    
+    // Assign samples in round-robin fashion
+    for (let i = 0; i < availableSamples.length; i++) {
+      const sample = availableSamples[i];
+      const auditorIndex = i % auditorIds.length;
+      const auditorId = auditorIds[auditorIndex];
+      
+      try {
+        await this.updateAuditSample(sample.id, {
+          assignedTo: auditorId,
+          status: "assigned",
+          assignedAt: new Date()
+        });
+        assignedCount++;
+      } catch (error) {
+        errors.push({ sampleId: sample.id, auditorId, error });
+      }
+    }
+    
+    return { assigned: assignedCount, errors };
+  }
+  
+  // Skipped samples methods
+  async getSkippedSample(id: number): Promise<SkippedSample | undefined> {
+    try {
+      const [sample] = await db.select().from(skippedSamples).where(eq(skippedSamples.id, id));
+      return sample || undefined;
+    } catch (error) {
+      console.error('Error getting skipped sample:', error);
+      return undefined;
+    }
+  }
+  
+  async getAllSkippedSamples(): Promise<SkippedSample[]> {
+    try {
+      return await db.select().from(skippedSamples).orderBy(skippedSamples.timestamp);
+    } catch (error) {
+      console.error('Error getting all skipped samples:', error);
+      return [];
+    }
+  }
+  
+  async getSkippedSamplesByAuditor(auditorId: number): Promise<SkippedSample[]> {
+    try {
+      return await db.select().from(skippedSamples)
+        .where(eq(skippedSamples.auditor, auditorId))
+        .orderBy(skippedSamples.timestamp);
+    } catch (error) {
+      console.error('Error getting skipped samples by auditor:', error);
+      return [];
+    }
+  }
+  
+  async createSkippedSample(sample: InsertSkippedSample): Promise<SkippedSample> {
+    const [createdSample] = await db
+      .insert(skippedSamples)
+      .values({
+        auditId: sample.auditId,
+        formName: sample.formName,
+        agent: sample.agent,
+        agentId: sample.agentId,
+        auditor: sample.auditor || null,
+        auditorName: sample.auditorName,
+        reason: sample.reason,
+        status: sample.status || "skipped"
+      })
+      .returning();
+    return createdSample;
+  }
+  
+  async updateSkippedSample(id: number, sampleData: Partial<SkippedSample>): Promise<SkippedSample | undefined> {
+    try {
+      const [updatedSample] = await db
+        .update(skippedSamples)
+        .set(sampleData)
+        .where(eq(skippedSamples.id, id))
+        .returning();
+      return updatedSample;
+    } catch (error) {
+      console.error('Error updating skipped sample:', error);
+      return undefined;
+    }
+  }
+  
+  async deleteSkippedSample(id: number): Promise<boolean> {
+    try {
+      const [deletedSample] = await db.delete(skippedSamples).where(eq(skippedSamples.id, id)).returning();
+      return !!deletedSample;
+    } catch (error) {
+      console.error('Error deleting skipped sample:', error);
+      return false;
+    }
+  }
+}
+
+// Use database storage connected to Neon PostgreSQL
+export const storage = new DatabaseStorage();
