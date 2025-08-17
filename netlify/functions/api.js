@@ -647,10 +647,14 @@ exports.handler = async (event, context) => {
       
       try {
         const result = await pool.query('SELECT * FROM users ORDER BY id');
+        
+        // Filter out the default admin user from the displayed list to match local behavior
+        const filteredUsers = result.rows.filter(user => user.username !== 'admin');
+        
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify(result.rows)
+          body: JSON.stringify(filteredUsers)
         };
       } catch (error) {
         console.error('Users GET error:', error);
@@ -692,7 +696,7 @@ exports.handler = async (event, context) => {
             userData.username,
             userData.email || null,
             hashedPassword,
-            userData.rights || ['audit'],
+            JSON.stringify(userData.rights || ['audit']), // Convert array to JSON string
             userData.isInactive || false
           ]
         );

@@ -121,9 +121,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const users = await storage.getAllUsers();
       
-      // Filter out the default admin user from the displayed list
-      // The admin still exists and has all rights, but is hidden from the user list
-      const filteredUsers = users.filter(user => user.username !== 'admin');
+      // Show ALL users including admin for proper user management
+      const filteredUsers = users;
       
       res.json(filteredUsers);
     } catch (error) {
