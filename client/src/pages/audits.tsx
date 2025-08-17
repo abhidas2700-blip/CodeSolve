@@ -3022,7 +3022,12 @@ export default function Audits() {
           agentId: auditInProgress.ticketId || auditInProgress.agentId,
           auditor: user?.id ? Number(user.id) : undefined,
           auditorName: user?.username || 'Unknown',
-          sectionAnswers: completedAudit.sectionAnswers || {},
+          sectionAnswers: Array.isArray(completedAudit.sectionAnswers) 
+            ? completedAudit.sectionAnswers.reduce((acc, section, index) => {
+                acc[`section${index + 1}`] = section;
+                return acc;
+              }, {} as Record<string, any>)
+            : (completedAudit.sectionAnswers || {}),
           score: completedAudit.score || 0,
           maxScore: completedAudit.maxScore || 100,
           hasFatal: completedAudit.hasFatal || false,
