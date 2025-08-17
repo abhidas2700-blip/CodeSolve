@@ -402,6 +402,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alternative endpoint for audit reports (for compatibility)
+  app.get('/api/audit-reports', async (req: Request, res: Response) => {
+    try {
+      const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching audit reports:', error);
+      res.status(500).json({ error: 'Failed to fetch audit reports' });
+    }
+  });
+
+  // Create audit report via /api/audit-reports (compatibility)
+  app.post('/api/audit-reports', async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertAuditReportSchema.parse(req.body);
+      
+      const [newReport] = await db.insert(auditReports).values({
+        auditId: validatedData.auditId,
+        formName: validatedData.formName,
+        agent: validatedData.agent,
+        agentId: validatedData.agentId,
+        auditorName: validatedData.auditorName,
+        sectionAnswers: validatedData.sectionAnswers || {},
+        score: validatedData.score,
+        maxScore: validatedData.maxScore,
+        hasFatal: validatedData.hasFatal,
+        status: validatedData.status
+      }).returning();
+
+      broadcast({
+        type: 'report_created',
+        report: newReport
+      });
+
+      res.status(201).json(newReport);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating audit report:', error);
+      res.status(500).json({ error: 'Failed to create audit report' });
+    }
+  });
+
   // Create audit report
   app.post('/api/reports', async (req: Request, res: Response) => {
     try {
