@@ -180,6 +180,7 @@ export function ATAReportsTab({ className }: ATAReportsTabProps): React.ReactEle
         setAtaReports(processedReports);
       } catch (error) {
         console.error('Error loading ATA reports:', error);
+        console.error('Error details:', error.message, error.stack);
         setAtaReports([]);
       }
     };

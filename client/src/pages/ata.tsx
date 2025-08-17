@@ -323,21 +323,38 @@ export default function Ata() {
       
       console.log('Processing audits:', allAudits.length, 'audits after deduplication');
       allAudits.forEach((audit: any) => {
+        // Skip invalid audits
+        if (!audit || !audit.id) {
+          console.warn('Skipping invalid audit:', audit);
+          return;
+        }
+        
         // Debug each audit in detail, especially our target audit
         const isTargetAudit = audit.id === 'AUD-20045389';
         if (isTargetAudit) {
           console.log('Found target audit AUD-20045389:', audit);
         }
-        console.log('Audit:', audit.id, 'Status:', audit.status);
+        console.log('Audit:', audit.id, 'Status:', audit.status || 'unknown');
         
         // Process section answers to ensure question text is available
         const processedSectionAnswers = (audit.sectionAnswers || []).map((section: any) => {
+          // Skip invalid sections
+          if (!section || !section.answers || !Array.isArray(section.answers)) {
+            console.warn('Skipping invalid section in audit:', audit.id, section);
+            return { sectionName: section?.sectionName || 'Unknown Section', answers: [] };
+          }
+          
           // Try to find the matching form section to get question texts
           const form = formMap.get(audit.formName);
           
           return {
-            sectionName: section.sectionName,
+            sectionName: section.sectionName || 'Unknown Section',
             answers: section.answers.map((answer: any) => {
+              // Skip invalid answers
+              if (!answer || typeof answer !== 'object') {
+                console.warn('Skipping invalid answer in audit:', audit.id, answer);
+                return { questionId: 'invalid', text: 'Invalid Answer', answer: '', remarks: '' };
+              }
               // If the answer already has text, keep it
               if (answer.text) {
                 return answer;
@@ -400,17 +417,17 @@ export default function Ata() {
         });
         
         const reportObj: AuditReport = {
-          id: audit.id,
-          agent: audit.agent,
-          agentId: audit.agentId,
-          formName: audit.formName,
-          score: audit.score,
-          maxScore: audit.maxScore,
+          id: audit.id || 'unknown',
+          agent: audit.agent || 'Unknown Agent',
+          agentId: audit.agentId || audit.id || 'unknown',
+          formName: audit.formName || 'Unknown Form',
+          score: audit.score || 0,
+          maxScore: audit.maxScore || 100,
           hasFatal: audit.hasFatal || checkForFatalAnswers({ ...audit, id: audit.id, sectionAnswers: processedSectionAnswers }),
           auditor: audit.auditorName || audit.auditor || 'Unknown',
-          timestamp: audit.timestamp,
+          timestamp: audit.timestamp || new Date().toISOString(),
           sectionAnswers: processedSectionAnswers,
-          status: audit.status,
+          status: audit.status || 'completed',
           ...(audit.ataReview ? { ataReview: audit.ataReview } : {})
         };
         
@@ -425,6 +442,10 @@ export default function Ata() {
       setReviewedReports(reviewed);
     } catch (error) {
       console.error('Error loading ATA reports:', error);
+      console.error('Error details:', error.message, error.stack);
+      // Set empty arrays as fallback
+      setReports([]);
+      setReviewedReports([]);
     }
   };
 
