@@ -161,7 +161,7 @@ export default function Forms() {
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
-  // Check for existing forms on component mount
+  // Check for existing forms on component mount and refresh periodically
   useEffect(() => {
     loadSavedForms();
     
@@ -177,17 +177,30 @@ export default function Forms() {
       setCurrentSectionId(initialSection.id);
     }
     
+    // Set up automatic form list refresh every 10 seconds
+    const refreshInterval = setInterval(() => {
+      loadSavedForms();
+    }, 10000);
+    
     // Set up a recurring interval to continuously check for and remove problematic reports
     // This ensures they can't reappear if other parts of the app are recreating them
     const purgeInterval = setInterval(() => {
       purgeProblematicReports();
     }, 5000); // Check every 5 seconds
     
-    // Clean up the interval when the component unmounts
+    // Clean up the intervals when the component unmounts
     return () => {
+      clearInterval(refreshInterval);
       clearInterval(purgeInterval);
     };
   }, []);
+
+  // Add refresh mechanism for tab changes
+  useEffect(() => {
+    if (activeTab === 'library') {
+      loadSavedForms(); // Refresh forms when user switches to library tab
+    }
+  }, [activeTab]);
   
   
   // Load forms from database first, fallback to localStorage
@@ -203,10 +216,9 @@ export default function Forms() {
       
       if (response.ok) {
         const dbForms = await response.json();
-        if (dbForms && dbForms.length > 0) {
-          setSavedForms(dbForms);
-          return; // Successfully loaded from database
-        }
+        console.log(`Loaded ${dbForms?.length || 0} forms from database`);
+        setSavedForms(dbForms || []);
+        return; // Successfully loaded from database
       }
       
       // Fallback to localStorage if database fails
@@ -994,6 +1006,9 @@ export default function Forms() {
         dispatchFormUpdate(formName);
         
         alert(`Form "${formName}" saved successfully to database!`);
+        
+        // Force immediate refresh of the forms list
+        setTimeout(() => loadSavedForms(), 500);
       } else {
         throw new Error(`Failed to save form: ${response.status}`);
       }
@@ -1091,6 +1106,9 @@ export default function Forms() {
           dispatchFormUpdate('*');
           
           alert(`Duplicated form: ${form.name}`);
+          
+          // Force immediate refresh of the forms list
+          setTimeout(() => loadSavedForms(), 500);
         } else {
           throw new Error(`Failed to duplicate form: ${response.status}`);
         }
@@ -1148,7 +1166,10 @@ export default function Forms() {
           localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
           
           // Reload forms from database to ensure consistency
-          loadSavedForms();
+          await loadSavedForms();
+          
+          // Force immediate refresh of the forms list
+          setTimeout(() => loadSavedForms(), 500);
           
           // Dispatch event for form deletion - use '*' to refresh all forms
           console.log(`Dispatching form update event for deletion`);
@@ -2659,10 +2680,22 @@ export default function Forms() {
         <TabsContent value="library">
           <Card>
             <CardHeader>
-              <CardTitle>Form Library</CardTitle>
-              <CardDescription>
-                View and manage your saved audit forms
-              </CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Form Library</CardTitle>
+                  <CardDescription>
+                    View and manage your saved audit forms
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadSavedForms}
+                  className="shrink-0"
+                >
+                  Refresh Forms
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
