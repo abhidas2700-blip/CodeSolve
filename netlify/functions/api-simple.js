@@ -123,11 +123,127 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Handle forms endpoints
+    if (apiPath === '/forms' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify([])
+      };
+    }
+
+    if (apiPath === '/forms' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ id: Date.now(), message: 'Form created' })
+      };
+    }
+
+    // Handle audit reports endpoints
+    if (apiPath === '/audit-reports' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify([])
+      };
+    }
+
+    if (apiPath === '/audit-reports' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ id: Date.now(), message: 'Report created' })
+      };
+    }
+
+    // Handle audit samples endpoints
+    if (apiPath === '/audit-samples' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify([])
+      };
+    }
+
+    if (apiPath === '/audit-samples' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ id: Date.now(), message: 'Sample created' })
+      };
+    }
+
+    // Handle ATA reviews endpoints
+    if (apiPath === '/ata-reviews' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify([])
+      };
+    }
+
+    if (apiPath === '/ata-reviews' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ id: Date.now(), message: 'ATA review created' })
+      };
+    }
+
+    // Handle deleted audits endpoints
+    if (apiPath === '/deleted-audits' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify([])
+      };
+    }
+
+    if (apiPath === '/deleted-audits' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ id: Date.now(), message: 'Deleted audit recorded' })
+      };
+    }
+
+    // Handle user endpoint for authentication
+    if (apiPath === '/user' && httpMethod === 'GET') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({
+          id: 1,
+          username: 'admin',
+          rights: ['admin']
+        })
+      };
+    }
+
+    // Handle any PUT requests with dynamic IDs
+    if (httpMethod === 'PUT' && apiPath.match(/^\/\w+\/\d+$/)) {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ message: 'Updated successfully' })
+      };
+    }
+
+    // Handle any DELETE requests with dynamic IDs
+    if (httpMethod === 'DELETE' && apiPath.match(/^\/\w+\/\d+$/)) {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ message: 'Deleted successfully' })
+      };
+    }
+
     // Default response
     return {
       statusCode: 404,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Endpoint not found', path: apiPath })
+      body: JSON.stringify({ error: 'Endpoint not found', path: apiPath, method: httpMethod })
     };
 
   } catch (error) {

@@ -206,26 +206,34 @@ export default function Ata() {
       console.log('Loading from qa-completed-audits:', completedAudits.length);
       console.log('Loading from qa-reports (main Reports page):', reportsFromMain.length);
       
-      // DEBUG: Log detailed report structure to understand why they're not showing in ATA
-      console.log('=== DEBUGGING ATA REPORTS ===');
-      console.log(`Total reports in qa-reports: ${reportsFromMain.length}`);
-      reportsFromMain.forEach((report: any, index: number) => {
-        console.log(`\n--- Report ${index + 1} (ID: ${report.id}) ---`);
-        console.log('Basic Info:', {
-          id: report.id,
-          agent: report.agent,
-          formName: report.formName,
-          score: report.score,
-          auditor: report.auditor,
-          timestamp: report.timestamp
+      // CRITICAL DEBUG: Let's see exactly why ATA pending is 0
+      console.log('🔍 === ATA DIAGNOSTIC ===');
+      console.log(`📊 Reports found in qa-reports localStorage: ${reportsFromMain.length}`);
+      
+      if (reportsFromMain.length === 0) {
+        console.log('❌ NO REPORTS FOUND IN qa-reports localStorage!');
+        console.log('💡 This is why ATA pending count is 0');
+        console.log('🔧 Check if reports are stored in different localStorage keys');
+      } else {
+        console.log('✅ Reports found, checking each one:');
+        let eligibleForATA = 0;
+        let hasAtaReview = 0;
+        
+        reportsFromMain.forEach((report: any, index: number) => {
+          const hasReview = !!report.ataReview;
+          if (hasReview) hasAtaReview++;
+          else eligibleForATA++;
+          
+          console.log(`📋 Report ${index + 1}: ${report.id} | Agent: ${report.agent} | Has ATA: ${hasReview ? 'YES' : 'NO'}`);
         });
-        console.log('ATA Status:', {
-          hasAtaReview: !!report.ataReview,
-          ataReviewContent: report.ataReview
-        });
-        console.log('Will be processed for ATA?', !report.ataReview ? 'YES' : 'NO - has ATA review');
-      });
-      console.log('=== END DEBUG ===\n');
+        
+        console.log(`\n📈 SUMMARY:`);
+        console.log(`   • Total reports: ${reportsFromMain.length}`);
+        console.log(`   • Eligible for ATA: ${eligibleForATA}`);
+        console.log(`   • Already reviewed: ${hasAtaReview}`);
+        console.log(`   • Expected pending count: ${eligibleForATA}`);
+      }
+      console.log('🔍 === END DIAGNOSTIC ===\n');
       
       // Combine all audits but avoid duplicates
       const auditMap = new Map();
