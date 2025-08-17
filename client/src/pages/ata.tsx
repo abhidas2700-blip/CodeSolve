@@ -236,15 +236,20 @@ export default function Ata() {
           console.log('Processing AUD-20045389 - has ATA review?', !!report.ataReview);
         }
         
-        // Skip any reports that already have an ATA review
+        // Skip invalid reports or reports that already have an ATA review
+        if (!report || typeof report !== 'object') {
+          console.warn('Skipping invalid report:', report);
+          return;
+        }
+        
         if (!report.ataReview) {
           // Use auditId or id as the key
           const reportKey = report.auditId || report.id;
           if (!auditMap.has(reportKey)) {
             auditMap.set(reportKey, {
               id: reportKey,
-              agent: report.agent,
-              agentId: report.agent.replace(/\s+/g, '').toLowerCase() + Date.now(),
+              agent: report.agent || 'Unknown Agent',
+              agentId: (report.agent || 'unknown').replace(/\s+/g, '').toLowerCase() + Date.now(),
               formName: report.formName,
               score: report.score || 0,
               maxScore: 100, // Assuming a default max score
@@ -267,16 +272,16 @@ export default function Ata() {
               })(),
               auditor: report.auditor || 'Unknown Auditor',
               timestamp: report.timestamp,
-              sectionAnswers: report.answers ? report.answers.map((section: any) => ({
-                sectionName: section.section,
-                answers: section.questions.map((q: any) => ({
+              sectionAnswers: (report.answers && Array.isArray(report.answers)) ? report.answers.map((section: any) => ({
+                sectionName: section.section || 'Unknown Section',
+                answers: (section.questions && Array.isArray(section.questions)) ? section.questions.map((q: any) => ({
                   questionId: q.questionId || `q_${Math.random().toString(36).substring(2, 8)}`,
-                  text: q.text,
-                  answer: q.answer,
-                  remarks: q.remarks,
-                  options: q.options,
-                  isFatal: q.isFatal
-                }))
+                  text: q.text || 'Unknown Question',
+                  answer: q.answer || '',
+                  remarks: q.remarks || '',
+                  options: q.options || [],
+                  isFatal: q.isFatal || false
+                })) : []
               })) : [],
               status: 'completed'
             });
