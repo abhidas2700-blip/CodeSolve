@@ -1049,10 +1049,18 @@ exports.handler = async (event, context) => {
         console.log('Fetching audit reports from database...');
         const result = await pool.query('SELECT * FROM audit_reports WHERE deleted = false ORDER BY timestamp DESC');
         console.log('Audit reports result:', result.rows.length, 'rows found');
+        
+        // Process the data to handle JSON serialization safely
+        const processedRows = result.rows.map(row => ({
+          ...row,
+          section_answers: typeof row.section_answers === 'string' ? 
+            JSON.parse(row.section_answers) : row.section_answers
+        }));
+        
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify(result.rows)
+          body: JSON.stringify(processedRows)
         };
       } catch (error) {
         console.error('Reports GET error:', error);
@@ -1078,10 +1086,18 @@ exports.handler = async (event, context) => {
         console.log('Fetching available samples from database (/samples endpoint)...');
         const result = await pool.query('SELECT * FROM audit_samples ORDER BY uploaded_at DESC');
         console.log('Available samples result (/samples):', result.rows.length, 'rows found');
+        
+        // Process the data to handle JSON serialization safely
+        const processedRows = result.rows.map(row => ({
+          ...row,
+          metadata: typeof row.metadata === 'string' ? 
+            JSON.parse(row.metadata) : row.metadata
+        }));
+        
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify(result.rows)
+          body: JSON.stringify(processedRows)
         };
       } catch (error) {
         console.error('Samples GET error:', error);
@@ -1107,10 +1123,18 @@ exports.handler = async (event, context) => {
         console.log('Fetching audit reports from database (alt endpoint)...');
         const result = await pool.query('SELECT * FROM audit_reports WHERE deleted = false ORDER BY timestamp DESC');
         console.log('Audit reports (alt) result:', result.rows.length, 'rows found');
+        
+        // Process the data to handle JSON serialization safely
+        const processedRows = result.rows.map(row => ({
+          ...row,
+          section_answers: typeof row.section_answers === 'string' ? 
+            JSON.parse(row.section_answers) : row.section_answers
+        }));
+        
         return {
           statusCode: 200,
           headers: corsHeaders,
-          body: JSON.stringify(result.rows)
+          body: JSON.stringify(processedRows)
         };
       } catch (error) {
         console.error('Audit reports GET error:', error);
