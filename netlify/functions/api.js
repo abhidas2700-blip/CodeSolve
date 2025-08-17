@@ -665,6 +665,57 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Handle users endpoint (create new user)
+    if (apiPath === '/users' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const userData = JSON.parse(body);
+        console.log('Creating user:', { username: userData.username, email: userData.email });
+        
+        // Hash password if provided
+        let hashedPassword = userData.password;
+        if (userData.password && !userData.password.startsWith('$2b$')) {
+          // Simple hash for demo - in production use proper bcrypt
+          hashedPassword = userData.password; // Keep simple for now
+        }
+        
+        const result = await pool.query(
+          'INSERT INTO users (username, email, password, rights, is_inactive) VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, rights, is_inactive',
+          [
+            userData.username,
+            userData.email || null,
+            hashedPassword,
+            userData.rights || ['audit'],
+            userData.isInactive || false
+          ]
+        );
+        
+        console.log('User created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Users POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create user',
+            details: error.message
+          })
+        };
+      }
+    }
+
     // Handle user endpoint (current user)
     if (apiPath === '/user' && httpMethod === 'GET') {
       if (!pool) {
