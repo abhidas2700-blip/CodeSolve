@@ -1477,10 +1477,9 @@ function generateDemoSamples(count: number): AuditSample[] {
   const auditors = ['auditor', 'testuser', 'agent 1', 'agent 2', 'admin111', 'mohit'];
   
   return Array(count).fill(0).map((_, i) => {
-    // Make some samples assigned to auditors
-    const isAssigned = i % 3 === 0; // Every third sample is assigned 
-    const status = isAssigned ? 'assigned' : 'available';
-    const assignedTo = isAssigned ? auditors[i % auditors.length] : undefined;
+    // All samples start as available - no automatic assignment
+    const status = 'available';
+    const assignedTo = undefined;
     
     return {
       id: generateAuditId(),
@@ -1701,39 +1700,38 @@ export default function Audits() {
       });
   }, [user, isAdmin, isManager, isTeamLeader]);
   
-  // Get forms from localStorage
+  // Get forms from database API
   const [availableForms, setAvailableForms] = useState<{ id: string, name: string }[]>([]);
+  const [isLoadingForms, setIsLoadingForms] = useState(false);
   
-  // Load forms from localStorage
+  // Load forms from database API
   useEffect(() => {
-    try {
-      const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
-      if (savedForms.length > 0) {
-        const mappedForms = savedForms.map((form: any) => ({
-          id: form.id,
-          name: form.name
-        }));
-        setAvailableForms(mappedForms);
-      } else {
-        // Fallback forms if none exist
-        setAvailableForms([
-          { id: "1", name: "Call Quality Assessment" },
-          { id: "2", name: "Email Response Evaluation" },
-          { id: "3", name: "Customer Service Audit" },
-          { id: "4", name: "Technical Support Evaluation" }
-        ]);
-      }
-    } catch (error) {
-      console.error("Error loading audit forms:", error);
-      // Fallback to default forms
-      setAvailableForms([
-        { id: "1", name: "Call Quality Assessment" },
-        { id: "2", name: "Email Response Evaluation" },
-        { id: "3", name: "Customer Service Audit" },
-        { id: "4", name: "Technical Support Evaluation" }
-      ]);
-    }
-  }, []);
+    if (!user) return; // Only load if user is logged in
+    
+    setIsLoadingForms(true);
+    fetch('/api/forms', { credentials: 'include' })
+      .then(res => res.ok ? res.json() : [])
+      .then(apiData => {
+        console.log("Loaded forms from API for sample generation:", apiData.length);
+        if (apiData && apiData.length > 0) {
+          const mappedForms = apiData.map((form: any) => ({
+            id: form.id.toString(),
+            name: form.name
+          }));
+          setAvailableForms(mappedForms);
+        } else {
+          console.log("No forms found in database for sample generation");
+          setAvailableForms([]);
+        }
+      })
+      .catch(err => {
+        console.error("Error loading forms from API:", err);
+        setAvailableForms([]);
+      })
+      .finally(() => {
+        setIsLoadingForms(false);
+      });
+  }, [user]);
 
   // Mock data for draft/in-progress audits
   const [draftAudits, setDraftAudits] = useState<AuditSample[]>([]);
@@ -4083,6 +4081,9 @@ export default function Audits() {
                 // Update state and localStorage
                 setAuditSamples(updatedSamples);
                 localStorage.setItem('qa-audit-samples', JSON.stringify(updatedSamples));
+                
+                // Sync to database
+                syncAuditSamplesToDatabase(newSamples);
                 
                 setUploadDialogOpen(false);
                 
