@@ -3016,17 +3016,17 @@ export default function Audits() {
       // CRITICAL FIX: Save audit report to database
       try {
         const reportForDatabase = {
-          auditId: completedAudit.id,
-          formName: completedAudit.formName,
-          agent: completedAudit.agent,
-          agentId: completedAudit.agentId,
+          auditId: auditInProgress.id || auditInProgress.sampleId,
+          formName: auditInProgress.formType || auditInProgress.formName,
+          agent: auditInProgress.customerName || auditInProgress.agent,
+          agentId: auditInProgress.ticketId || auditInProgress.agentId,
           auditor: user?.id ? Number(user.id) : undefined,
           auditorName: user?.username || 'Unknown',
-          sectionAnswers: completedAudit.sectionAnswers,
-          score: completedAudit.score,
-          maxScore: completedAudit.maxScore,
-          hasFatal: completedAudit.hasFatal,
-          status: completedAudit.status
+          sectionAnswers: completedAudit.sectionAnswers || {},
+          score: completedAudit.score || 0,
+          maxScore: completedAudit.maxScore || 100,
+          hasFatal: completedAudit.hasFatal || false,
+          status: 'completed'
         };
         
         console.log('Saving audit report to database:', reportForDatabase);
