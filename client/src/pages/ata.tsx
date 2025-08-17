@@ -267,22 +267,29 @@ export default function Ata() {
           // Use auditId or id as the key
           const reportKey = report.auditId || report.id;
           if (!auditMap.has(reportKey)) {
-            console.log(`✅ Adding report to ATA map:`, reportKey, `(agent: ${report.agent})`);
+            console.log(`✅ Adding report to ATA map:`, reportKey, `(agent: ${report.agent || 'Unknown'})`);
             
-            // Create a simplified audit object that won't cause data structure issues
-            auditMap.set(reportKey, {
-              id: reportKey,
-              agent: report.agent || 'Unknown Agent',
-              agentId: (report.agent || 'unknown').replace(/\s+/g, '').toLowerCase() + Date.now(),
-              formName: report.formName || 'Unknown Form',
-              score: report.score || 0,
-              maxScore: report.maxScore || 100,
-              hasFatal: report.hasFatal || false,
-              auditor: report.auditor || 'Unknown Auditor',
-              timestamp: report.timestamp || new Date().toISOString(),
-              sectionAnswers: [], // Simplified - empty for now to avoid data structure issues
-              status: 'completed'
-            });
+            // Create a safe audit object 
+            try {
+              const safeAuditObject = {
+                id: reportKey,
+                agent: report.agent || 'Unknown Agent',
+                agentId: String(report.agent || 'unknown').replace(/\s+/g, '').toLowerCase() + Date.now(),
+                formName: report.formName || 'Unknown Form',
+                score: Number(report.score) || 0,
+                maxScore: Number(report.maxScore) || 100,
+                hasFatal: Boolean(report.hasFatal) || false,
+                auditor: report.auditor || 'Unknown Auditor',
+                timestamp: report.timestamp || new Date().toISOString(),
+                sectionAnswers: [], // Empty to avoid data issues
+                status: 'completed'
+              };
+              
+              auditMap.set(reportKey, safeAuditObject);
+              console.log(`✅ Successfully added report to map:`, reportKey);
+            } catch (addError) {
+              console.error(`❌ Error adding report ${reportKey} to map:`, addError);
+            }
           } else {
             console.log(`⚠️ Report already in map, skipping:`, reportKey);
           }
@@ -342,85 +349,21 @@ export default function Ata() {
         }
         console.log('Audit:', audit.id, 'Status:', audit.status || 'unknown');
         
-        // Process section answers to ensure question text is available
-        const processedSectionAnswers = (audit.sectionAnswers || []).map((section: any) => {
-          // Skip invalid sections
-          if (!section || !section.answers || !Array.isArray(section.answers)) {
-            console.warn('Skipping invalid section in audit:', audit.id, section);
-            return { sectionName: section?.sectionName || 'Unknown Section', answers: [] };
-          }
-          
-          // Try to find the matching form section to get question texts
-          const form = formMap.get(audit.formName);
-          
-          return {
-            sectionName: section.sectionName || 'Unknown Section',
-            answers: section.answers.map((answer: any) => {
-              // Skip invalid answers
-              if (!answer || typeof answer !== 'object') {
-                console.warn('Skipping invalid answer in audit:', audit.id, answer);
-                return { questionId: 'invalid', text: 'Invalid Answer', answer: '', remarks: '' };
-              }
-              // If the answer already has text, keep it
-              if (answer.text) {
-                return answer;
-              }
-              
-              // Otherwise try to find question text from the form
-              // Start with a more descriptive text in case we can't find the actual question
-              let questionText = answer.questionId;
-              
-              // Try to find proper question text instead of using the ID
-              const forms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
-              let questionFound = false;
+        // Simplified section processing - avoid complex data structures
+        const processedSectionAnswers = Array.isArray(audit.sectionAnswers) ? 
+          audit.sectionAnswers.map((section: any) => ({
+            sectionName: section?.sectionName || 'Unknown Section',
+            answers: Array.isArray(section?.answers) ? section.answers.map((answer: any) => ({
+              questionId: answer?.questionId || 'unknown',
+              text: answer?.text || answer?.questionId || 'Question',
+              answer: answer?.answer || '',
+              remarks: answer?.remarks || '',
+              options: Array.isArray(answer?.options) ? answer.options : [],
+              isFatal: Boolean(answer?.isFatal)
+            })) : []
+          })) : [];
+        
 
-              for (const form of forms) {
-                for (const section of form.sections || []) {
-                  for (const question of section.questions || []) {
-                    if (question.id === questionText) {
-                      questionText = question.text;
-                      questionFound = true;
-                      break;
-                    }
-                  }
-                  if (questionFound) break;
-                }
-                if (questionFound) break;
-              }
-              
-              // Only transform IDs if we couldn't find the actual question text
-              if (!questionFound) {
-                if (questionText.startsWith('question_')) {
-                  // Format: question_xyz123
-                  questionText = `${questionText.substring(9)}`;
-                } else if (questionText.includes('_') && questionText.length > 2) {
-                  // Format: q_xyz123 or other prefixed formats
-                  questionText = `${questionText.substring(questionText.indexOf('_') + 1)}`;
-                } else if (/^[a-z0-9]{5,}$/i.test(questionText)) {
-                  // Format: mznm4 or other short alphanumeric codes
-                  questionText = `${questionText}`;
-                }
-              }
-              
-              if (form) {
-                // Try to find matching section and question in the form
-                const formSection = form.sections?.find((s: any) => s.name === section.sectionName);
-                if (formSection) {
-                  const formQuestion = formSection.questions?.find((q: any) => q.id === answer.questionId);
-                  if (formQuestion) {
-                    questionText = formQuestion.text;
-                  }
-                }
-              }
-              
-              // Return the answer with added text
-              return {
-                ...answer,
-                text: questionText
-              };
-            })
-          };
-        });
         
         const reportObj: AuditReport = {
           id: audit.id || 'unknown',
