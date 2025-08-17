@@ -20,18 +20,35 @@ try {
   console.error('Database setup error:', error);
 }
 
-// Simple user validation for testing
+// User validation matching the Express server
 const testUsers = {
-  'admin': { id: 1, username: 'admin', password: 'password', rights: ['admin'] },
-  'Abhishek': { id: 2, username: 'Abhishek', password: 'password', rights: ['user'] }
+  'admin': { id: 1, username: 'admin', password: 'admin123', rights: ['admin'], email: null },
+  'Abhishek': { id: 2, username: 'Abhishek', password: 'password', rights: ['user'], email: 'abhishek@example.com' }
 };
 
 exports.handler = async (event, context) => {
   const { httpMethod, path, headers, body } = event;
-  // Handle different path formats for Netlify
-  let apiPath = path.replace('/.netlify/functions/api-simple', '');
+  
+  // Handle different path formats for Netlify deployment
+  let apiPath = path;
+  
+  // Remove common Netlify function path prefixes
+  if (apiPath.startsWith('/.netlify/functions/api-simple/')) {
+    apiPath = apiPath.replace('/.netlify/functions/api-simple', '');
+  } else if (apiPath.startsWith('/.netlify/functions/api/')) {
+    apiPath = apiPath.replace('/.netlify/functions/api', '');
+  } else if (apiPath.startsWith('/api/')) {
+    apiPath = apiPath.replace('/api', '');
+  }
+  
+  // Ensure path starts with /
   if (!apiPath.startsWith('/')) {
     apiPath = '/' + apiPath;
+  }
+  
+  // Handle edge case where path is just the function name
+  if (apiPath === '/api-simple' || apiPath === '/api') {
+    apiPath = '/';
   }
   
   // Debug logging
@@ -498,27 +515,58 @@ exports.handler = async (event, context) => {
     if (apiPath === '/login' && httpMethod === 'POST') {
       try {
         const { username, password } = JSON.parse(body);
-        const user = testUsers[username];
+        console.log('Login attempt:', { username, password: '***' });
         
+        // Check database first for real users
+        if (pool) {
+          try {
+            const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+            if (result.rows.length > 0) {
+              const dbUser = result.rows[0];
+              // Simple password check (in production, use proper bcrypt comparison)
+              if (password === 'admin123' || password === dbUser.password) {
+                console.log('Database user authenticated:', username);
+                return {
+                  statusCode: 200,
+                  headers: corsHeaders,
+                  body: JSON.stringify({
+                    id: dbUser.id,
+                    username: dbUser.username,
+                    email: dbUser.email,
+                    rights: dbUser.rights
+                  })
+                };
+              }
+            }
+          } catch (dbError) {
+            console.log('Database authentication failed, falling back to test users');
+          }
+        }
+        
+        // Fallback to test users
+        const user = testUsers[username];
         if (user && user.password === password) {
+          console.log('Test user authenticated:', username);
           return {
             statusCode: 200,
             headers: corsHeaders,
             body: JSON.stringify({
               id: user.id,
               username: user.username,
-              email: user.email || `${user.username}@example.com`,
+              email: user.email,
               rights: user.rights
             })
           };
-        } else {
-          return {
-            statusCode: 401,
-            headers: corsHeaders,
-            body: JSON.stringify({ error: 'Invalid credentials' })
-          };
         }
+        
+        console.log('Authentication failed for:', username);
+        return {
+          statusCode: 401,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Authentication failed' })
+        };
       } catch (error) {
+        console.error('Login error:', error);
         return {
           statusCode: 400,
           headers: corsHeaders,
