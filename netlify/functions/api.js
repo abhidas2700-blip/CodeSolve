@@ -604,8 +604,38 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Handle user endpoint (both /user and /users for compatibility)
-    if ((apiPath === '/user' || apiPath === '/users') && httpMethod === 'GET') {
+    // Handle users endpoint (list all users)
+    if (apiPath === '/users' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM users ORDER BY id');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Users GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Database query failed',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle user endpoint (current user)
+    if (apiPath === '/user' && httpMethod === 'GET') {
       if (!pool) {
         // Fallback to test users if database unavailable
         return {
