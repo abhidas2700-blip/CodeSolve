@@ -1044,7 +1044,7 @@ exports.handler = async (event, context) => {
       }
       
       try {
-        const result = await pool.query('SELECT * FROM audit_reports ORDER BY created_at DESC');
+        const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
         return {
           statusCode: 200,
           headers: corsHeaders,
@@ -1056,6 +1056,468 @@ exports.handler = async (event, context) => {
           statusCode: 500,
           headers: corsHeaders,
           body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle /audit-reports endpoint
+    if (apiPath === '/audit-reports' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM audit_reports ORDER BY timestamp DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Audit reports GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle audit reports creation (POST)
+    if (apiPath === '/audit-reports' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reportData = JSON.parse(body);
+        console.log('Creating audit report:', reportData.auditId);
+        
+        const result = await pool.query(
+          'INSERT INTO audit_reports (audit_id, form_name, agent, agent_id, auditor_name, section_answers, score, max_score, has_fatal, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+          [
+            reportData.auditId,
+            reportData.formName,
+            reportData.agent,
+            reportData.agentId,
+            reportData.auditorName,
+            JSON.stringify(reportData.sectionAnswers || {}),
+            reportData.score || 0,
+            reportData.maxScore || 0,
+            reportData.hasFatal || false,
+            reportData.status || 'completed'
+          ]
+        );
+        
+        console.log('Audit report created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Audit reports POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create audit report',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle reports creation (POST) - alias
+    if (apiPath === '/reports' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reportData = JSON.parse(body);
+        console.log('Creating report:', reportData.auditId);
+        
+        const result = await pool.query(
+          'INSERT INTO audit_reports (audit_id, form_name, agent, agent_id, auditor_name, section_answers, score, max_score, has_fatal, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+          [
+            reportData.auditId,
+            reportData.formName,
+            reportData.agent,
+            reportData.agentId,
+            reportData.auditorName,
+            JSON.stringify(reportData.sectionAnswers || {}),
+            reportData.score || 0,
+            reportData.maxScore || 0,
+            reportData.hasFatal || false,
+            reportData.status || 'completed'
+          ]
+        );
+        
+        console.log('Report created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Reports POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create report',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle ATA reviews endpoint
+    if (apiPath === '/ata-reviews' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM ata_reviews ORDER BY timestamp DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('ATA reviews GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle ATA reviews creation (POST)
+    if (apiPath === '/ata-reviews' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reviewData = JSON.parse(body);
+        console.log('Creating ATA review:', reviewData);
+        
+        const result = await pool.query(
+          'INSERT INTO ata_reviews (audit_report_id, reviewer_id, review_data, master_score, master_max_score, ata_notes) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+          [
+            reviewData.auditReportId,
+            reviewData.reviewerId || null,
+            JSON.stringify(reviewData.reviewData || {}),
+            reviewData.masterScore || 0,
+            reviewData.masterMaxScore || 0,
+            reviewData.ataNotes || ''
+          ]
+        );
+        
+        console.log('ATA review created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('ATA reviews POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create ATA review',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle skipped samples endpoint
+    if (apiPath === '/skipped-samples' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM skipped_samples ORDER BY timestamp DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Skipped samples GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle skipped samples creation (POST)
+    if (apiPath === '/skipped-samples' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const sampleData = JSON.parse(body);
+        console.log('Creating skipped sample:', sampleData);
+        
+        const result = await pool.query(
+          'INSERT INTO skipped_samples (agent, agent_id, auditor_name, reason, form_name) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [
+            sampleData.agent,
+            sampleData.agentId,
+            sampleData.auditorName,
+            sampleData.reason,
+            sampleData.formName
+          ]
+        );
+        
+        console.log('Skipped sample created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Skipped samples POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create skipped sample',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle skipped samples deletion
+    if (apiPath.match(/^\/skipped-samples\/\d+$/) && httpMethod === 'DELETE') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const sampleId = parseInt(apiPath.split('/')[2]);
+        console.log('Deleting skipped sample:', sampleId);
+        
+        const result = await pool.query('DELETE FROM skipped_samples WHERE id = $1 RETURNING id', [sampleId]);
+        
+        if (result.rows.length === 0) {
+          return {
+            statusCode: 404,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Skipped sample not found' })
+          };
+        }
+        
+        console.log('Skipped sample deleted successfully:', sampleId);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify({ message: 'Skipped sample deleted successfully' })
+        };
+      } catch (error) {
+        console.error('Skipped samples DELETE error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to delete skipped sample',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle deleted audits endpoint
+    if (apiPath === '/deleted-audits' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM deleted_audits ORDER BY deleted_at DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Deleted audits GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle deleted audits creation (POST)
+    if (apiPath === '/deleted-audits' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const deletedData = JSON.parse(body);
+        console.log('Creating deleted audit record:', deletedData);
+        
+        const result = await pool.query(
+          'INSERT INTO deleted_audits (original_id, audit_id, form_name, agent, agent_id, auditor_name, section_answers, score, max_score, has_fatal, timestamp, deleted_by_name, edit_history) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
+          [
+            deletedData.originalId || deletedData.auditId,
+            deletedData.auditId,
+            deletedData.formName,
+            deletedData.agent,
+            deletedData.agentId,
+            deletedData.auditorName,
+            JSON.stringify(deletedData.sectionAnswers || {}),
+            deletedData.score || 0,
+            deletedData.maxScore || 0,
+            deletedData.hasFatal || false,
+            deletedData.timestamp || new Date().toISOString(),
+            deletedData.deletedByName || 'Unknown User',
+            JSON.stringify(deletedData.editHistory || {})
+          ]
+        );
+        
+        console.log('Deleted audit record created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Deleted audits POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create deleted audit record',
+            details: error.message
+          })
+        };
+      }
+    }
+
+    // Handle available samples endpoint
+    if (apiPath === '/samples' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM audit_samples ORDER BY timestamp DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Samples GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    // Handle available samples creation (POST)
+    if (apiPath === '/samples' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const sampleData = JSON.parse(body);
+        console.log('Creating sample:', sampleData);
+        
+        const result = await pool.query(
+          'INSERT INTO audit_samples (agent, agent_id, form_name, priority, team, lob) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+          [
+            sampleData.agent,
+            sampleData.agentId,
+            sampleData.formName,
+            sampleData.priority || 'normal',
+            sampleData.team || null,
+            sampleData.lob || null
+          ]
+        );
+        
+        console.log('Sample created successfully:', result.rows[0]);
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Samples POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ 
+            error: 'Failed to create sample',
+            details: error.message
+          })
         };
       }
     }
