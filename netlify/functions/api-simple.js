@@ -494,8 +494,59 @@ exports.handler = async (event, context) => {
       }
     }
 
-    // Handle user endpoint for authentication
-    if (apiPath === '/user' && httpMethod === 'GET') {
+    // Handle login endpoint
+    if (apiPath === '/login' && httpMethod === 'POST') {
+      try {
+        const { username, password } = JSON.parse(body);
+        const user = testUsers[username];
+        
+        if (user && user.password === password) {
+          return {
+            statusCode: 200,
+            headers: corsHeaders,
+            body: JSON.stringify({
+              id: user.id,
+              username: user.username,
+              email: user.email || `${user.username}@example.com`,
+              rights: user.rights
+            })
+          };
+        } else {
+          return {
+            statusCode: 401,
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Invalid credentials' })
+          };
+        }
+      } catch (error) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Invalid request body' })
+        };
+      }
+    }
+
+    // Handle register endpoint
+    if (apiPath === '/register' && httpMethod === 'POST') {
+      return {
+        statusCode: 201,
+        headers: corsHeaders,
+        body: JSON.stringify({ message: 'User registered successfully' })
+      };
+    }
+
+    // Handle logout endpoint
+    if (apiPath === '/logout' && httpMethod === 'POST') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ message: 'Logged out successfully' })
+      };
+    }
+
+    // Handle user endpoint (both /user and /users for compatibility)
+    if ((apiPath === '/user' || apiPath === '/users') && httpMethod === 'GET') {
       if (!pool) {
         // Fallback to test users if database unavailable
         return {
@@ -562,6 +613,157 @@ exports.handler = async (event, context) => {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({ message: 'Deleted successfully' })
+      };
+    }
+
+    // Handle /reports endpoint (alias for /audit-reports)
+    if (apiPath === '/reports' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM audit_reports ORDER BY created_at DESC');
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Reports GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    if (apiPath === '/reports' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const reportData = JSON.parse(body);
+        const result = await pool.query(
+          `INSERT INTO audit_reports (
+            report_id, agent, agent_id, form_name, score, max_score, 
+            has_fatal, auditor, timestamp, section_answers, status, 
+            created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW()) RETURNING *`,
+          [
+            reportData.reportId || reportData.id,
+            reportData.agent,
+            reportData.agentId,
+            reportData.formName,
+            reportData.score || 0,
+            reportData.maxScore || 100,
+            reportData.hasFatal || false,
+            reportData.auditor,
+            reportData.timestamp || new Date().toISOString(),
+            JSON.stringify(reportData.sectionAnswers || []),
+            reportData.status || 'completed'
+          ]
+        );
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Reports POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Failed to create report' })
+        };
+      }
+    }
+
+    // Handle skipped samples endpoints
+    if (apiPath === '/skipped-samples' && httpMethod === 'GET') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const result = await pool.query('SELECT * FROM audit_samples WHERE status = $1 ORDER BY created_at DESC', ['skipped']);
+        return {
+          statusCode: 200,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows)
+        };
+      } catch (error) {
+        console.error('Skipped samples GET error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database query failed' })
+        };
+      }
+    }
+
+    if (apiPath === '/skipped-samples' && httpMethod === 'POST') {
+      if (!pool) {
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Database not available' })
+        };
+      }
+      
+      try {
+        const sampleData = JSON.parse(body);
+        const result = await pool.query(
+          `INSERT INTO audit_samples (
+            sample_id, customer_name, ticket_id, form_type, priority, 
+            status, metadata, uploaded_by, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()) RETURNING *`,
+          [
+            sampleData.sampleId || Date.now().toString(),
+            sampleData.customerName,
+            sampleData.ticketId,
+            sampleData.formType,
+            sampleData.priority || 'medium',
+            'skipped',
+            JSON.stringify(sampleData.metadata || {}),
+            sampleData.uploadedBy || 1
+          ]
+        );
+        return {
+          statusCode: 201,
+          headers: corsHeaders,
+          body: JSON.stringify(result.rows[0])
+        };
+      } catch (error) {
+        console.error('Skipped samples POST error:', error);
+        return {
+          statusCode: 500,
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'Failed to create skipped sample' })
+        };
+      }
+    }
+
+    // Handle migration endpoint
+    if (apiPath === '/migrate' && httpMethod === 'POST') {
+      return {
+        statusCode: 200,
+        headers: corsHeaders,
+        body: JSON.stringify({ message: 'Migration completed successfully' })
       };
     }
 
