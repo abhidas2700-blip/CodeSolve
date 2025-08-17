@@ -928,8 +928,8 @@ export default function Forms() {
     setFormSections(updatedSections);
   };
 
-  // Save the current form to localStorage
-  const saveForm = () => {
+  // Save the current form to database
+  const saveForm = async () => {
     if (!formName.trim()) {
       alert("Please enter a form name");
       return;
@@ -949,39 +949,87 @@ export default function Forms() {
       if (!confirm) return;
     }
     
-    // Create or update form
-    const timestamp = new Date().toISOString();
-    const formToSave: AuditForm = currentFormId 
-      ? {
-          ...savedForms.find(f => f.id === currentFormId)!,
-          name: formName,
-          sections: formSections,
-          lastModified: timestamp,
-          lastModifiedBy: user?.username || 'Unknown'
-        }
-      : {
-          id: generateId('form'),
-          name: formName,
-          sections: formSections,
-          createdAt: timestamp,
-          createdBy: user?.username || 'Unknown'
-        };
-    
-    // Update savedForms state
-    const updatedForms = currentFormId
-      ? savedForms.map(form => form.id === currentFormId ? formToSave : form)
-      : [...savedForms, formToSave];
-    
-    setSavedForms(updatedForms);
-    localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
-    
-    // Dispatch event to notify other components that the form has been updated
-    // This triggers the real-time update in the audit page
-    console.log(`Dispatching form update event for "${formName}"`);
-    dispatchFormUpdate(formName);
-    
-    setCurrentFormId(formToSave.id);
-    alert(`Form "${formName}" saved successfully!`);
+    try {
+      // Create form data for API
+      const formData = {
+        name: formName,
+        sections: { sections: formSections }, // Wrap sections in object to match database structure
+        createdBy: user?.id || 1
+      };
+      
+      let response;
+      if (currentFormId && !currentFormId.startsWith('form_')) {
+        // Update existing form in database
+        response = await fetch(`/api/forms/${currentFormId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData)
+        });
+      } else {
+        // Create new form in database
+        response = await fetch('/api/forms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData)
+        });
+      }
+      
+      if (response.ok) {
+        const savedForm = await response.json();
+        
+        // Update local state with the saved form
+        setCurrentFormId(savedForm.id.toString());
+        
+        // Refresh the forms list from database
+        await loadSavedForms();
+        
+        // Dispatch event to notify other components that the form has been updated
+        console.log(`Dispatching form update event for "${formName}"`);
+        dispatchFormUpdate(formName);
+        
+        alert(`Form "${formName}" saved successfully to database!`);
+      } else {
+        throw new Error(`Failed to save form: ${response.status}`);
+      }
+      
+    } catch (error) {
+      console.error('Error saving form to database:', error);
+      
+      // Fallback to localStorage save
+      const timestamp = new Date().toISOString();
+      const formToSave: AuditForm = currentFormId 
+        ? {
+            ...savedForms.find(f => f.id === currentFormId)!,
+            name: formName,
+            sections: formSections,
+            lastModified: timestamp,
+            lastModifiedBy: user?.username || 'Unknown'
+          }
+        : {
+            id: generateId('form'),
+            name: formName,
+            sections: formSections,
+            createdAt: timestamp,
+            createdBy: user?.username || 'Unknown'
+          };
+      
+      // Update savedForms state
+      const updatedForms = currentFormId
+        ? savedForms.map(form => form.id === currentFormId ? formToSave : form)
+        : [...savedForms, formToSave];
+      
+      setSavedForms(updatedForms);
+      localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
+      
+      setCurrentFormId(formToSave.id);
+      alert(`Database save failed, but form "${formName}" saved locally. Error: ${error}`);
+    }
   };
 
   // Load a form for editing
@@ -1003,7 +1051,7 @@ export default function Forms() {
   };
 
   // Duplicate an existing form
-  const duplicateForm = (formId: string) => {
+  const duplicateForm = async (formId: string) => {
     const form = savedForms.find(f => f.id === formId);
     if (form) {
       // Don't allow duplicating problematic forms
@@ -1012,24 +1060,64 @@ export default function Forms() {
         alert("This form type has been blacklisted due to known issues and cannot be duplicated.");
         return;
       }
-      const timestamp = new Date().toISOString();
-      const newForm: AuditForm = {
-        ...form,
-        id: generateId('form'),
-        name: `${form.name} (Copy)`,
-        createdAt: timestamp,
-        createdBy: user?.username || 'Unknown'
-      };
       
-      const updatedForms = [...savedForms, newForm];
-      setSavedForms(updatedForms);
-      localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
-      
-      // Dispatch event to notify other components that a new form was added
-      console.log(`Dispatching form update event for new form: ${newForm.name}`);
-      dispatchFormUpdate('*');
-      
-      alert(`Duplicated form: ${form.name}`);
+      try {
+        // Create form data for API
+        const sections = Array.isArray(form.sections) ? form.sections : form.sections?.sections || [];
+        const formData = {
+          name: `${form.name} (Copy)`,
+          sections: { sections: sections }, // Wrap sections in object to match database structure
+          createdBy: user?.id || 1
+        };
+        
+        // Create new form in database
+        const response = await fetch('/api/forms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          const duplicatedForm = await response.json();
+          
+          // Refresh the forms list from database
+          await loadSavedForms();
+          
+          // Dispatch event to notify other components that a new form was added
+          console.log(`Dispatching form update event for new form: ${duplicatedForm.name}`);
+          dispatchFormUpdate('*');
+          
+          alert(`Duplicated form: ${form.name}`);
+        } else {
+          throw new Error(`Failed to duplicate form: ${response.status}`);
+        }
+        
+      } catch (error) {
+        console.error('Error duplicating form in database:', error);
+        
+        // Fallback to localStorage duplication
+        const timestamp = new Date().toISOString();
+        const newForm: AuditForm = {
+          ...form,
+          id: generateId('form'),
+          name: `${form.name} (Copy)`,
+          createdAt: timestamp,
+          createdBy: user?.username || 'Unknown'
+        };
+        
+        const updatedForms = [...savedForms, newForm];
+        setSavedForms(updatedForms);
+        localStorage.setItem('qa-audit-forms', JSON.stringify(updatedForms));
+        
+        // Dispatch event to notify other components that a new form was added
+        console.log(`Dispatching form update event for new form: ${newForm.name}`);
+        dispatchFormUpdate('*');
+        
+        alert(`Database duplication failed, but created local copy: ${form.name}. Error: ${error}`);
+      }
     }
   };
 
