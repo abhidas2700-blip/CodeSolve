@@ -17,7 +17,9 @@ The backend is a Node.js Express application with TypeScript, designed for serve
 ### Database Design
 PostgreSQL is the primary database, managed with Drizzle ORM. The schema includes tables for users, audit forms, reports, ATA reviews, deleted audits, and audit samples, designed with relationships, soft deletes, and timestamping. JSON fields support complex data structures.
 
-**Recent Update (Aug 17, 2025)**: Successfully migrated Forms component from localStorage-only storage to full database integration. All form operations (create, read, update, delete, duplicate) now persist to PostgreSQL database with automatic UI refresh.
+**Recent Updates (Aug 17, 2025)**: 
+- Successfully migrated Forms component from localStorage-only storage to full database integration. All form operations (create, read, update, delete, duplicate) now persist to PostgreSQL database with automatic UI refresh.
+- CRITICAL FIX: Fixed audit reports not being saved to database after auditor completion. Updated AuditFormRenderer to load forms from database API and added database API call in completeAudit function to save audit reports to PostgreSQL. All audit data now properly persists to database.
 
 ### Real-time Communication
 WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.

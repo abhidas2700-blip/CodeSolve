@@ -2680,7 +2680,7 @@ export default function Audits() {
   };
 
   // Complete an audit with proper data capturing
-  const completeAudit = () => {
+  const completeAudit = async () => {
     if (!auditInProgress) return;
     
     try {
@@ -2728,8 +2728,23 @@ export default function Audits() {
       console.log("Checking required fields in form:", auditInProgress.formType);
       console.log("Current answers:", answers);
       
-      // Get saved forms first, so we can use it throughout
-      const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
+      // Load forms from database API instead of localStorage
+      let savedForms: AuditForm[] = [];
+      try {
+        const response = await fetch('/api/forms');
+        if (response.ok) {
+          const dbForms = await response.json();
+          savedForms = dbForms.map((f: any) => {
+            // Handle database form structure
+            if (f.sections && f.sections.sections) {
+              return { ...f, sections: f.sections.sections };
+            }
+            return f;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading forms from database:', error);
+      }
       
       if (!formDef) {
         console.error("Form definition not found in global state");
@@ -2997,6 +3012,44 @@ export default function Audits() {
       const reports = JSON.parse(localStorage.getItem('qa-reports') || '[]');
       reports.push(newReport);
       localStorage.setItem('qa-reports', JSON.stringify(reports));
+      
+      // CRITICAL FIX: Save audit report to database
+      try {
+        const reportForDatabase = {
+          auditId: completedAudit.id,
+          formName: completedAudit.formName,
+          agent: completedAudit.agent,
+          agentId: completedAudit.agentId,
+          auditorName: user?.username || 'Unknown',
+          sectionAnswers: completedAudit.sectionAnswers,
+          score: completedAudit.score,
+          maxScore: completedAudit.maxScore,
+          hasFatal: completedAudit.hasFatal,
+          status: completedAudit.status
+        };
+        
+        console.log('Saving audit report to database:', reportForDatabase);
+        
+        const reportResponse = await fetch('/api/reports', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(reportForDatabase)
+        });
+        
+        if (reportResponse.ok) {
+          const savedReport = await reportResponse.json();
+          console.log('✅ Audit report saved to database successfully:', savedReport.id);
+        } else {
+          console.error('Failed to save audit report to database:', reportResponse.status);
+          // Still continue with completion, but log the error
+        }
+      } catch (error) {
+        console.error('Error saving audit report to database:', error);
+        // Still continue with completion
+      }
       
       // Use alert instead of toast, include timestamp and details
       const timestamp = new Date().toLocaleString();
