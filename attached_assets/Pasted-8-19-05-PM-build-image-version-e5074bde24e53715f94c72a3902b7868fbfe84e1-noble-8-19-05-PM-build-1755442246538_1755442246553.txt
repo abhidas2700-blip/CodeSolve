@@ -1,0 +1,172 @@
+8:19:05 PM: build-image version: e5074bde24e53715f94c72a3902b7868fbfe84e1 (noble)
+8:19:05 PM: buildbot version: e2595138a7c5ab9f292ccfa2932733582fe0dc65
+8:19:05 PM: Fetching cached dependencies
+8:19:05 PM: Failed to fetch cache, continuing with build
+8:19:05 PM: Starting to prepare the repo for build
+8:19:05 PM: No cached dependencies found. Cloning fresh repo
+8:19:05 PM: git clone --filter=blob:none https://github.com/abhidas2700-blip/CodeSolve
+8:19:05 PM: Preparing Git Reference refs/heads/main
+8:19:06 PM: Custom publish path detected. Proceeding with the specified path: 'dist'
+8:19:06 PM: Custom functions path detected. Proceeding with the specified path: 'netlify/functions'
+8:19:06 PM: Custom build command detected. Proceeding with the specified command: 'npm install && npm run build'
+8:19:07 PM: Starting to install dependencies
+8:19:07 PM: Downloading and installing node v18.20.8...
+8:19:08 PM: Downloading https://nodejs.org/dist/v18.20.8/node-v18.20.8-linux-x64.tar.xz...
+8:19:08 PM: Computing checksum with sha256sum
+8:19:08 PM: Checksums matched!
+8:19:10 PM: Now using node v18.20.8 (npm v10.8.2)
+8:19:10 PM: Enabling Node.js Corepack
+8:19:10 PM: Started restoring cached build plugins
+8:19:10 PM: Finished restoring cached build plugins
+8:19:10 PM: Started restoring cached corepack dependencies
+8:19:10 PM: Finished restoring cached corepack dependencies
+8:19:10 PM: No npm workspaces detected
+8:19:10 PM: Started restoring cached node modules
+8:19:10 PM: Finished restoring cached node modules
+8:19:10 PM: Installing npm packages using npm version 10.8.2
+8:19:12 PM: npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+8:19:12 PM: npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+8:19:13 PM: npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+8:19:13 PM: npm warn deprecated gauge@4.0.4: This package is no longer supported.
+8:19:13 PM: npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+8:19:14 PM: npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+8:19:14 PM: npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+8:19:14 PM: npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+8:19:14 PM: npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+8:19:14 PM: npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+8:19:14 PM: npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+8:19:20 PM: added 678 packages in 10s
+8:19:20 PM: 86 packages are looking for funding
+8:19:20 PM:   run `npm fund` for details
+8:19:20 PM: npm packages installed
+8:19:21 PM: Successfully installed dependencies
+8:19:21 PM: Starting build script
+8:19:21 PM: Detected 1 framework(s)
+8:19:21 PM: "vite" at version "5.4.14"
+8:19:21 PM: Section completed: initializing
+8:19:23 PM: ​
+8:19:23 PM: Netlify Build                                                 
+8:19:23 PM: ────────────────────────────────────────────────────────────────
+8:19:23 PM: ​
+8:19:23 PM: ❯ Version
+8:19:23 PM:   @netlify/build 35.1.0
+8:19:23 PM: ​
+8:19:23 PM: ❯ Flags
+8:19:23 PM:   accountId: 68a1eb9fe31cceead58d909f
+8:19:23 PM:   baseRelDir: true
+8:19:23 PM:   buildId: 68a1ebd33087edebbb1c7f63
+8:19:23 PM:   deployId: 68a1ebd33087edebbb1c7f65
+8:19:23 PM: ​
+8:19:23 PM: ❯ Current directory
+8:19:23 PM:   /opt/build/repo
+8:19:23 PM: ​
+8:19:23 PM: ❯ Config file
+8:19:23 PM:   /opt/build/repo/netlify.toml
+8:19:23 PM: ​
+8:19:23 PM: ❯ Context
+8:19:23 PM:   production
+8:19:23 PM: ​
+8:19:23 PM: build.command from netlify.toml                               
+8:19:23 PM: ────────────────────────────────────────────────────────────────
+8:19:23 PM: ​
+8:19:23 PM: $ npm install && npm run build
+8:19:25 PM: up to date, audited 679 packages in 2s
+8:19:25 PM: 86 packages are looking for funding
+8:19:25 PM:   run `npm fund` for details
+8:19:25 PM: 15 vulnerabilities (6 low, 7 moderate, 2 high)
+8:19:25 PM: To address issues that do not require attention, run:
+8:19:25 PM:   npm audit fix
+8:19:25 PM: To address all issues possible (including breaking changes), run:
+8:19:25 PM:   npm audit fix --force
+8:19:25 PM: Some issues need review, and may require choosing
+8:19:25 PM: a different dependency.
+8:19:25 PM: Run `npm audit` for details.
+8:19:25 PM: > rest-express@1.0.0 build
+8:19:25 PM: > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+8:19:26 PM: vite v5.4.14 building for production...
+8:19:26 PM: transforming...
+8:19:26 PM: Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+8:19:26 PM:   npx update-browserslist-db@latest
+8:19:26 PM:   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+8:19:30 PM: ✓ 2588 modules transformed.
+8:19:31 PM: [plugin:vite:reporter] [plugin vite:reporter]
+8:19:31 PM: (!) /opt/build/repo/node_modules/xlsx/xlsx.mjs is dynamically imported by /opt/build/repo/client/src/pages/audits.tsx but also statically imported by /opt/build/repo/client/src/components/audit/ata-reports-tab.tsx, dynamic import will not move module into another chunk.
+8:19:31 PM: 
+8:19:31 PM: rendering chunks...
+8:19:31 PM: computing gzip size...
+8:19:31 PM: ../dist/public/index.html                     0.95 kB │ gzip:   0.52 kB
+8:19:31 PM: ../dist/public/assets/index-CnAIbq48.css     79.53 kB │ gzip:  13.64 kB
+8:19:31 PM: ../dist/public/assets/index-BcoMiGOK.js   1,252.13 kB │ gzip: 369.85 kB
+8:19:31 PM: 
+8:19:31 PM: (!) Some chunks are larger than 500 kB after minification. Consider:
+8:19:31 PM: - Using dynamic import() to code-split the application
+8:19:31 PM: - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+8:19:31 PM: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+8:19:31 PM: ✓ built in 4.97s
+8:19:31 PM:   dist/index.js  72.6kb
+8:19:31 PM: ⚡ Done in 8ms
+8:19:31 PM: ​
+8:19:31 PM: (build.command completed in 7.8s)
+8:19:31 PM: ​
+8:19:31 PM: Functions bundling                                            
+8:19:31 PM: ────────────────────────────────────────────────────────────────
+8:19:31 PM: ​
+8:19:31 PM: Packaging Functions from netlify/functions directory:
+8:19:31 PM:  - api.js
+8:19:31 PM:  - db-config.js
+8:19:31 PM:  - websocket.js
+8:19:31 PM: ​
+8:19:31 PM: ​
+8:19:31 PM: (Functions bundling completed in 661ms)
+8:19:31 PM: ​
+8:19:31 PM: Deploy site                                                   
+8:19:31 PM: ────────────────────────────────────────────────────────────────
+8:19:31 PM: ​
+8:19:31 PM: Starting to deploy site from 'dist'
+8:19:31 PM: Calculating files to upload
+8:19:32 PM: 4 new file(s) to upload
+8:19:32 PM: 3 new function(s) to upload
+8:19:38 PM: Starting post processing
+8:19:38 PM: Section completed: deploying
+8:19:38 PM: Site deploy was successfully initiated
+8:19:38 PM: ​
+8:19:38 PM: (Deploy site completed in 6.7s)
+8:19:38 PM: ​
+8:19:38 PM: Netlify Build Complete                                        
+8:19:38 PM: ────────────────────────────────────────────────────────────────
+8:19:38 PM: ​
+8:19:38 PM: (Netlify Build completed in 15.5s)
+8:19:39 PM: Caching artifacts
+8:19:39 PM: Started saving node modules
+8:19:39 PM: Finished saving node modules
+8:19:39 PM: Started saving build plugins
+8:19:39 PM: Finished saving build plugins
+8:19:39 PM: Started saving bun cache
+8:19:39 PM: Finished saving bun cache
+8:19:39 PM: Started saving go cache
+8:19:40 PM: Finished saving go cache
+8:19:40 PM: Started saving python cache
+8:19:40 PM: Finished saving python cache
+8:19:40 PM: Started saving ruby cache
+8:19:43 PM: Finished saving ruby cache
+8:19:43 PM: Started saving corepack cache
+8:19:43 PM: Finished saving corepack cache
+8:19:43 PM: Started saving emacs cask dependencies
+8:19:43 PM: Finished saving emacs cask dependencies
+8:19:43 PM: Started saving maven dependencies
+8:19:43 PM: Finished saving maven dependencies
+8:19:43 PM: Started saving boot dependencies
+8:19:43 PM: Finished saving boot dependencies
+8:19:43 PM: Started saving rust rustup cache
+8:19:43 PM: Finished saving rust rustup cache
+8:19:44 PM: Build script success
+8:19:44 PM: Section completed: building
+8:19:38 PM: Skipping form detection
+8:19:38 PM: Post processing - header rules
+8:19:38 PM: Post processing - redirect rules
+8:19:38 PM: Post processing done
+8:19:38 PM: Section completed: postprocessing
+8:19:39 PM: Site is live ✨
+8:19:49 PM: Uploading Cache of size 325.2MB
+8:19:50 PM: Section completed: cleanup
+8:19:51 PM: Finished processing build request in 45.945s

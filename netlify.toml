@@ -1,8 +1,8 @@
 # Minimal Netlify configuration for ThorEye Audit System
 
 [build]
-  command = "npm install && npm run build"
-  publish = "dist"
+  command = "npm install && npm run build && cp _redirects dist/public/_redirects"
+  publish = "dist/public"
   functions = "netlify/functions"
 
 # Redirects

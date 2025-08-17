@@ -23,6 +23,7 @@ PostgreSQL is the primary database, managed with Drizzle ORM. The schema include
 - FINAL FIX: Resolved deleted audits database integration - updated markReportAsDeleted to save deleted audits via /api/deleted-audits API with proper async handling and field mapping.
 - VALIDATION FIX: Fixed sectionAnswers data structure conversion from array to object format for database schema compliance, resolving 400 validation errors.
 - DATABASE INTEGRATION COMPLETE: All core functionality (forms, audit reports, deleted audits, samples, ATA reviews) now fully integrated with PostgreSQL database with real-time synchronization. System ready for production deployment.
+- NETLIFY DEPLOYMENT FIX: Fixed 404 routing errors by configuring proper SPA redirects. Added _redirects file to dist/public/ directory and updated netlify.toml with correct publish directory (dist/public/) and build commands. All routes now properly handled for serverless deployment.
 
 ### Real-time Communication
 WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.
