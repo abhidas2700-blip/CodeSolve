@@ -3,31 +3,49 @@
  * Direct import approach for better compatibility
  */
 
-const { Pool, neonConfig } = require('@neondatabase/serverless');
-
-// Force HTTP fetch mode for Netlify (no WebSocket)
-neonConfig.fetchConnectionCache = true;
-neonConfig.useSecureWebSocket = false;
-neonConfig.pipelineConnect = false;
-neonConfig.webSocketConstructor = undefined; // Force HTTP fetch
-
-console.log('Neon configured for HTTP fetch mode (Netlify serverless)');
-
-// Database pool setup for Neon with HTTP fetch only
+// Alternative approach: Use neon() function for serverless
 let pool;
 try {
+  // Try using the neon() function which is better for serverless
+  const { neon } = require('@neondatabase/serverless');
   const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-  pool = new Pool({
-    connectionString: DATABASE_URL,
-    ssl: { rejectUnauthorized: false },
-    max: 1, // Limit for serverless
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
-  });
-  console.log('Neon database pool initialized with URL:', DATABASE_URL.replace(/\/\/.*@/, '//***@'));
+  
+  // Use neon() function instead of Pool for better Netlify compatibility
+  const sql = neon(DATABASE_URL);
+  console.log('Neon database initialized with function API (serverless compatible)');
+  
+  // Create a pool-like wrapper for compatibility
+  pool = {
+    query: async (text, params) => {
+      try {
+        const result = await sql(text, params || []);
+        return { rows: result };
+      } catch (error) {
+        console.error('Query error:', error);
+        throw error;
+      }
+    }
+  };
 } catch (error) {
   console.error('Database setup error:', error);
-  pool = null;
+  
+  // Fallback to Pool with forced HTTP fetch
+  try {
+    const { Pool, neonConfig } = require('@neondatabase/serverless');
+    neonConfig.webSocketConstructor = undefined; // Force HTTP fetch
+    neonConfig.fetchConnectionCache = true;
+    
+    const DATABASE_URL = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+    pool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 1,
+    });
+    console.log('Fallback to Pool with HTTP fetch');
+  } catch (fallbackError) {
+    console.error('Fallback database setup error:', fallbackError);
+    pool = null;
+  }
 }
 
 // User validation matching the Express server

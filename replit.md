@@ -25,7 +25,7 @@ PostgreSQL is the primary database, managed with Drizzle ORM. The schema include
 - DATABASE INTEGRATION COMPLETE: All core functionality (forms, audit reports, deleted audits, samples, ATA reviews) now fully integrated with PostgreSQL database with real-time synchronization. System ready for production deployment.
 - NETLIFY DEPLOYMENT FIX: Fixed 404 routing errors by configuring proper SPA redirects. Added _redirects file to dist/public/ directory and updated netlify.toml with correct publish directory (dist/public/) and build commands. All routes now properly handled for serverless deployment.
 - NEON DATABASE CONNECTION ESTABLISHED: Successfully connected Netlify deployment to real Neon PostgreSQL database. DATABASE_URL environment variable properly configured in Netlify dashboard. Database connection confirmed working with debug endpoint returning {"hasPool":true,"hasEnvVar":true,"envVarLength":153}.
-- PENDING: Function code deployment - updated netlify/functions/api.js with proper users endpoint (returns array) and enhanced error handling, but deployment not yet reflected. Requires manual deployment trigger to show real database data in Users management page.
+- NETLIFY SERVERLESS ISSUE: WebSocket connection failing on Netlify despite proper DATABASE_URL configuration. Updated function to use neon() serverless function instead of Pool for better Netlify compatibility. Local database works perfectly, Netlify deployment requires neon() function API for serverless environments.
 
 ### Real-time Communication
 WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.
