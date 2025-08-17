@@ -2197,7 +2197,7 @@ export default function ReportsPage() {
   };
 
   // Handle report deletion with improved reliable confirmation
-  const handleDeleteReport = (report: AuditReport) => {
+  const handleDeleteReport = async (report: AuditReport) => {
     // Only users with elevated access can delete reports
     if (!hasElevatedAccess) {
       toast({
@@ -2241,7 +2241,7 @@ export default function ReportsPage() {
       });
       
       // AFTER updating UI, actually perform the deletion in storage
-      if (markReportAsDeleted(report, user?.username || 'Admin')) {
+      if (await markReportAsDeleted(report, user?.username || 'Admin')) {
         toast({
           title: "Report Deleted",
           description: "Report has been permanently removed from active reports and moved to deleted tab",

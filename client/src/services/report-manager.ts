@@ -39,7 +39,7 @@ export function getAllDeletedReportIds(): Set<string> {
 }
 
 // Add a report to the deleted reports tracking
-export function markReportAsDeleted(report: any, deletedBy: string): boolean {
+export async function markReportAsDeleted(report: any, deletedBy: string): Promise<boolean> {
   try {
     if (!report || !report.id) {
       console.error('Cannot delete invalid report');
@@ -87,7 +87,46 @@ export function markReportAsDeleted(report: any, deletedBy: string): boolean {
     // 5. Clean up any related records in other collections
     cleanupRelatedReports(reportId, auditId);
     
-    // 6. Dispatch event to notify all components of the change
+    // 6. Save to database via API
+    try {
+      const dbPayload = {
+        originalId: report.id,
+        auditId: report.auditId || report.id,
+        formName: report.formName || 'Unknown Form',
+        agent: report.agent || 'Unknown',
+        agentId: report.agentId || report.ticketId || 'Unknown',
+        auditor: report.auditor,
+        auditorName: report.auditorName || 'Unknown',
+        sectionAnswers: report.sectionAnswers || {},
+        score: report.score || 0,
+        maxScore: report.maxScore || 100,
+        hasFatal: report.hasFatal || false,
+        timestamp: report.timestamp || new Date(),
+        deletedByName: deletedBy
+      };
+      
+      console.log('Saving deleted audit to database:', dbPayload);
+      
+      const response = await fetch('/api/deleted-audits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(dbPayload)
+      });
+      
+      if (response.ok) {
+        console.log('✅ Deleted audit saved to database successfully');
+      } else {
+        console.error('Failed to save deleted audit to database:', response.status);
+      }
+    } catch (error) {
+      console.error('Error saving deleted audit to database:', error);
+      // Don't fail the deletion if database save fails
+    }
+
+    // 7. Dispatch event to notify all components of the change
     window.dispatchEvent(new CustomEvent('reportsUpdated'));
     
     return true;
