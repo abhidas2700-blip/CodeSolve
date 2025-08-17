@@ -28,7 +28,11 @@ const testUsers = {
 
 exports.handler = async (event, context) => {
   const { httpMethod, path, headers, body } = event;
-  const apiPath = path.replace('/.netlify/functions/api-simple', '');
+  // Handle different path formats for Netlify
+  let apiPath = path.replace('/.netlify/functions/api-simple', '');
+  if (!apiPath.startsWith('/')) {
+    apiPath = '/' + apiPath;
+  }
   
   // Debug logging
   console.log('Netlify Function Called:', {
@@ -555,11 +559,27 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Catch-all diagnostic endpoint
+    console.log('Unmatched endpoint:', {
+      path: apiPath,
+      method: httpMethod,
+      allEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits', '/health', '/database/status']
+    });
+
     // Default response
     return {
       statusCode: 404,
       headers: corsHeaders,
-      body: JSON.stringify({ error: 'Endpoint not found', path: apiPath, method: httpMethod })
+      body: JSON.stringify({ 
+        error: 'Endpoint not found', 
+        path: apiPath, 
+        method: httpMethod,
+        availableEndpoints: ['/login', '/user', '/forms', '/audit-reports', '/audit-samples', '/ata-reviews', '/deleted-audits'],
+        debug: {
+          originalPath: path,
+          cleanedPath: apiPath
+        }
+      })
     };
 
   } catch (error) {
