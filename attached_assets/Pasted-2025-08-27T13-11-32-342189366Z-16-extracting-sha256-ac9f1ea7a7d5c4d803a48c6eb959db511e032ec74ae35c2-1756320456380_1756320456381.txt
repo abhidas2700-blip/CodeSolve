@@ -1,0 +1,60 @@
+2025-08-27T13:11:32.342189366Z #16 extracting sha256:ac9f1ea7a7d5c4d803a48c6eb959db511e032ec74ae35c207ef9968001a6d74c 0.0s done
+2025-08-27T13:11:32.342193976Z #16 CACHED
+2025-08-27T13:11:32.535514893Z 
+2025-08-27T13:11:32.535556254Z #17 exporting to docker image format
+2025-08-27T13:11:32.535562764Z #17 exporting layers done
+2025-08-27T13:11:32.535568134Z #17 exporting manifest sha256:c7b52986f203792d1b8e4e88bb264d956a5b3ba78e9404d9527e5ddc177a384f 0.0s done
+2025-08-27T13:11:32.535572804Z #17 exporting config sha256:a1aabb6d5163703cb3f8642d78c2431b447de75c647f7edc32ca0bf49bbf6db5 0.0s done
+2025-08-27T13:11:34.557540305Z #17 DONE 2.2s
+2025-08-27T13:11:34.708279422Z 
+2025-08-27T13:11:34.708298922Z #18 exporting cache to client directory
+2025-08-27T13:11:34.708302393Z #18 preparing build cache for export
+2025-08-27T13:11:36.612451083Z #18 writing cache manifest sha256:27170bfe900465189ffa6a6ca3d0c9d4b9f949c61749a9fd01b38886bf45fd7e 0.0s done
+2025-08-27T13:11:36.612468143Z #18 DONE 2.0s
+2025-08-27T13:11:37.280170879Z Pushing image to registry...
+2025-08-27T13:11:37.962378119Z Upload succeeded
+2025-08-27T13:11:39.690106011Z ==> Deploying...
+2025-08-27T13:11:54.808463139Z Warning: connect.session() MemoryStore is not
+2025-08-27T13:11:54.808473169Z designed for a production environment, as it will leak
+2025-08-27T13:11:54.80847612Z memory, and will not scale past a single process.
+2025-08-27T13:11:55.360347908Z 1:11:54 PM [express] serving on 0.0.0.0:10000
+2025-08-27T13:12:00.735620468Z ==> Your service is live 🎉
+2025-08-27T13:12:00.770806615Z ==> 
+2025-08-27T13:12:00.805442193Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T13:12:00.833247701Z ==> 
+2025-08-27T13:12:00.866064599Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T13:12:00.899294386Z ==> 
+2025-08-27T13:12:00.929416595Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T13:13:05.591576409Z 1:13:05 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-27T13:13:11.619352881Z 1:13:11 PM [express] POST /api/login 200 in 1408ms :: {"user":{"id":1,"username":"admin"}}
+2025-08-27T13:13:19.634607442Z 1:13:19 PM [express] GET /api/user 200 in 1ms :: {"id":1,"username":"admin"}
+2025-08-27T13:14:08.085379282Z 1:14:08 PM [express] GET /api/user 304 in 2ms :: {"id":1,"username":"admin"}
+2025-08-27T13:14:14.274677691Z 1:14:14 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin"}
+2025-08-27T13:14:26.136711742Z 1:14:26 PM [express] POST /api/logout 200 in 2ms :: {"success":true}
+2025-08-27T13:14:26.226010117Z 1:14:26 PM [express] POST /api/logout 200 in 1ms :: {"success":true}
+2025-08-27T13:14:30.538896134Z 1:14:30 PM [express] POST /api/login 401 in 163ms :: {"error":"Invalid username or password"}
+2025-08-27T13:14:31.612482228Z 1:14:31 PM [express] POST /api/login 401 in 163ms :: {"error":"Invalid username or password"}
+2025-08-27T13:15:05.599590204Z 1:15:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:16:06.905502261Z 1:16:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:17:03.58412859Z ==> Detected service running on port 10000
+2025-08-27T13:17:03.727436407Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-08-27T13:17:06.443643392Z 1:17:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:18:06.459318724Z 1:18:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:19:06.534814729Z 1:19:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:20:19.972850713Z 1:20:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:21:19.456729071Z 1:21:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:22:19.571864369Z 1:22:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:23:20.169450552Z 1:23:20 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:24:20.061090577Z 1:24:20 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:25:19.526727594Z 1:25:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:26:20.081723202Z 1:26:20 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T13:26:32.343878564Z Received SIGTERM, shutting down...
+2025-08-27T13:26:32.350878838Z Server exited with code null
+2025-08-27T13:26:32.343878564Z Received SIGTERM, shutting down...
+2025-08-27T13:26:32.350878838Z Server exited with code null
+2025-08-27T13:26:32.343878564Z Received SIGTERM, shutting down...
+2025-08-27T13:26:32.350878838Z Server exited with code null
+2025-08-27T13:26:32.343878564Z Received SIGTERM, shutting down...
+2025-08-27T13:26:32.350878838Z Server exited with code null
+2025-08-27T13:26:32.343878564Z Received SIGTERM, shutting down...
+2025-08-27T13:26:32.350878838Z Server exited with code null
