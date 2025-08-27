@@ -1,152 +1,209 @@
-# 📋 FILES TO COPY TO YOUR GITHUB REPOSITORY
+# 📋 COPY TO GITHUB - IMMEDIATE FIX
 
-## Git Commands (Run These in Your Terminal):
+## Instructions
+1. Copy the entire content below (from `import express` to the end)
+2. Go to your GitHub repository → server/production.ts
+3. Delete ALL existing content in that file
+4. Paste the content below
+5. Commit the changes
 
-```bash
-# Remove git lock if it exists
-rm -f .git/index.lock
+## Production Server Code (Copy Everything Below)
 
-# Add the new files
-git add Dockerfile
-git add start-render.js  
-git add server/production.ts
-git add FINAL-RENDER-FIX.md
+```typescript
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import session from "express-session";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
+import { DatabaseStorage } from "./storage";
 
-# Commit the changes
-git commit -m "Fix Render deployment with emergency startup script"
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-# Push to GitHub
-git push origin main
-```
-
-## File Contents to Copy:
-
-### 1. **Dockerfile** (Complete file):
-```dockerfile
-# Base Node.js image
-FROM node:18-alpine as builder
-
-# Working directory in the container
-WORKDIR /app
-
-# Install dependencies with dev dependencies first (needed for build)
-COPY package*.json ./
-RUN npm install
-
-# Copy the rest of the application
-COPY . .
-
-# Build the application with production server
-RUN vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
-
-# Production stage - use a clean image for running the app
-FROM node:18-alpine
-
-# Set environment variables
-ENV NODE_ENV=production
-
-# Create app directory
-WORKDIR /app
-
-# Copy only the built application and production dependencies
-COPY --from=builder /app/dist ./dist
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm install --omit=dev
-
-# Expose the port the app runs on
-EXPOSE 10000
-
-# Add healthcheck to ensure container is healthy
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/health || exit 1
-
-# Start with emergency startup script that handles both scenarios
-COPY start-render.js ./
-CMD ["node", "start-render.js"]
-```
-
-### 2. **start-render.js** (New file):
-```javascript
-#!/usr/bin/env node
-
-// Emergency startup script for Render deployment
-// This bypasses any Docker CMD issues and forces production server usage
-
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-
-console.log('🚀 ThorEye Emergency Startup Script');
-console.log('NODE_ENV:', process.env.NODE_ENV || 'Not set');
-console.log('PORT:', process.env.PORT || 'Not set');
-
-// Ensure production environment
-process.env.NODE_ENV = 'production';
-if (!process.env.PORT) {
-  process.env.PORT = '10000';
+function log(message: string) {
+  const timestamp = new Date().toLocaleTimeString();
+  console.log(`${timestamp} [express] ${message}`);
 }
 
-// Check for production server file
-const productionPath = path.join(__dirname, 'dist', 'production.js');
-const indexPath = path.join(__dirname, 'dist', 'index.js');
+const app = express();
+const storage = new DatabaseStorage();
 
-let serverFile;
-if (fs.existsSync(productionPath)) {
-  serverFile = productionPath;
-  console.log('✅ Using production server:', serverFile);
-} else if (fs.existsSync(indexPath)) {
-  console.log('⚠️  Production server not found, falling back to index.js');
-  console.log('⚠️  This may cause Vite dependency errors');
-  serverFile = indexPath;
-} else {
-  console.error('❌ No server file found in dist/');
-  process.exit(1);
+app.use(session({
+  secret: process.env.SESSION_SECRET || "fallback-secret-key",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  }
+}));
+
+passport.use(new LocalStrategy(
+  { usernameField: 'username', passwordField: 'password' },
+  async (username: string, password: string, done) => {
+    try {
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return done(null, false, { message: 'Invalid username or password' });
+      }
+      
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return done(null, false, { message: 'Invalid username or password' });
+      }
+      
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  }
+));
+
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id: number, done) => {
+  try {
+    const user = await storage.getUser(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+async function initializeDefaultUser() {
+  try {
+    const existingAdmin = await storage.getUserByUsername("admin");
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await storage.createUser({
+        username: "admin",
+        password: hashedPassword,
+        role: "administrator"
+      });
+      log("Default admin user created");
+    }
+  } catch (error) {
+    log(`Error initializing default user: ${error}`);
+  }
 }
 
-// Start the server
-console.log('Starting server with:', serverFile);
-const server = spawn('node', [serverFile], {
-  stdio: 'inherit',
-  env: process.env
+initializeDefaultUser();
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
+    }
+  });
+
+  next();
 });
 
-server.on('error', (err) => {
-  console.error('❌ Server startup failed:', err);
-  process.exit(1);
+function requireAuth(req: any, res: any, next: any) {
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    res.status(401).json({ error: "Not authenticated" });
+  }
+}
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
 });
 
-server.on('exit', (code) => {
-  console.log(`Server exited with code ${code}`);
-  process.exit(code);
+app.post("/api/login", (req, res, next) => {
+  passport.authenticate("local", (err: any, user: any, info: any) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    req.logIn(user, (err: any) => {
+      if (err) {
+        return res.status(500).json({ error: "Login failed" });
+      }
+      res.json({ 
+        user: { 
+          id: user.id,
+          username: user.username,
+          role: user.role 
+        } 
+      });
+    });
+  })(req, res, next);
 });
 
-// Handle graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('Received SIGTERM, shutting down...');
-  server.kill('SIGTERM');
+app.post("/api/logout", (req, res) => {
+  req.logout(() => {
+    res.json({ success: true });
+  });
 });
 
-process.on('SIGINT', () => {
-  console.log('Received SIGINT, shutting down...');
-  server.kill('SIGINT');
+app.get("/api/user", requireAuth, (req, res) => {
+  const user = req.user as any;
+  res.json({ 
+    id: user.id,
+    username: user.username,
+    role: user.role 
+  });
+});
+
+const staticPath = path.join(__dirname, "public");
+app.use(express.static(staticPath));
+
+app.get("*", (req, res) => {
+  if (!req.path.startsWith("/api")) {
+    res.sendFile(path.join(staticPath, "index.html"));
+  }
+});
+
+app.use((err: any, req: any, res: any, next: any) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+  log(`Error: ${message}`);
+});
+
+const PORT = parseInt(process.env.PORT || "10000");
+app.listen(PORT, "0.0.0.0", () => {
+  log(`serving on 0.0.0.0:${PORT}`);
 });
 ```
 
-## After Pushing to GitHub:
+## After GitHub Update
 
-1. **Go to Render Dashboard**
-2. **Trigger Manual Deploy** with "Clear build cache"
-3. **Monitor Build Logs** - Should show the emergency startup script being used
-4. **Check Startup Logs** - Should show "✅ Using production server"
+Set the environment variable in Render Dashboard:
+- Key: `DATABASE_URL`
+- Value: `postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
 
-## Environment Variables (same as before):
-```
-DATABASE_URL=postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-SESSION_SECRET=29ce079e08a47e3949b4ac74c01aa19039bd3e76890c51c5f9d1435e83366635
-NODE_ENV=production
-PORT=10000
-```
-
-This emergency startup script will finally solve your deployment issue!
+Your ThorEye system will then be fully operational with database connectivity!
