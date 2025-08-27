@@ -1,0 +1,76 @@
+2025-08-27T10:32:59.031478986Z #14 10.83 
+2025-08-27T10:32:59.031481156Z #14 10.83 Run `npm audit` for details.
+2025-08-27T10:32:59.031483966Z #14 10.83 npm notice
+2025-08-27T10:32:59.031486546Z #14 10.83 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T10:32:59.031488946Z #14 10.83 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T10:32:59.031491266Z #14 10.83 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T10:32:59.031493656Z #14 10.83 npm notice
+2025-08-27T10:32:59.884689903Z #14 DONE 11.7s
+2025-08-27T10:32:59.884704963Z 
+2025-08-27T10:32:59.884709583Z #15 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-27T10:33:00.336183558Z #15 DONE 0.4s
+2025-08-27T10:33:00.336203178Z 
+2025-08-27T10:33:00.336209168Z #16 exporting to docker image format
+2025-08-27T10:33:00.336213808Z #16 exporting layers
+2025-08-27T10:33:14.162413034Z #16 exporting layers 13.8s done
+2025-08-27T10:33:14.162430005Z #16 exporting manifest sha256:d14f70b43ad156079507925c2a8f672b409e2f2b8e3373a54bbb66a1babe668d 0.0s done
+2025-08-27T10:33:14.162434455Z #16 exporting config sha256:0b1efaee2d397701913a80ac87146b424b2eb46c9019df19310be9f183a24e50 done
+2025-08-27T10:33:16.378496778Z #16 DONE 16.1s
+2025-08-27T10:33:16.378516719Z 
+2025-08-27T10:33:16.378520969Z #17 exporting cache to client directory
+2025-08-27T10:33:16.378524039Z #17 preparing build cache for export
+2025-08-27T10:33:40.651350332Z #17 writing cache manifest sha256:7cf12b5ca815bc7a0ba67a6d4fde018fe63c51794e9babd0d524666afb0b2228 done
+2025-08-27T10:33:40.651369622Z #17 DONE 24.2s
+2025-08-27T10:33:45.655595769Z Pushing image to registry...
+2025-08-27T10:33:51.244577803Z Upload succeeded
+2025-08-27T10:33:53.359486757Z ==> Deploying...
+2025-08-27T10:34:03.600511394Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T10:34:03.601211953Z NODE_ENV: production
+2025-08-27T10:34:03.601229854Z PORT: 10000
+2025-08-27T10:34:03.601533012Z ✅ Using production server: /app/dist/production.js
+2025-08-27T10:34:03.601575294Z Starting server with: /app/dist/production.js
+2025-08-27T10:34:04.206436836Z node:internal/errors:496
+2025-08-27T10:34:04.206457817Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:34:04.206461017Z     ^
+2025-08-27T10:34:04.206463487Z 
+2025-08-27T10:34:04.206466317Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/production.js
+2025-08-27T10:34:04.206469487Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:34:04.206471777Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:34:04.206473957Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:34:04.206476618Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:34:04.206479118Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:34:04.206481568Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:34:04.206484078Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:34:04.206486518Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:34:04.206489038Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:34:04.206491538Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:34:04.206494118Z }
+2025-08-27T10:34:04.206496258Z 
+2025-08-27T10:34:04.206499018Z Node.js v18.20.8
+2025-08-27T10:34:04.302854896Z Server exited with code 1
+2025-08-27T10:34:08.169705842Z ==> Exited with status 1
+2025-08-27T10:34:08.186006981Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-08-27T10:34:08.529335697Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T10:34:08.530255053Z NODE_ENV: production
+2025-08-27T10:34:08.530293274Z PORT: 10000
+2025-08-27T10:34:08.530679895Z ✅ Using production server: /app/dist/production.js
+2025-08-27T10:34:08.530753107Z Starting server with: /app/dist/production.js
+2025-08-27T10:34:09.216964753Z node:internal/errors:496
+2025-08-27T10:34:09.216988244Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:34:09.216991264Z     ^
+2025-08-27T10:34:09.216993574Z 
+2025-08-27T10:34:09.216997394Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/production.js
+2025-08-27T10:34:09.217001764Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:34:09.217004255Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:34:09.217006995Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:34:09.217010555Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:34:09.217012745Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:34:09.217014385Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:34:09.217016055Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:34:09.217017905Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:34:09.217019525Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:34:09.217021165Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:34:09.217022825Z }
+2025-08-27T10:34:09.217024375Z 
+2025-08-27T10:34:09.217026055Z Node.js v18.20.8
+2025-08-27T10:34:09.222348402Z Server exited with code 1

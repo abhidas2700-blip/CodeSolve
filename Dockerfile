@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Build the application with production server
-RUN npx vite build && npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+RUN npx vite build && npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist --external:@vitejs/plugin-react
 
 # Production stage - use a clean image for running the app
 FROM node:18-alpine

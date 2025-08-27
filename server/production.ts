@@ -1,6 +1,29 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { serveStatic, log } from "./vite";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Production logging function (no Vite dependency)
+function log(message: string) {
+  const timestamp = new Date().toLocaleTimeString();
+  console.log(`${timestamp} [express] ${message}`);
+}
+
+// Production static file serving (no Vite dependency)
+function serveStatic(app: express.Application) {
+  const staticPath = path.join(__dirname, "..", "public");
+  app.use(express.static(staticPath));
+  
+  // SPA fallback for all non-API routes
+  app.get("*", (req, res) => {
+    if (!req.path.startsWith("/api")) {
+      res.sendFile(path.join(staticPath, "index.html"));
+    }
+  });
+}
 
 const app = express();
 app.use(express.json());
