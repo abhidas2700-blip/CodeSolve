@@ -39,5 +39,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Start with emergency startup script that handles both scenarios  
 COPY start-render.cjs ./
-COPY start-render.js ./
 CMD ["node", "start-render.cjs"]
