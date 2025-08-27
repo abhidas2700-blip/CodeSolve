@@ -3,9 +3,12 @@
 // Emergency startup script for Render deployment
 // This bypasses any Docker CMD issues and forces production server usage
 
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 console.log('🚀 ThorEye Emergency Startup Script');
 console.log('NODE_ENV:', process.env.NODE_ENV || 'Not set');
