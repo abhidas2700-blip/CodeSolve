@@ -1,0 +1,78 @@
+2025-08-27T10:21:19.151290132Z #14 12.97   run `npm fund` for details
+2025-08-27T10:21:19.151293782Z #14 13.04 
+2025-08-27T10:21:19.151297272Z #14 13.04 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T10:21:19.151300982Z #14 13.04 
+2025-08-27T10:21:19.151307332Z #14 13.04 To address issues that do not require attention, run:
+2025-08-27T10:21:19.151320772Z #14 13.04   npm audit fix
+2025-08-27T10:21:19.151323053Z #14 13.04 
+2025-08-27T10:21:19.151325233Z #14 13.04 Some issues need review, and may require choosing
+2025-08-27T10:21:19.151327363Z #14 13.04 a different dependency.
+2025-08-27T10:21:19.151329433Z #14 13.04 
+2025-08-27T10:21:19.151331543Z #14 13.04 Run `npm audit` for details.
+2025-08-27T10:21:19.151334503Z #14 13.04 npm notice
+2025-08-27T10:21:19.151337173Z #14 13.04 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T10:21:19.151339683Z #14 13.04 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T10:21:19.151341943Z #14 13.04 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T10:21:19.151344393Z #14 13.04 npm notice
+2025-08-27T10:21:25.625049643Z #14 DONE 19.5s
+2025-08-27T10:21:25.625077354Z 
+2025-08-27T10:21:25.625083144Z #15 [stage-1 6/6] COPY start-render.js ./
+2025-08-27T10:21:26.978305526Z #15 DONE 1.4s
+2025-08-27T10:21:26.978328227Z 
+2025-08-27T10:21:26.978337777Z #16 exporting to docker image format
+2025-08-27T10:21:26.978344757Z #16 exporting layers
+2025-08-27T10:21:46.983728219Z #16 exporting layers 20.0s done
+2025-08-27T10:21:46.98375056Z #16 exporting manifest sha256:0d31a287bd0b588e653106d1241ddc8dcb863a232358bb5f731106da8b38a923
+2025-08-27T10:21:47.095866699Z #16 exporting manifest sha256:0d31a287bd0b588e653106d1241ddc8dcb863a232358bb5f731106da8b38a923 0.2s done
+2025-08-27T10:21:47.104083671Z #16 exporting config sha256:dda02591a3434b29176f81c4bbd6a985d87b4871355b1cac786fea5ad3636084
+2025-08-27T10:21:47.396132095Z #16 exporting config sha256:dda02591a3434b29176f81c4bbd6a985d87b4871355b1cac786fea5ad3636084 0.2s done
+2025-08-27T10:21:49.428270972Z #16 DONE 22.4s
+2025-08-27T10:21:49.430451665Z 
+2025-08-27T10:21:49.430478316Z #17 exporting cache to client directory
+2025-08-27T10:21:49.430484216Z #17 preparing build cache for export
+2025-08-27T10:22:38.157175948Z #17 writing cache manifest sha256:272e382348e90b1985ef0d839f8c60f67d82ce095fc02470f99bd4e49bbd26fd 0.0s done
+2025-08-27T10:22:38.170032903Z #17 DONE 48.7s
+2025-08-27T10:23:14.007480272Z Pushing image to registry...
+2025-08-27T10:23:20.392013411Z Upload succeeded
+2025-08-27T10:23:23.676376243Z ==> Deploying...
+2025-08-27T10:23:35.157349352Z file:///app/start-render.js:6
+2025-08-27T10:23:35.157392613Z const { spawn } = require('child_process');
+2025-08-27T10:23:35.157397053Z                   ^
+2025-08-27T10:23:35.157400053Z 
+2025-08-27T10:23:35.157402873Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-08-27T10:23:35.157406703Z This file is being treated as an ES module because it has a '.js' file extension and '/app/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-08-27T10:23:35.157410803Z     at file:///app/start-render.js:6:19
+2025-08-27T10:23:35.157414173Z     at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+2025-08-27T10:23:35.157416793Z     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+2025-08-27T10:23:35.157420043Z     at async loadESM (node:internal/process/esm_loader:34:7)
+2025-08-27T10:23:35.157422803Z     at async handleMainPromise (node:internal/modules/run_main:106:12)
+2025-08-27T10:23:35.157425024Z 
+2025-08-27T10:23:35.157427753Z Node.js v18.20.8
+2025-08-27T10:23:38.937564617Z ==> Exited with status 1
+2025-08-27T10:23:38.953371835Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-08-27T10:23:39.353773989Z file:///app/start-render.js:6
+2025-08-27T10:23:39.35381718Z const { spawn } = require('child_process');
+2025-08-27T10:23:39.35382072Z                   ^
+2025-08-27T10:23:39.35382254Z 
+2025-08-27T10:23:39.35382472Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-08-27T10:23:39.353827151Z This file is being treated as an ES module because it has a '.js' file extension and '/app/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-08-27T10:23:39.353829491Z     at file:///app/start-render.js:6:19
+2025-08-27T10:23:39.353831861Z     at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+2025-08-27T10:23:39.353833981Z     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+2025-08-27T10:23:39.353836931Z     at async loadESM (node:internal/process/esm_loader:34:7)
+2025-08-27T10:23:39.353839811Z     at async handleMainPromise (node:internal/modules/run_main:106:12)
+2025-08-27T10:23:39.353842631Z 
+2025-08-27T10:23:39.353845841Z Node.js v18.20.8
+2025-08-27T10:23:39.353773989Z file:///app/start-render.js:6
+2025-08-27T10:23:39.35381718Z const { spawn } = require('child_process');
+2025-08-27T10:23:39.35382072Z                   ^
+2025-08-27T10:23:39.35382254Z 
+2025-08-27T10:23:39.35382472Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-08-27T10:23:39.353827151Z This file is being treated as an ES module because it has a '.js' file extension and '/app/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-08-27T10:23:39.353829491Z     at file:///app/start-render.js:6:19
+2025-08-27T10:23:39.353831861Z     at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+2025-08-27T10:23:39.353833981Z     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+2025-08-27T10:23:39.353836931Z     at async loadESM (node:internal/process/esm_loader:34:7)
+2025-08-27T10:23:39.353839811Z     at async handleMainPromise (node:internal/modules/run_main:106:12)
+2025-08-27T10:23:39.353842631Z 
+2025-08-27T10:23:39.353845841Z Node.js v18.20.8
