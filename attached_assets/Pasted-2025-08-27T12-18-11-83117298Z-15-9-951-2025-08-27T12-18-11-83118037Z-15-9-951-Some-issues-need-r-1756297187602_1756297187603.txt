@@ -1,0 +1,50 @@
+2025-08-27T12:18:11.83117298Z #15 9.951 
+2025-08-27T12:18:11.83118037Z #15 9.951 Some issues need review, and may require choosing
+2025-08-27T12:18:11.831188321Z #15 9.951 a different dependency.
+2025-08-27T12:18:11.831196181Z #15 9.951 
+2025-08-27T12:18:11.831203871Z #15 9.951 Run `npm audit` for details.
+2025-08-27T12:18:11.831238472Z #15 9.953 npm notice
+2025-08-27T12:18:11.831247192Z #15 9.953 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T12:18:11.831320944Z #15 9.953 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T12:18:11.831331534Z #15 9.953 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T12:18:11.831336554Z #15 9.953 npm notice
+2025-08-27T12:18:12.682662209Z #15 DONE 10.9s
+2025-08-27T12:18:12.834037701Z 
+2025-08-27T12:18:12.834058291Z #16 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-27T12:18:12.965407021Z #16 DONE 0.3s
+2025-08-27T12:18:13.115821003Z 
+2025-08-27T12:18:13.115843083Z #17 exporting to docker image format
+2025-08-27T12:18:13.115848083Z #17 exporting layers
+2025-08-27T12:18:25.954007168Z #17 exporting layers 12.9s done
+2025-08-27T12:18:25.954039148Z #17 exporting manifest sha256:a33f677d20f1fd22ca247a59fb7eb2ed1720c5cb2574930adb02bd3464686dd4 done
+2025-08-27T12:18:25.954047819Z #17 exporting config sha256:0c9df516c5d4b2a842eeb85cf67633b6e148f4834074a81c8c9cb39dfd9c3a12 done
+2025-08-27T12:18:28.066699171Z #17 DONE 15.1s
+2025-08-27T12:18:28.066717952Z 
+2025-08-27T12:18:28.066722222Z #18 exporting cache to client directory
+2025-08-27T12:18:28.066725302Z #18 preparing build cache for export
+2025-08-27T12:18:31.660340551Z #18 writing cache manifest sha256:76130de948bb2531da3fd7e8de03e7c3cec8cf1d2741f3b475deeff5ad61902b
+2025-08-27T12:18:31.806604373Z #18 writing cache manifest sha256:76130de948bb2531da3fd7e8de03e7c3cec8cf1d2741f3b475deeff5ad61902b 0.2s done
+2025-08-27T12:18:31.806624233Z #18 DONE 3.7s
+2025-08-27T12:18:33.06186335Z Pushing image to registry...
+2025-08-27T12:18:39.973725846Z Upload succeeded
+2025-08-27T12:18:43.580616522Z ==> Deploying...
+2025-08-27T12:18:55.045923445Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T12:18:55.046769296Z NODE_ENV: production
+2025-08-27T12:18:55.046785207Z PORT: 10000
+2025-08-27T12:18:55.047154356Z ✅ Using production server: /app/dist/production.js
+2025-08-27T12:18:55.047164566Z Starting server with: /app/dist/production.js
+2025-08-27T12:18:57.740149575Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T12:18:57.741639363Z Warning: connect.session() MemoryStore is not
+2025-08-27T12:18:57.741653303Z designed for a production environment, as it will leak
+2025-08-27T12:18:57.741656993Z memory, and will not scale past a single process.
+2025-08-27T12:18:57.941832664Z 12:18:57 PM [express] serving on 0.0.0.0:10000
+2025-08-27T12:19:05.116141498Z ==> Your service is live 🎉
+2025-08-27T12:19:05.152190376Z ==> 
+2025-08-27T12:19:05.184378863Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:19:05.23481232Z ==> 
+2025-08-27T12:19:05.262061958Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T12:19:05.291381466Z ==> 
+2025-08-27T12:19:05.326427244Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:19:11.942223678Z 12:19:11 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-27T12:19:19.1756508Z 12:19:19 PM [express] POST /api/login 401 in 1339ms
+2025-08-27T12:19:24.141811525Z 12:19:24 PM [express] POST /api/login 401 in 163ms

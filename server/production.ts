@@ -70,6 +70,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Initialize default admin user for production
+async function initializeDefaultUser() {
+  try {
+    const existingAdmin = await storage.getUserByUsername("admin");
+    if (!existingAdmin) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await storage.createUser({
+        username: "admin",
+        password: hashedPassword,
+        role: "administrator"
+      });
+      log("Default admin user created");
+    }
+  } catch (error) {
+    log(`Error initializing default user: ${error}`);
+  }
+}
+
+// Initialize on startup
+initializeDefaultUser();
+
 // Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
@@ -116,14 +137,27 @@ app.get("/api/health", (req, res) => {
 });
 
 // Auth routes
-app.post("/api/login", passport.authenticate("local"), (req, res) => {
-  res.json({ 
-    user: { 
-      id: (req.user as any).id,
-      username: (req.user as any).username,
-      role: (req.user as any).role 
-    } 
-  });
+app.post("/api/login", (req, res, next) => {
+  passport.authenticate("local", (err: any, user: any, info: any) => {
+    if (err) {
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    req.logIn(user, (err: any) => {
+      if (err) {
+        return res.status(500).json({ error: "Login failed" });
+      }
+      res.json({ 
+        user: { 
+          id: user.id,
+          username: user.username,
+          role: user.role 
+        } 
+      });
+    });
+  })(req, res, next);
 });
 
 app.post("/api/logout", (req, res) => {
