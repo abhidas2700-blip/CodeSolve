@@ -1,0 +1,58 @@
+2025-08-27T12:42:09.240412642Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 18.87MB / 156.85MB 0.2s
+2025-08-27T12:42:09.390737919Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 37.75MB / 156.85MB 0.3s
+2025-08-27T12:42:09.541496312Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 51.38MB / 156.85MB 0.5s
+2025-08-27T12:42:09.692506Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 65.01MB / 156.85MB 0.6s
+2025-08-27T12:42:09.842605843Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 84.93MB / 156.85MB 0.8s
+2025-08-27T12:42:09.992637383Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 103.81MB / 156.85MB 0.9s
+2025-08-27T12:42:10.142761898Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 123.73MB / 156.85MB 1.1s
+2025-08-27T12:42:10.292855671Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 142.61MB / 156.85MB 1.2s
+2025-08-27T12:42:10.442935154Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 156.85MB / 156.85MB 1.4s
+2025-08-27T12:42:13.011203351Z #16 sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 156.85MB / 156.85MB 3.8s done
+2025-08-27T12:42:13.011253674Z #16 extracting sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f
+2025-08-27T12:42:24.685245107Z #16 extracting sha256:4b3f5da01b57b9217f4c93f42dae1a45c62a5a9490c76d11e93bfd1fca1c9d2f 11.7s done
+2025-08-27T12:42:24.835426456Z #16 sha256:ac9f1ea7a7d5c4d803a48c6eb959db511e032ec74ae35c207ef9968001a6d74c 894B / 894B done
+2025-08-27T12:42:24.903423189Z #16 extracting sha256:ac9f1ea7a7d5c4d803a48c6eb959db511e032ec74ae35c207ef9968001a6d74c
+2025-08-27T12:42:24.977055117Z #16 extracting sha256:ac9f1ea7a7d5c4d803a48c6eb959db511e032ec74ae35c207ef9968001a6d74c 0.3s done
+2025-08-27T12:42:25.078598411Z #16 CACHED
+2025-08-27T12:42:25.078614252Z 
+2025-08-27T12:42:25.078618612Z #17 exporting to docker image format
+2025-08-27T12:42:25.078622762Z #17 exporting layers done
+2025-08-27T12:42:25.078626473Z #17 exporting manifest sha256:c7b52986f203792d1b8e4e88bb264d956a5b3ba78e9404d9527e5ddc177a384f 0.0s done
+2025-08-27T12:42:25.078630073Z #17 exporting config sha256:a1aabb6d5163703cb3f8642d78c2431b447de75c647f7edc32ca0bf49bbf6db5
+2025-08-27T12:42:25.228696185Z #17 exporting config sha256:a1aabb6d5163703cb3f8642d78c2431b447de75c647f7edc32ca0bf49bbf6db5 0.0s done
+2025-08-27T12:42:27.032200872Z #17 DONE 2.0s
+2025-08-27T12:42:27.032221213Z 
+2025-08-27T12:42:27.032225494Z #18 exporting cache to client directory
+2025-08-27T12:42:27.032228454Z #18 preparing build cache for export
+2025-08-27T12:42:32.24738214Z #18 writing cache manifest sha256:d10cea33b2727ef0824d2a486efcc0dccda576215a4131fddfc1835aea615e57 0.0s done
+2025-08-27T12:42:32.247401231Z #18 DONE 5.1s
+2025-08-27T12:42:33.356822906Z Pushing image to registry...
+2025-08-27T12:42:34.050444644Z Upload succeeded
+2025-08-27T12:42:38.677882735Z ==> Deploying...
+2025-08-27T12:42:50.585437153Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T12:42:50.58607022Z NODE_ENV: production
+2025-08-27T12:42:50.586093381Z PORT: 10000
+2025-08-27T12:42:50.586412249Z ✅ Using production server: /app/dist/production.js
+2025-08-27T12:42:50.58641875Z Starting server with: /app/dist/production.js
+2025-08-27T12:42:53.390457047Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T12:42:53.472882861Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T12:42:53.473043845Z Warning: connect.session() MemoryStore is not
+2025-08-27T12:42:53.473053626Z designed for a production environment, as it will leak
+2025-08-27T12:42:53.473056786Z memory, and will not scale past a single process.
+2025-08-27T12:42:54.135097927Z 12:42:53 PM [express] serving on 0.0.0.0:10000
+2025-08-27T12:42:59.499364588Z ==> Your service is live 🎉
+2025-08-27T12:42:59.526127076Z ==> 
+2025-08-27T12:42:59.549878085Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:42:59.574725283Z ==> 
+2025-08-27T12:42:59.597999621Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T12:42:59.622627879Z ==> 
+2025-08-27T12:42:59.646905788Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:43:18.365619538Z 12:43:18 PM [express] GET /api/user 401 in 3ms :: {"error":"Not authenticated"}
+2025-08-27T12:44:18.507865252Z 12:44:18 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-27T12:45:19.840133196Z 12:45:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T12:46:19.490001844Z 12:46:19 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-27T12:47:19.386757328Z 12:47:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T12:48:00.066960939Z ==> Detected service running on port 10000
+2025-08-27T12:48:00.164567473Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-08-27T12:48:19.441603332Z 12:48:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-27T12:49:19.996511051Z 12:49:19 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
