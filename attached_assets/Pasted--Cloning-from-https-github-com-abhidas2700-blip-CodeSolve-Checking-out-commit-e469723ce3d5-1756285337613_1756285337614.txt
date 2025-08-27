@@ -1,0 +1,199 @@
+==> Cloning from https://github.com/abhidas2700-blip/CodeSolve
+==> Checking out commit e469723ce3d5c82a2e492e47ec72fc1e46a58dbe in branch main
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile:
+#1 transferring dockerfile: 1.02kB done
+#1 DONE 0.9s
+#2 [internal] load metadata for docker.io/library/node:18-alpine
+#2 ...
+#3 [auth] library/node:pull render-prod/docker-mirror-repository/library/node:pull token for us-west1-docker.pkg.dev
+#3 DONE 0.0s
+#2 [internal] load metadata for docker.io/library/node:18-alpine
+#2 DONE 2.5s
+#4 [internal] load .dockerignore
+#4 transferring context: 166B done
+#4 DONE 1.3s
+#5 [internal] load build context
+#5 DONE 0.0s
+#6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#6 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#6 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.7s done
+#6 ...
+#5 [internal] load build context
+#5 transferring context: 5.02MB 0.1s done
+#5 DONE 0.6s
+#6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#6 sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 446B / 446B 0.1s done
+#6 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0B / 1.26MB 0.2s
+#6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 0B / 40.01MB 0.2s
+#6 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0B / 3.64MB 0.2s
+#6 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 1.26MB / 1.26MB 0.3s done
+#6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 7.34MB / 40.01MB 0.3s
+#6 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 3.64MB / 3.64MB 0.3s done
+#6 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870
+#6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 22.02MB / 40.01MB 0.5s
+#6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 40.01MB / 40.01MB 0.6s
+#6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 40.01MB / 40.01MB 1.9s done
+#6 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 1.8s done
+#6 DONE 3.7s
+#6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+#6 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e
+#6 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 13.8s done
+#6 extracting sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3
+#6 extracting sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0.1s done
+#6 extracting sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0.0s done
+#6 DONE 17.6s
+#7 [builder 2/6] WORKDIR /app
+#7 DONE 0.0s
+#8 [builder 3/6] COPY package*.json ./
+#8 DONE 0.0s
+#9 [builder 4/6] RUN npm install
+#9 3.393 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#9 4.034 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+#9 4.343 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#9 4.642 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+#9 4.825 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+#9 5.415 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+#9 5.577 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+#9 5.773 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+#9 6.091 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#9 6.246 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#9 6.381 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#9 13.95 
+#9 13.95 added 678 packages, and audited 679 packages in 14s
+#9 13.95 
+#9 13.95 86 packages are looking for funding
+#9 13.95   run `npm fund` for details
+#9 14.03 
+#9 14.03 15 vulnerabilities (6 low, 7 moderate, 2 high)
+#9 14.03 
+#9 14.03 To address issues that do not require attention, run:
+#9 14.03   npm audit fix
+#9 14.03 
+#9 14.03 To address all issues possible (including breaking changes), run:
+#9 14.03   npm audit fix --force
+#9 14.03 
+#9 14.03 Some issues need review, and may require choosing
+#9 14.03 a different dependency.
+#9 14.03 
+#9 14.03 Run `npm audit` for details.
+#9 14.04 npm notice
+#9 14.04 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+#9 14.04 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+#9 14.04 npm notice To update run: npm install -g npm@11.5.2
+#9 14.04 npm notice
+#9 DONE 15.5s
+#10 [builder 5/6] COPY . .
+#10 DONE 0.9s
+#11 [builder 6/6] RUN npm run build
+#11 0.232 
+#11 0.232 > rest-express@1.0.0 build
+#11 0.232 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+#11 0.232 
+#11 0.468 vite v5.4.14 building for production...
+#11 0.531 transforming...
+#11 0.842 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+#11 0.842   npx update-browserslist-db@latest
+#11 0.842   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+#11 7.985 ✓ 2588 modules transformed.
+#11 8.664 [plugin:vite:reporter] [plugin vite:reporter] 
+#11 8.664 (!) /app/node_modules/xlsx/xlsx.mjs is dynamically imported by /app/client/src/pages/audits.tsx but also statically imported by /app/client/src/components/audit/ata-reports-tab.tsx, dynamic import will not move module into another chunk.
+#11 8.664 
+#11 8.665 rendering chunks...
+#11 8.877 computing gzip size...
+#11 8.911 ../dist/public/index.html                     0.95 kB │ gzip:   0.52 kB
+#11 8.911 ../dist/public/assets/index-CnAIbq48.css     79.53 kB │ gzip:  13.64 kB
+#11 8.911 ../dist/public/assets/index-BmHCq6Rx.js   1,253.45 kB │ gzip: 370.32 kB
+#11 8.911 
+#11 8.911 (!) Some chunks are larger than 500 kB after minification. Consider:
+#11 8.911 - Using dynamic import() to code-split the application
+#11 8.911 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+#11 8.911 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+#11 8.911 ✓ built in 8.42s
+#11 9.011 
+#11 9.011   dist/index.js  73.3kb
+#11 9.011 
+#11 9.011 ⚡ Done in 15ms
+#11 DONE 14.1s
+#12 [stage-1 3/5] COPY --from=builder /app/dist ./dist
+#12 DONE 0.4s
+#13 [stage-1 4/5] COPY package*.json ./
+#13 DONE 0.1s
+#14 [stage-1 5/5] RUN npm install --omit=dev
+#14 3.136 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+#14 3.493 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+#14 3.693 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+#14 4.112 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+#14 4.208 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+#14 4.775 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+#14 5.054 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#14 5.087 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#14 5.156 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+#14 15.17 
+#14 15.17 added 591 packages, and audited 592 packages in 15s
+#14 15.17 
+#14 15.17 78 packages are looking for funding
+#14 15.17   run `npm fund` for details
+#14 15.23 
+#14 15.23 10 vulnerabilities (6 low, 2 moderate, 2 high)
+#14 15.23 
+#14 15.23 To address issues that do not require attention, run:
+#14 15.23   npm audit fix
+#14 15.23 
+#14 15.23 Some issues need review, and may require choosing
+#14 15.23 a different dependency.
+#14 15.23 
+#14 15.23 Run `npm audit` for details.
+#14 15.23 npm notice
+#14 15.23 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+#14 15.23 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+#14 15.23 npm notice To update run: npm install -g npm@11.5.2
+#14 15.23 npm notice
+#14 DONE 69.7s
+#15 exporting to docker image format
+#15 exporting layers
+#15 exporting layers 15.1s done
+#15 exporting manifest sha256:1fbc6aada6c64ed3f34b066443d4ac06019ca163945094794c64d0a0b321c9a8 done
+#15 exporting config sha256:0e401920fe88fb08d47aadb0e72cd9c28645ec0768c7c1eac930cce77cabe5c7 done
+#15 DONE 17.5s
+#16 exporting cache to client directory
+#16 preparing build cache for export
+#16 writing cache manifest sha256:15dd428dd176e27187d999635f9485c3ef8b684ac7df7525eaa881ef8c8ac95a done
+#16 DONE 23.4s
+Pushing image to registry...
+Upload succeeded
+==> Deploying...
+node:internal/errors:496
+    ErrorCaptureStackTrace(err);
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/index.js
+    at new NodeError (node:internal/errors:405:5)
+    at packageResolve (node:internal/modules/esm/resolve:916:9)
+    at moduleResolve (node:internal/modules/esm/resolve:973:20)
+    at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+    at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+    at link (node:internal/modules/esm/module_job:75:36) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+Node.js v18.20.8
+==> Exited with status 1
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+node:internal/errors:496
+    ErrorCaptureStackTrace(err);
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/index.js
+    at new NodeError (node:internal/errors:405:5)
+    at packageResolve (node:internal/modules/esm/resolve:916:9)
+    at moduleResolve (node:internal/modules/esm/resolve:973:20)
+    at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+    at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+    at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+    at link (node:internal/modules/esm/module_job:75:36) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+Node.js v18.20.8

@@ -4,8 +4,8 @@ services:
     env: node
     region: singapore
     plan: starter
-    buildCommand: npm install && npm run build
-    startCommand: NODE_ENV=production node dist/index.js
+    buildCommand: npm install && npm run build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+    startCommand: NODE_ENV=production node dist/production.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
