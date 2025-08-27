@@ -1,0 +1,59 @@
+2025-08-27T12:09:54.860052067Z #14 22.52 
+2025-08-27T12:09:54.860056587Z #14 22.52 78 packages are looking for funding
+2025-08-27T12:09:54.860060187Z #14 22.52   run `npm fund` for details
+2025-08-27T12:09:54.860063738Z #14 22.60 
+2025-08-27T12:09:54.860067268Z #14 22.60 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T12:09:54.860071198Z #14 22.60 
+2025-08-27T12:09:54.860075128Z #14 22.60 To address issues that do not require attention, run:
+2025-08-27T12:09:54.860079679Z #14 22.60   npm audit fix
+2025-08-27T12:09:54.860083939Z #14 22.60 
+2025-08-27T12:09:54.86009885Z #14 22.60 Some issues need review, and may require choosing
+2025-08-27T12:09:54.86010163Z #14 22.60 a different dependency.
+2025-08-27T12:09:54.86010395Z #14 22.60 
+2025-08-27T12:09:54.86010619Z #14 22.60 Run `npm audit` for details.
+2025-08-27T12:09:54.8601091Z #14 22.61 npm notice
+2025-08-27T12:09:54.86011235Z #14 22.61 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T12:09:54.860114711Z #14 22.61 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T12:09:54.860116941Z #14 22.61 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T12:09:54.860119251Z #14 22.61 npm notice
+2025-08-27T12:09:57.114549443Z #14 DONE 24.8s
+2025-08-27T12:09:57.114576364Z 
+2025-08-27T12:09:57.114582325Z #15 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-27T12:09:58.467771811Z #15 DONE 1.3s
+2025-08-27T12:09:58.467789101Z 
+2025-08-27T12:09:58.467792992Z #16 exporting to docker image format
+2025-08-27T12:09:58.467796562Z #16 exporting layers
+2025-08-27T12:10:17.55878529Z #16 exporting layers 19.1s done
+2025-08-27T12:10:17.558811301Z #16 exporting manifest sha256:4478f9d63281f6a17b78ab5b4e85afedaa7b687e3ec63245fdd0895c395e8b71
+2025-08-27T12:10:18.111175558Z #16 exporting manifest sha256:4478f9d63281f6a17b78ab5b4e85afedaa7b687e3ec63245fdd0895c395e8b71 0.7s done
+2025-08-27T12:10:18.111194169Z #16 exporting config sha256:bd4105d913ceb7f09e9b1dc9b8d0896742ab7746894e41651675f677dc1e7b97
+2025-08-27T12:10:18.410894388Z #16 exporting config sha256:bd4105d913ceb7f09e9b1dc9b8d0896742ab7746894e41651675f677dc1e7b97 0.3s done
+2025-08-27T12:10:20.805381415Z #16 DONE 22.3s
+2025-08-27T12:10:20.805400936Z 
+2025-08-27T12:10:20.805405476Z #17 exporting cache to client directory
+2025-08-27T12:10:20.805409237Z #17 preparing build cache for export
+2025-08-27T12:10:51.222255486Z #17 writing cache manifest sha256:43e6195694b83a4a0881518a45c6b1fbe2b9e650f112689e3b4a4bd6a1b9853c done
+2025-08-27T12:10:51.222274058Z #17 DONE 30.5s
+2025-08-27T12:10:52.117878058Z Pushing image to registry...
+2025-08-27T12:10:59.450309165Z Upload succeeded
+2025-08-27T12:11:11.397072361Z ==> Deploying...
+2025-08-27T12:11:22.554358952Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T12:11:22.555204297Z NODE_ENV: production
+2025-08-27T12:11:22.555215867Z PORT: 10000
+2025-08-27T12:11:22.555633364Z ✅ Using production server: /app/dist/production.js
+2025-08-27T12:11:22.555661174Z Starting server with: /app/dist/production.js
+2025-08-27T12:11:25.557990685Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T12:11:25.560386615Z Warning: connect.session() MemoryStore is not
+2025-08-27T12:11:25.560405086Z designed for a production environment, as it will leak
+2025-08-27T12:11:25.560409716Z memory, and will not scale past a single process.
+2025-08-27T12:11:25.862714311Z 12:11:25 PM [express] serving on 0.0.0.0:10000
+2025-08-27T12:11:26.256382522Z 12:11:26 PM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
+2025-08-27T12:11:32.505758534Z ==> Your service is live 🎉
+2025-08-27T12:11:32.535831691Z ==> 
+2025-08-27T12:11:32.56268559Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:11:32.588006728Z ==> 
+2025-08-27T12:11:32.614907716Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T12:11:32.641144855Z ==> 
+2025-08-27T12:11:32.666882442Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:11:34.084826661Z 12:11:34 PM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
+2025-08-27T12:11:38.300254358Z 12:11:38 PM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
