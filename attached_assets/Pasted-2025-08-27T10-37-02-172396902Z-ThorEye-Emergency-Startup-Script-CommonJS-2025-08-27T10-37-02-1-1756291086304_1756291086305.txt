@@ -1,0 +1,51 @@
+2025-08-27T10:37:02.172396902Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T10:37:02.173293054Z NODE_ENV: production
+2025-08-27T10:37:02.173366736Z PORT: 10000
+2025-08-27T10:37:02.173841197Z ✅ Using production server: /app/dist/production.js
+2025-08-27T10:37:02.17394834Z Starting server with: /app/dist/production.js
+2025-08-27T10:37:02.958563626Z node:internal/errors:496
+2025-08-27T10:37:02.958598617Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:37:02.958601937Z     ^
+2025-08-27T10:37:02.958604257Z 
+2025-08-27T10:37:02.958608477Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/production.js
+2025-08-27T10:37:02.958661779Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:37:02.958665099Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:37:02.958667169Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:37:02.958671809Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:37:02.958674199Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:37:02.958676699Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:37:02.958679049Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:37:02.958681399Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:37:02.958683559Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:37:02.958686049Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:37:02.958688189Z }
+2025-08-27T10:37:02.958690049Z 
+2025-08-27T10:37:02.958692019Z Node.js v18.20.8
+2025-08-27T10:37:02.969859691Z Server exited with code 1
+2025-08-27T10:37:03.534166126Z ==> Exited with status 1
+2025-08-27T10:37:03.558975504Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-08-27T10:37:03.771463649Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T10:37:03.772180737Z NODE_ENV: production
+2025-08-27T10:37:03.772210037Z PORT: 10000
+2025-08-27T10:37:03.772539085Z ✅ Using production server: /app/dist/production.js
+2025-08-27T10:37:03.772550326Z Starting server with: /app/dist/production.js
+2025-08-27T10:37:04.459196544Z node:internal/errors:496
+2025-08-27T10:37:04.459221155Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:37:04.459224115Z     ^
+2025-08-27T10:37:04.459226285Z 
+2025-08-27T10:37:04.459229405Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/production.js
+2025-08-27T10:37:04.459232805Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:37:04.459234915Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:37:04.459236965Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:37:04.459239755Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:37:04.459241745Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:37:04.459243835Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:37:04.459245835Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:37:04.459247945Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:37:04.459249955Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:37:04.459251975Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:37:04.459254126Z }
+2025-08-27T10:37:04.459256006Z 
+2025-08-27T10:37:04.459257966Z Node.js v18.20.8
+2025-08-27T10:37:04.464897492Z Server exited with code 1
+2025-08-27T10:37:54.594793239Z ==> No open ports detected, continuing to scan...

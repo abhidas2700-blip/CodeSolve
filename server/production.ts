@@ -1,7 +1,12 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+// DIRECTLY IMPORT ROUTES - NO INTERMEDIATE FILES
+import session from "express-session";
+import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
+import { storage } from "./storage";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,23 +17,60 @@ function log(message: string) {
   console.log(`${timestamp} [express] ${message}`);
 }
 
-// Production static file serving (no Vite dependency)
-function serveStatic(app: express.Application) {
-  const staticPath = path.join(__dirname, "..", "public");
-  app.use(express.static(staticPath));
-  
-  // SPA fallback for all non-API routes
-  app.get("*", (req, res) => {
-    if (!req.path.startsWith("/api")) {
-      res.sendFile(path.join(staticPath, "index.html"));
-    }
-  });
-}
-
 const app = express();
+
+// Configure session
+app.use(session({
+  secret: process.env.SESSION_SECRET || "fallback-secret-key",
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false,
+    maxAge: 1000 * 60 * 60 * 24 * 7 // 7 days
+  }
+}));
+
+// Configure passport
+passport.use(new LocalStrategy(
+  { usernameField: 'username', passwordField: 'password' },
+  async (username: string, password: string, done) => {
+    try {
+      const user = await storage.getUserByUsername(username);
+      if (!user) {
+        return done(null, false, { message: 'Invalid username or password' });
+      }
+      
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return done(null, false, { message: 'Invalid username or password' });
+      }
+      
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  }
+));
+
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id: number, done) => {
+  try {
+    const user = await storage.getUser(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(passport.initialize());
+app.use(passport.session());
 
+// Logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -59,22 +101,66 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  const server = await registerRoutes(app);
+// Auth middleware
+function requireAuth(req: any, res: any, next: any) {
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    res.status(401).json({ error: "Not authenticated" });
+  }
+}
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
-    res.status(status).json({ message });
-    throw err;
+// Auth routes
+app.post("/api/login", passport.authenticate("local"), (req, res) => {
+  res.json({ 
+    user: { 
+      id: (req.user as any).id,
+      username: (req.user as any).username,
+      role: (req.user as any).role 
+    } 
   });
+});
 
-  // Production: serve static files
-  serveStatic(app);
-
-  const PORT = parseInt(process.env.PORT || "10000");
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`serving on 0.0.0.0:${PORT}`);
+app.post("/api/logout", (req, res) => {
+  req.logout(() => {
+    res.json({ success: true });
   });
-})();
+});
+
+app.get("/api/user", requireAuth, (req, res) => {
+  const user = req.user as any;
+  res.json({ 
+    id: user.id,
+    username: user.username,
+    role: user.role 
+  });
+});
+
+// Production: serve static files
+const staticPath = path.join(__dirname, "..", "public");
+app.use(express.static(staticPath));
+
+// SPA fallback for all non-API routes
+app.get("*", (req, res) => {
+  if (!req.path.startsWith("/api")) {
+    res.sendFile(path.join(staticPath, "index.html"));
+  }
+});
+
+// Error handler
+app.use((err: any, req: any, res: any, next: any) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  res.status(status).json({ message });
+  log(`Error: ${message}`);
+});
+
+const PORT = parseInt(process.env.PORT || "10000");
+app.listen(PORT, "0.0.0.0", () => {
+  log(`serving on 0.0.0.0:${PORT}`);
+});
