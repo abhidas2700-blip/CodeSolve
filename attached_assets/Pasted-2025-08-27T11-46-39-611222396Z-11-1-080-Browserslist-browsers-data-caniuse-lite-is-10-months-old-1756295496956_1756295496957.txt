@@ -1,0 +1,102 @@
+2025-08-27T11:46:39.611222396Z #11 1.080 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+2025-08-27T11:46:39.611245126Z #11 1.080   npx update-browserslist-db@latest
+2025-08-27T11:46:39.611249477Z #11 1.080   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-08-27T11:46:45.917996031Z #11 7.464 ✓ 2588 modules transformed.
+2025-08-27T11:46:46.480638805Z #11 7.995 [plugin:vite:reporter] [plugin vite:reporter] 
+2025-08-27T11:46:46.480670265Z #11 7.995 (!) /app/node_modules/xlsx/xlsx.mjs is dynamically imported by /app/client/src/pages/audits.tsx but also statically imported by /app/client/src/components/audit/ata-reports-tab.tsx, dynamic import will not move module into another chunk.
+2025-08-27T11:46:46.480674076Z #11 7.995 
+2025-08-27T11:46:46.480677536Z #11 7.996 rendering chunks...
+2025-08-27T11:46:46.480680296Z #11 8.027 computing gzip size...
+2025-08-27T11:46:46.631176266Z #11 8.060 ../dist/public/index.html                     0.95 kB │ gzip:   0.52 kB
+2025-08-27T11:46:46.631205837Z #11 8.060 ../dist/public/assets/index-CnAIbq48.css     79.53 kB │ gzip:  13.64 kB
+2025-08-27T11:46:46.631209027Z #11 8.060 ../dist/public/assets/index-BmHCq6Rx.js   1,253.45 kB │ gzip: 370.32 kB
+2025-08-27T11:46:46.631212027Z #11 8.060 
+2025-08-27T11:46:46.631215347Z #11 8.060 (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-08-27T11:46:46.631220607Z #11 8.060 - Using dynamic import() to code-split the application
+2025-08-27T11:46:46.631225647Z #11 8.060 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-08-27T11:46:46.631228857Z #11 8.060 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-08-27T11:46:46.631233247Z #11 8.060 ✓ built in 7.33s
+2025-08-27T11:46:47.042356535Z #11 8.589 
+2025-08-27T11:46:47.042374865Z #11 8.589   dist/production.js  30.4kb
+2025-08-27T11:46:47.042381486Z #11 8.589 
+2025-08-27T11:46:47.042384736Z #11 8.589 ⚡ Done in 7ms
+2025-08-27T11:46:49.297138803Z #11 DONE 10.8s
+2025-08-27T11:46:50.199524319Z 
+2025-08-27T11:46:50.199548979Z #12 [stage-1 3/6] COPY --from=builder /app/dist ./dist
+2025-08-27T11:46:53.948053492Z #12 DONE 3.9s
+2025-08-27T11:46:54.099025443Z 
+2025-08-27T11:46:54.099049554Z #13 [stage-1 4/6] COPY package*.json ./
+2025-08-27T11:46:54.099053994Z #13 DONE 0.1s
+2025-08-27T11:46:54.099057694Z 
+2025-08-27T11:46:54.099061794Z #14 [stage-1 5/6] RUN npm install --omit=dev
+2025-08-27T11:46:56.943195348Z #14 2.936 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-08-27T11:46:57.698174938Z #14 3.556 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+2025-08-27T11:46:57.827638095Z #14 3.821 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2025-08-27T11:46:58.429127831Z #14 4.344 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+2025-08-27T11:46:58.580138563Z #14 4.490 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+2025-08-27T11:46:59.331563724Z #14 5.204 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+2025-08-27T11:46:59.594869136Z #14 5.563 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:46:59.594884947Z #14 5.588 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:46:59.745697384Z #14 5.642 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:47:05.907354655Z #14 11.77 
+2025-08-27T11:47:05.907385156Z #14 11.77 added 591 packages, and audited 592 packages in 12s
+2025-08-27T11:47:05.907390476Z #14 11.77 
+2025-08-27T11:47:05.907399746Z #14 11.77 78 packages are looking for funding
+2025-08-27T11:47:05.907403807Z #14 11.77   run `npm fund` for details
+2025-08-27T11:47:05.907416517Z #14 11.83 
+2025-08-27T11:47:05.907418647Z #14 11.83 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T11:47:05.907420407Z #14 11.83 
+2025-08-27T11:47:05.907422077Z #14 11.83 To address issues that do not require attention, run:
+2025-08-27T11:47:05.907424327Z #14 11.83   npm audit fix
+2025-08-27T11:47:05.907425997Z #14 11.83 
+2025-08-27T11:47:05.907427707Z #14 11.83 Some issues need review, and may require choosing
+2025-08-27T11:47:05.907429427Z #14 11.83 a different dependency.
+2025-08-27T11:47:05.907431107Z #14 11.83 
+2025-08-27T11:47:05.907435597Z #14 11.83 Run `npm audit` for details.
+2025-08-27T11:47:05.907439307Z #14 11.84 npm notice
+2025-08-27T11:47:05.907441657Z #14 11.84 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T11:47:05.907443397Z #14 11.84 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T11:47:05.907445148Z #14 11.84 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T11:47:05.907446828Z #14 11.84 npm notice
+2025-08-27T11:47:06.057999458Z #14 DONE 12.0s
+2025-08-27T11:47:06.058019278Z 
+2025-08-27T11:47:06.058023758Z #15 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-27T11:47:06.508557282Z #15 DONE 0.4s
+2025-08-27T11:47:06.508572822Z 
+2025-08-27T11:47:06.508576812Z #16 exporting to docker image format
+2025-08-27T11:47:06.508580542Z #16 exporting layers
+2025-08-27T11:47:22.440694234Z #16 exporting layers 16.0s done
+2025-08-27T11:47:22.440717014Z #16 exporting manifest sha256:f115a3711b6b090e71b75623df991d7df55332bf4389c7802dab7de62a02a488
+2025-08-27T11:47:22.85968049Z #16 exporting manifest sha256:f115a3711b6b090e71b75623df991d7df55332bf4389c7802dab7de62a02a488 0.5s done
+2025-08-27T11:47:22.859697801Z #16 exporting config sha256:712fdb5b922c43012b200238aa471e7a260a9e09987cb14f2909094561b0b3c8
+2025-08-27T11:47:23.46080535Z #16 exporting config sha256:712fdb5b922c43012b200238aa471e7a260a9e09987cb14f2909094561b0b3c8 0.5s done
+2025-08-27T11:47:25.611875254Z #16 DONE 19.1s
+2025-08-27T11:47:25.611888875Z 
+2025-08-27T11:47:25.611893355Z #17 exporting cache to client directory
+2025-08-27T11:47:25.611896445Z #17 preparing build cache for export
+2025-08-27T11:47:53.506332044Z #17 writing cache manifest sha256:1ee12c336b322d23d3d5a769eb0776c5724bb5c1b32a93138c17c3adbb860549 done
+2025-08-27T11:47:53.506348335Z #17 DONE 27.9s
+2025-08-27T11:47:54.765815479Z Pushing image to registry...
+2025-08-27T11:48:01.142228274Z Upload succeeded
+2025-08-27T11:48:05.54311709Z ==> Deploying...
+2025-08-27T11:48:59.09444835Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T11:48:59.095140251Z NODE_ENV: production
+2025-08-27T11:48:59.095151861Z PORT: 10000
+2025-08-27T11:48:59.095531608Z ✅ Using production server: /app/dist/production.js
+2025-08-27T11:48:59.095543928Z Starting server with: /app/dist/production.js
+2025-08-27T11:49:01.980297287Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T11:49:01.981958895Z Warning: connect.session() MemoryStore is not
+2025-08-27T11:49:01.981982436Z designed for a production environment, as it will leak
+2025-08-27T11:49:01.981987846Z memory, and will not scale past a single process.
+2025-08-27T11:49:02.131413867Z 11:49:01 AM [express] serving on 0.0.0.0:10000
+2025-08-27T11:49:02.493018095Z 11:49:02 AM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
+2025-08-27T11:49:08.077142678Z ==> Your service is live 🎉
+2025-08-27T11:49:08.103456646Z ==> 
+2025-08-27T11:49:08.128496775Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T11:49:08.152309103Z ==> 
+2025-08-27T11:49:08.175592671Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T11:49:08.19947775Z ==> 
+2025-08-27T11:49:08.224440948Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T11:49:09.297025113Z 11:49:09 AM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
+2025-08-27T11:51:14.647102105Z Received SIGTERM, shutting down...
+2025-08-27T11:51:14.657597211Z Server exited with code null

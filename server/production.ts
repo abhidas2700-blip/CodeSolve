@@ -142,7 +142,7 @@ app.get("/api/user", requireAuth, (req, res) => {
 });
 
 // Production: serve static files
-const staticPath = path.join(__dirname, "..", "public");
+const staticPath = path.join(__dirname, "public");
 app.use(express.static(staticPath));
 
 // SPA fallback for all non-API routes
