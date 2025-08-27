@@ -6,7 +6,7 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
-import { storage } from "./storage";
+import { DatabaseStorage } from "./storage";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +18,9 @@ function log(message: string) {
 }
 
 const app = express();
+
+// Initialize database storage for production
+const storage = new DatabaseStorage();
 
 // Configure session
 app.use(session({
