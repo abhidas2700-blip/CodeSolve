@@ -37,7 +37,15 @@ PostgreSQL is the primary database, managed with Drizzle ORM. The schema include
 WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.
 
 ### Deployment Architecture
-The system supports deployment via Docker, Render, and Netlify serverless functions. Vite is used for frontend builds and esbuild for the backend. Environment variables manage configuration.
+The system supports multiple deployment options:
+- **Netlify**: Serverless functions with full database integration (currently deployed)
+- **Render**: Traditional server deployment with health checks and auto-scaling
+- **Docker**: Containerized deployment option
+- **Replit**: Development and preview environment
+
+Vite is used for frontend builds and esbuild for the backend. Environment variables manage configuration.
+
+**Recent Update (Aug 18, 2025)**: Added complete Render deployment configuration with health checks, proper PORT handling, and production startup scripts. The system is ready for deployment on Render with the same Neon PostgreSQL database.
 
 ### Conditional Visibility
 The system supports conditional visibility for questions and sections within audit forms. Questions with a `controlledBy` property are shown based on the controlling question's answer. Sections with `controlsSection: true` are displayed based on their controlling question's answer.

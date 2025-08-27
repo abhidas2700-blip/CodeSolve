@@ -22,6 +22,7 @@ import { z } from "zod";
 import { setupAuth, hashPassword } from "./auth";
 import { db } from "./db";
 import { eq, desc, and, sql } from "drizzle-orm";
+import { healthCheck } from "./health";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Add middleware to update session lastActivity timestamp
@@ -969,6 +970,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: 'Failed to delete audit sample' });
     }
   });
+
+  // Add health check endpoint
+  app.get('/api/health', healthCheck);
 
   return httpServer;
 }
