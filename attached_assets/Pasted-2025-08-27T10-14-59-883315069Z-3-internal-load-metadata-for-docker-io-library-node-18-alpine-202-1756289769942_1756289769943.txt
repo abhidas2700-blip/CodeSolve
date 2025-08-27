@@ -1,0 +1,95 @@
+2025-08-27T10:14:59.883315069Z #3 [internal] load metadata for docker.io/library/node:18-alpine
+2025-08-27T10:15:00.288727047Z #3 DONE 0.6s
+2025-08-27T10:15:00.288738537Z 
+2025-08-27T10:15:00.288741007Z #4 [internal] load .dockerignore
+2025-08-27T10:15:00.288743297Z #4 transferring context: 166B done
+2025-08-27T10:15:00.288745117Z #4 DONE 0.0s
+2025-08-27T10:15:00.288746767Z 
+2025-08-27T10:15:00.288748467Z #5 [internal] load build context
+2025-08-27T10:15:00.539669462Z #5 transferring context: 5.07MB 0.1s done
+2025-08-27T10:15:00.539684013Z #5 DONE 0.2s
+2025-08-27T10:15:00.539686713Z 
+2025-08-27T10:15:00.539690483Z #6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-08-27T10:15:00.539693573Z #6 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.0s done
+2025-08-27T10:15:00.650974849Z #6 sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 446B / 446B 0.1s done
+2025-08-27T10:15:00.65099018Z #6 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0B / 1.26MB 0.2s
+2025-08-27T10:15:00.77443163Z #6 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 1.26MB / 1.26MB 0.3s done
+2025-08-27T10:15:00.77444447Z #6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 0B / 40.01MB 0.2s
+2025-08-27T10:15:00.77444667Z #6 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0B / 3.64MB 0.2s
+2025-08-27T10:15:00.924836917Z #6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 8.39MB / 40.01MB 0.3s
+2025-08-27T10:15:00.924850398Z #6 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 3.64MB / 3.64MB 0.3s done
+2025-08-27T10:15:00.924852598Z #6 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870
+2025-08-27T10:15:01.075751808Z #6 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 40.01MB / 40.01MB 0.5s done
+2025-08-27T10:15:01.075766178Z #6 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0.1s done
+2025-08-27T10:15:01.075768358Z #6 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e
+2025-08-27T10:15:03.777493394Z #6 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 2.6s done
+2025-08-27T10:15:03.777513965Z #6 extracting sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0.1s done
+2025-08-27T10:15:03.777518435Z #6 DONE 3.5s
+2025-08-27T10:15:03.928475326Z 
+2025-08-27T10:15:03.928504257Z #6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-08-27T10:15:03.928510517Z #6 extracting sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0.0s done
+2025-08-27T10:15:03.928514887Z #6 DONE 3.5s
+2025-08-27T10:15:03.928518678Z 
+2025-08-27T10:15:03.928523338Z #7 [builder 2/6] WORKDIR /app
+2025-08-27T10:15:03.928527508Z #7 DONE 0.0s
+2025-08-27T10:15:03.928531258Z 
+2025-08-27T10:15:03.928535708Z #8 [builder 3/6] COPY package*.json ./
+2025-08-27T10:15:03.928540338Z #8 DONE 0.0s
+2025-08-27T10:15:03.928544218Z 
+2025-08-27T10:15:03.928561479Z #9 [builder 4/6] RUN npm install
+2025-08-27T10:15:07.386579817Z #9 3.404 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-08-27T10:15:07.838128797Z #9 3.867 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+2025-08-27T10:15:08.58972486Z #9 4.633 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2025-08-27T10:15:09.792420561Z #9 5.786 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+2025-08-27T10:15:09.792447731Z #9 5.832 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+2025-08-27T10:15:10.506671709Z #9 6.642 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+2025-08-27T10:15:10.807569524Z #9 6.808 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+2025-08-27T10:15:10.830540708Z #9 6.824 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+2025-08-27T10:15:11.108315456Z #9 7.109 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T10:15:11.113517331Z #9 7.193 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T10:15:11.212341435Z #9 7.348 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T10:15:23.98957713Z #9 20.05 
+2025-08-27T10:15:23.989601711Z #9 20.05 added 678 packages, and audited 679 packages in 20s
+2025-08-27T10:15:23.989606161Z #9 20.05 
+2025-08-27T10:15:23.989612731Z #9 20.05 86 packages are looking for funding
+2025-08-27T10:15:23.989616691Z #9 20.05   run `npm fund` for details
+2025-08-27T10:15:24.140536431Z #9 20.13 
+2025-08-27T10:15:24.140559662Z #9 20.13 15 vulnerabilities (6 low, 7 moderate, 2 high)
+2025-08-27T10:15:24.140564712Z #9 20.13 
+2025-08-27T10:15:24.140569062Z #9 20.13 To address issues that do not require attention, run:
+2025-08-27T10:15:24.140573682Z #9 20.13   npm audit fix
+2025-08-27T10:15:24.140577852Z #9 20.13 
+2025-08-27T10:15:24.140584872Z #9 20.13 To address all issues possible (including breaking changes), run:
+2025-08-27T10:15:24.140590502Z #9 20.13   npm audit fix --force
+2025-08-27T10:15:24.140594792Z #9 20.13 
+2025-08-27T10:15:24.140599083Z #9 20.13 Some issues need review, and may require choosing
+2025-08-27T10:15:24.140603093Z #9 20.13 a different dependency.
+2025-08-27T10:15:24.140607373Z #9 20.13 
+2025-08-27T10:15:24.140612793Z #9 20.13 Run `npm audit` for details.
+2025-08-27T10:15:24.140616853Z #9 20.13 npm notice
+2025-08-27T10:15:24.140620963Z #9 20.13 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T10:15:24.140625243Z #9 20.13 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T10:15:24.140629293Z #9 20.13 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T10:15:24.140633304Z #9 20.13 npm notice
+2025-08-27T10:15:24.741993201Z #9 DONE 20.7s
+2025-08-27T10:15:24.743054729Z 
+2025-08-27T10:15:24.743063049Z #10 [builder 5/6] COPY . .
+2025-08-27T10:15:25.296140619Z #10 DONE 0.6s
+2025-08-27T10:15:25.29615976Z 
+2025-08-27T10:15:25.29616531Z #11 [builder 6/6] RUN vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-08-27T10:15:25.29617068Z #11 0.067 /bin/sh: vite: not found
+2025-08-27T10:15:25.364457534Z #11 ERROR: process "/bin/sh -c vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist" did not complete successfully: exit code: 127
+2025-08-27T10:15:25.364483895Z ------
+2025-08-27T10:15:25.364488055Z  > [builder 6/6] RUN vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist:
+2025-08-27T10:15:25.364491306Z 0.067 /bin/sh: vite: not found
+2025-08-27T10:15:25.364493646Z ------
+2025-08-27T10:15:25.365403359Z Dockerfile:15
+2025-08-27T10:15:25.365413869Z --------------------
+2025-08-27T10:15:25.365416309Z   13 |     
+2025-08-27T10:15:25.365419139Z   14 |     # Build the application with production server
+2025-08-27T10:15:25.36542189Z   15 | >>> RUN vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-08-27T10:15:25.365424339Z   16 |     
+2025-08-27T10:15:25.365427Z   17 |     # Production stage - use a clean image for running the app
+2025-08-27T10:15:25.36542925Z --------------------
+2025-08-27T10:15:25.36543233Z error: failed to solve: process "/bin/sh -c vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist" did not complete successfully: exit code: 127
+2025-08-27T10:15:25.377228144Z error: exit status 1
