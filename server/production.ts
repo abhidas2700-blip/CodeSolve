@@ -156,7 +156,7 @@ app.post("/api/login", (req, res, next) => {
         user: { 
           id: user.id,
           username: user.username,
-          role: user.role 
+          rights: user.rights 
         } 
       });
     });
@@ -174,7 +174,7 @@ app.get("/api/user", requireAuth, (req, res) => {
   res.json({ 
     id: user.id,
     username: user.username,
-    role: user.role 
+    rights: user.rights 
   });
 });
 
