@@ -1,0 +1,101 @@
+2025-08-27T11:58:53.18142905Z #11 [builder 6/6] RUN npx vite build && npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-08-27T11:58:53.776490827Z #11 0.744 vite v5.4.14 building for production...
+2025-08-27T11:58:53.92710026Z #11 0.807 transforming...
+2025-08-27T11:58:54.227751678Z #11 1.117 Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+2025-08-27T11:58:54.22778002Z #11 1.117   npx update-browserslist-db@latest
+2025-08-27T11:58:54.227785461Z #11 1.117   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-08-27T11:59:00.389450221Z #11 7.289 ✓ 2588 modules transformed.
+2025-08-27T11:59:00.962148667Z #11 7.858 [plugin:vite:reporter] [plugin vite:reporter] 
+2025-08-27T11:59:00.962174709Z #11 7.858 (!) /app/node_modules/xlsx/xlsx.mjs is dynamically imported by /app/client/src/pages/audits.tsx but also statically imported by /app/client/src/components/audit/ata-reports-tab.tsx, dynamic import will not move module into another chunk.
+2025-08-27T11:59:00.962195251Z #11 7.858 
+2025-08-27T11:59:00.962198941Z #11 7.859 rendering chunks...
+2025-08-27T11:59:00.962201071Z #11 7.895 computing gzip size...
+2025-08-27T11:59:00.962203651Z #11 7.930 ../dist/public/index.html                     0.95 kB │ gzip:   0.52 kB
+2025-08-27T11:59:00.962205761Z #11 7.930 ../dist/public/assets/index-CnAIbq48.css     79.53 kB │ gzip:  13.64 kB
+2025-08-27T11:59:01.11288508Z #11 7.930 ../dist/public/assets/index-BmHCq6Rx.js   1,253.45 kB │ gzip: 370.32 kB
+2025-08-27T11:59:01.112899791Z #11 7.930 
+2025-08-27T11:59:01.112903161Z #11 7.930 (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-08-27T11:59:01.112905681Z #11 7.930 - Using dynamic import() to code-split the application
+2025-08-27T11:59:01.112907882Z #11 7.930 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-08-27T11:59:01.112910342Z #11 7.930 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-08-27T11:59:01.112912742Z #11 7.930 ✓ built in 7.16s
+2025-08-27T11:59:01.56450408Z #11 8.450 
+2025-08-27T11:59:01.56583069Z #11 8.450   dist/production.js  30.4kb
+2025-08-27T11:59:01.565838071Z #11 8.450 
+2025-08-27T11:59:01.565842031Z #11 8.450 ⚡ Done in 7ms
+2025-08-27T11:59:01.715699631Z #11 DONE 8.5s
+2025-08-27T11:59:02.119697709Z 
+2025-08-27T11:59:02.11972032Z #12 [stage-1 3/6] COPY --from=builder /app/dist ./dist
+2025-08-27T11:59:02.119724891Z #12 DONE 0.0s
+2025-08-27T11:59:02.27029034Z 
+2025-08-27T11:59:02.270311671Z #13 [stage-1 4/6] COPY package*.json ./
+2025-08-27T11:59:02.270316442Z #13 DONE 0.0s
+2025-08-27T11:59:02.270320112Z 
+2025-08-27T11:59:02.270324133Z #14 [stage-1 5/6] RUN npm install --omit=dev
+2025-08-27T11:59:04.777565914Z #14 2.610 npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-08-27T11:59:05.378943776Z #14 3.118 npm warn deprecated npmlog@6.0.2: This package is no longer supported.
+2025-08-27T11:59:05.679777328Z #14 3.396 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2025-08-27T11:59:05.827794655Z #14 3.660 npm warn deprecated gauge@4.0.4: This package is no longer supported.
+2025-08-27T11:59:05.976463006Z #14 3.808 npm warn deprecated are-we-there-yet@3.0.1: This package is no longer supported.
+2025-08-27T11:59:06.5776328Z #14 4.358 npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+2025-08-27T11:59:06.878782199Z #14 4.596 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:59:06.878805021Z #14 4.633 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:59:07.029869841Z #14 4.740 npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-08-27T11:59:11.967682828Z #14 9.800 
+2025-08-27T11:59:11.96770514Z #14 9.800 added 591 packages, and audited 592 packages in 10s
+2025-08-27T11:59:11.96770889Z #14 9.800 
+2025-08-27T11:59:11.967713421Z #14 9.800 78 packages are looking for funding
+2025-08-27T11:59:11.967716461Z #14 9.800   run `npm fund` for details
+2025-08-27T11:59:12.118815674Z #14 9.858 
+2025-08-27T11:59:12.118839006Z #14 9.858 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T11:59:12.118842386Z #14 9.858 
+2025-08-27T11:59:12.118845396Z #14 9.858 To address issues that do not require attention, run:
+2025-08-27T11:59:12.118862328Z #14 9.858   npm audit fix
+2025-08-27T11:59:12.118864268Z #14 9.858 
+2025-08-27T11:59:12.118866328Z #14 9.858 Some issues need review, and may require choosing
+2025-08-27T11:59:12.118868848Z #14 9.858 a different dependency.
+2025-08-27T11:59:12.118870568Z #14 9.858 
+2025-08-27T11:59:12.118872309Z #14 9.858 Run `npm audit` for details.
+2025-08-27T11:59:12.118874409Z #14 9.859 npm notice
+2025-08-27T11:59:12.118876769Z #14 9.859 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T11:59:12.118878539Z #14 9.859 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T11:59:12.118880299Z #14 9.859 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T11:59:12.118882009Z #14 9.859 npm notice
+2025-08-27T11:59:13.472194988Z #14 DONE 11.2s
+2025-08-27T11:59:13.472215609Z 
+2025-08-27T11:59:13.47222116Z #15 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-27T11:59:13.77255268Z #15 DONE 0.3s
+2025-08-27T11:59:13.772573432Z 
+2025-08-27T11:59:13.772578312Z #16 exporting to docker image format
+2025-08-27T11:59:13.772583223Z #16 exporting layers
+2025-08-27T11:59:26.907070417Z #16 exporting layers 13.1s done
+2025-08-27T11:59:26.90710695Z #16 exporting manifest sha256:a5566084c719646e29f5ec6609f5233be9aadc80e3da9b94cbcf412adbc8380e 0.0s done
+2025-08-27T11:59:26.907113611Z #16 exporting config sha256:7a9ce0f83ff17a7d3f685323af07bfa18a6902634bd84af74eafc5ee1d086be8 0.0s done
+2025-08-27T11:59:28.923547701Z #16 DONE 15.3s
+2025-08-27T11:59:28.923566772Z 
+2025-08-27T11:59:28.923571323Z #17 exporting cache to client directory
+2025-08-27T11:59:28.923574343Z #17 preparing build cache for export
+2025-08-27T11:59:51.850641372Z #17 writing cache manifest sha256:832a54635586b1b5d7894cf758ee6662d082c6ef17f2aeed91e563bb9df3876b done
+2025-08-27T11:59:51.850664343Z #17 DONE 22.8s
+2025-08-27T11:59:52.728181334Z Pushing image to registry...
+2025-08-27T11:59:59.05191182Z Upload succeeded
+2025-08-27T12:00:01.322273608Z ==> Deploying...
+2025-08-27T12:00:12.793378028Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-27T12:00:12.794007012Z NODE_ENV: production
+2025-08-27T12:00:12.794032533Z PORT: 10000
+2025-08-27T12:00:12.79434266Z ✅ Using production server: /app/dist/production.js
+2025-08-27T12:00:12.79436204Z Starting server with: /app/dist/production.js
+2025-08-27T12:00:15.584032728Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-27T12:00:15.585219125Z Warning: connect.session() MemoryStore is not
+2025-08-27T12:00:15.585234465Z designed for a production environment, as it will leak
+2025-08-27T12:00:15.585237696Z memory, and will not scale past a single process.
+2025-08-27T12:00:15.895640508Z 12:00:15 PM [express] serving on 0.0.0.0:10000
+2025-08-27T12:00:16.283056599Z 12:00:16 PM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
+2025-08-27T12:00:27.058262247Z ==> Your service is live 🎉
+2025-08-27T12:00:27.090496925Z ==> 
+2025-08-27T12:00:27.119629773Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:00:27.146278601Z ==> 
+2025-08-27T12:00:27.17244256Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-27T12:00:27.202777347Z ==> 
+2025-08-27T12:00:27.231239585Z ==> ///////////////////////////////////////////////////////////
+2025-08-27T12:02:05.143035371Z 12:02:05 PM [express] Error: ENOENT: no such file or directory, stat '/app/public/index.html'
