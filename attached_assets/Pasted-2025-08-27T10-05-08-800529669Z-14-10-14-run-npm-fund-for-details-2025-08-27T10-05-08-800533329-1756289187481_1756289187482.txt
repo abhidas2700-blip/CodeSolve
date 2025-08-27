@@ -1,0 +1,70 @@
+2025-08-27T10:05:08.800529669Z #14 10.14   run `npm fund` for details
+2025-08-27T10:05:08.800533329Z #14 10.19 
+2025-08-27T10:05:08.800536949Z #14 10.19 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T10:05:08.800540449Z #14 10.19 
+2025-08-27T10:05:08.800543899Z #14 10.19 To address issues that do not require attention, run:
+2025-08-27T10:05:08.800547909Z #14 10.19   npm audit fix
+2025-08-27T10:05:08.80056079Z #14 10.19 
+2025-08-27T10:05:08.80056318Z #14 10.19 Some issues need review, and may require choosing
+2025-08-27T10:05:08.80056528Z #14 10.19 a different dependency.
+2025-08-27T10:05:08.80056744Z #14 10.19 
+2025-08-27T10:05:08.80056954Z #14 10.19 Run `npm audit` for details.
+2025-08-27T10:05:08.950949659Z #14 10.20 npm notice
+2025-08-27T10:05:08.9509688Z #14 10.20 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T10:05:08.95097235Z #14 10.20 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T10:05:08.95097607Z #14 10.20 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T10:05:08.95097886Z #14 10.20 npm notice
+2025-08-27T10:05:11.505233821Z #14 DONE 12.8s
+2025-08-27T10:05:11.505254771Z 
+2025-08-27T10:05:11.505262611Z #15 exporting to docker image format
+2025-08-27T10:05:11.505268782Z #15 exporting layers
+2025-08-27T10:05:25.291142224Z #15 exporting layers 13.9s done
+2025-08-27T10:05:25.503729378Z #15 exporting manifest sha256:506dcfbfc6fcddaa510b28dafdc6f7a6acb540bf0b32dd4700ebf91ce6ebcfd9 0.0s done
+2025-08-27T10:05:25.503760349Z #15 exporting config sha256:618a569bd3cd893caa4e223bfc8c31fbbd7db800c951db9ca014fcd482b204da 0.0s done
+2025-08-27T10:05:27.611270459Z #15 DONE 16.2s
+2025-08-27T10:05:27.611289529Z 
+2025-08-27T10:05:27.611294409Z #16 exporting cache to client directory
+2025-08-27T10:05:27.611299089Z #16 preparing build cache for export
+2025-08-27T10:05:50.309129288Z #16 writing cache manifest sha256:3c1ec5360a365832dd6fe1c281083bc8106542812be66a78d4fc65d30c9f41ba done
+2025-08-27T10:05:50.309146538Z #16 DONE 22.6s
+2025-08-27T10:05:51.305292033Z Pushing image to registry...
+2025-08-27T10:05:56.749628449Z Upload succeeded
+2025-08-27T10:05:59.285393171Z ==> Deploying...
+2025-08-27T10:06:09.73534382Z node:internal/errors:496
+2025-08-27T10:06:09.735386023Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:06:09.735390074Z     ^
+2025-08-27T10:06:09.735392864Z 
+2025-08-27T10:06:09.735395804Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/index.js
+2025-08-27T10:06:09.735399154Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:06:09.735402084Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:06:09.735404935Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:06:09.735408245Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:06:09.735411025Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:06:09.735413545Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:06:09.735416266Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:06:09.735419016Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:06:09.735421926Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:06:09.735424546Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:06:09.735427277Z }
+2025-08-27T10:06:09.735429917Z 
+2025-08-27T10:06:09.735431627Z Node.js v18.20.8
+2025-08-27T10:06:13.877518828Z ==> Exited with status 1
+2025-08-27T10:06:13.892181067Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-08-27T10:06:14.520128338Z node:internal/errors:496
+2025-08-27T10:06:14.520174541Z     ErrorCaptureStackTrace(err);
+2025-08-27T10:06:14.520177981Z     ^
+2025-08-27T10:06:14.520180172Z 
+2025-08-27T10:06:14.520183972Z Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/dist/index.js
+2025-08-27T10:06:14.520187122Z     at new NodeError (node:internal/errors:405:5)
+2025-08-27T10:06:14.520189462Z     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-08-27T10:06:14.520191933Z     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-08-27T10:06:14.520195233Z     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-08-27T10:06:14.520198173Z     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-08-27T10:06:14.520200813Z     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-08-27T10:06:14.520203343Z     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-08-27T10:06:14.520205603Z     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-08-27T10:06:14.520208024Z     at link (node:internal/modules/esm/module_job:75:36) {
+2025-08-27T10:06:14.520210304Z   code: 'ERR_MODULE_NOT_FOUND'
+2025-08-27T10:06:14.520213144Z }
+2025-08-27T10:06:14.520215474Z 
+2025-08-27T10:06:14.520218175Z Node.js v18.20.8

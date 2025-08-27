@@ -11,8 +11,8 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the application with production server
+RUN vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
 
 # Production stage - use a clean image for running the app
 FROM node:18-alpine
@@ -31,11 +31,11 @@ COPY package*.json ./
 RUN npm install --omit=dev
 
 # Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 10000
 
 # Add healthcheck to ensure container is healthy
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/database/status || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/health || exit 1
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Start the application with production server
+CMD ["node", "dist/production.js"]
