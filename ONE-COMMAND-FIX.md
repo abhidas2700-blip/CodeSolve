@@ -1,24 +1,23 @@
-# 🎯 ONE COMMAND TO FIX EVERYTHING
+# 🚀 ONE COMMAND SOLUTION
 
-## Run This Single Command
+## Run This Command in Terminal
 
 ```bash
 ./update-github.sh
 ```
 
-## Then Set Environment Variable in Render
+## Then Add Environment Variable
 
-Go to Render Dashboard → Your Service → Settings → Environment Variables
-
-Add:
-- **Key:** `DATABASE_URL`
+Render Dashboard → Settings → Environment Variables:
+- **Key:** `DATABASE_URL` 
 - **Value:** `postgresql://neondb_owner:npg_jbypqi8SLvJ4@ep-billowing-water-a1dbc0af-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require`
 
-## What This Fixes
+## What Happens
 
-✅ **Database Connection:** Render will connect to your real Neon PostgreSQL  
-✅ **Authentication:** Login will work with admin/admin123  
-✅ **Frontend:** Static files will load properly  
-✅ **Data Persistence:** All audit data will be saved permanently  
+✅ **Commits all fixes to GitHub**  
+✅ **Render auto-deploys updated code**  
+✅ **Database connects to Neon PostgreSQL**  
+✅ **Login works with admin/admin123**  
+✅ **All audit data persists permanently**  
 
-**Your ThorEye audit system will be fully operational after this!**
+**Your ThorEye system will be fully operational!**
