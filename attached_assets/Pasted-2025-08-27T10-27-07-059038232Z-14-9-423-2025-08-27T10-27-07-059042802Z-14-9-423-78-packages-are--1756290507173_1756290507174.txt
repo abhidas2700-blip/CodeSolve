@@ -1,0 +1,65 @@
+2025-08-27T10:27:07.059038232Z #14 9.423 
+2025-08-27T10:27:07.059042802Z #14 9.423 78 packages are looking for funding
+2025-08-27T10:27:07.059046482Z #14 9.423   run `npm fund` for details
+2025-08-27T10:27:07.059050072Z #14 9.478 
+2025-08-27T10:27:07.059053822Z #14 9.478 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-27T10:27:07.059056402Z #14 9.478 
+2025-08-27T10:27:07.059058782Z #14 9.478 To address issues that do not require attention, run:
+2025-08-27T10:27:07.059061402Z #14 9.478   npm audit fix
+2025-08-27T10:27:07.059063453Z #14 9.478 
+2025-08-27T10:27:07.059069282Z #14 9.478 Some issues need review, and may require choosing
+2025-08-27T10:27:07.059071503Z #14 9.478 a different dependency.
+2025-08-27T10:27:07.059073663Z #14 9.478 
+2025-08-27T10:27:07.059075743Z #14 9.478 Run `npm audit` for details.
+2025-08-27T10:27:07.209445848Z #14 9.479 npm notice
+2025-08-27T10:27:07.209467668Z #14 9.479 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-27T10:27:07.209471818Z #14 9.479 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-27T10:27:07.209475798Z #14 9.479 npm notice To update run: npm install -g npm@11.5.2
+2025-08-27T10:27:07.209479269Z #14 9.479 npm notice
+2025-08-27T10:27:11.117998318Z #14 DONE 13.4s
+2025-08-27T10:27:11.118018858Z 
+2025-08-27T10:27:11.118027609Z #15 [stage-1 6/6] COPY start-render.js ./
+2025-08-27T10:27:11.395666057Z #15 DONE 0.4s
+2025-08-27T10:27:11.546699019Z 
+2025-08-27T10:27:11.546725729Z #16 exporting to docker image format
+2025-08-27T10:27:11.546730809Z #16 exporting layers
+2025-08-27T10:27:24.288520015Z #16 exporting layers 12.9s done
+2025-08-27T10:27:24.438587842Z #16 exporting manifest sha256:13392ebf702a83f0160a2ccde831435ebb44e98f9e26d74e06c1ad4c42303078 0.0s done
+2025-08-27T10:27:24.438608193Z #16 exporting config sha256:0d8b68a10e38d9a9b2f03b6b736d12a6dd580056910b47132169b84988b24001 0.0s done
+2025-08-27T10:27:26.671549238Z #16 DONE 15.1s
+2025-08-27T10:27:26.671566598Z 
+2025-08-27T10:27:26.671571918Z #17 exporting cache to client directory
+2025-08-27T10:27:26.671575998Z #17 preparing build cache for export
+2025-08-27T10:27:47.668353936Z #17 writing cache manifest sha256:a4b64417719bbc0d8d249d738aca4c97c75b3d0964d69c6b3d1aa7d36a0ffb28 done
+2025-08-27T10:27:47.668374187Z #17 DONE 21.1s
+2025-08-27T10:27:51.466243784Z Pushing image to registry...
+2025-08-27T10:27:56.751298044Z Upload succeeded
+2025-08-27T10:27:59.464833856Z ==> Deploying...
+2025-08-27T10:28:10.320723577Z file:///app/start-render.js:6
+2025-08-27T10:28:10.32077184Z const { spawn } = require('child_process');
+2025-08-27T10:28:10.32077665Z                   ^
+2025-08-27T10:28:10.3207791Z 
+2025-08-27T10:28:10.32078238Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-08-27T10:28:10.320785991Z This file is being treated as an ES module because it has a '.js' file extension and '/app/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-08-27T10:28:10.320789601Z     at file:///app/start-render.js:6:19
+2025-08-27T10:28:10.320792811Z     at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+2025-08-27T10:28:10.320795501Z     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+2025-08-27T10:28:10.320798392Z     at async loadESM (node:internal/process/esm_loader:34:7)
+2025-08-27T10:28:10.320800892Z     at async handleMainPromise (node:internal/modules/run_main:106:12)
+2025-08-27T10:28:10.320803212Z 
+2025-08-27T10:28:10.320805992Z Node.js v18.20.8
+2025-08-27T10:28:15.617732609Z ==> Exited with status 1
+2025-08-27T10:28:15.633478098Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+2025-08-27T10:28:15.908009493Z file:///app/start-render.js:6
+2025-08-27T10:28:15.908047265Z const { spawn } = require('child_process');
+2025-08-27T10:28:15.908052036Z                   ^
+2025-08-27T10:28:15.908054416Z 
+2025-08-27T10:28:15.908057236Z ReferenceError: require is not defined in ES module scope, you can use import instead
+2025-08-27T10:28:15.908060446Z This file is being treated as an ES module because it has a '.js' file extension and '/app/package.json' contains "type": "module". To treat it as a CommonJS script, rename it to use the '.cjs' file extension.
+2025-08-27T10:28:15.908064106Z     at file:///app/start-render.js:6:19
+2025-08-27T10:28:15.908066836Z     at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+2025-08-27T10:28:15.908069306Z     at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+2025-08-27T10:28:15.908071857Z     at async loadESM (node:internal/process/esm_loader:34:7)
+2025-08-27T10:28:15.908074407Z     at async handleMainPromise (node:internal/modules/run_main:106:12)
+2025-08-27T10:28:15.908076637Z 
+2025-08-27T10:28:15.908078797Z Node.js v18.20.8
