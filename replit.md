@@ -45,7 +45,7 @@ The system supports multiple deployment options:
 
 Vite is used for frontend builds and esbuild for the backend. Environment variables manage configuration.
 
-**Recent Update (Aug 18, 2025)**: Added complete Render deployment configuration with health checks, proper PORT handling, and production startup scripts. The system is ready for deployment on Render with the same Neon PostgreSQL database.
+**Recent Update (Aug 27, 2025)**: Fixed Render deployment bundling issues by creating dedicated production server (`server/production.ts`) that avoids Vite dev dependencies. Updated render.yaml with correct build commands (`vite build && esbuild server/production.ts`) and start command (`node dist/production.js`). System now ready for successful Render deployment with identical functionality to Replit preview.
 
 ### Conditional Visibility
 The system supports conditional visibility for questions and sections within audit forms. Questions with a `controlledBy` property are shown based on the controlling question's answer. Sections with `controlsSection: true` are displayed based on their controlling question's answer.
