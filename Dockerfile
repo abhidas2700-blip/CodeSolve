@@ -37,5 +37,6 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/health || exit 1
 
-# Start the application with production server
-CMD ["node", "dist/production.js"]
+# Start with emergency startup script that handles both scenarios
+COPY start-render.js ./
+CMD ["node", "start-render.js"]
