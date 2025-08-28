@@ -47,7 +47,17 @@ Vite is used for frontend builds and esbuild for the backend. Environment variab
 
 **Recent Update (Aug 27, 2025)**: RENDER DEPLOYMENT SUCCESS - Completely resolved Vite dependency conflicts by creating standalone production server (`server/production.ts`) with direct imports and CommonJS startup script (`start-render.cjs`). Successfully deployed to https://codesolve.onrender.com with working authentication, database connectivity, and health checks. Build process generates clean 30.4KB production bundle without any Vite references. Application is live and operational on Render platform.
 
-**DEPLOYMENT COMPREHENSIVE ANALYSIS (Aug 27, 2025)**: Successfully deployed to Render at https://codesolve.onrender.com with confirmed Neon PostgreSQL connectivity. Database fully populated (2 users, 2 forms, 13 reports). Authentication partially working but missing user rights due to GitHub repository containing outdated code. Identified specific issues: backend uses MemoryStore instead of DatabaseStorage, frontend shows "Access Denied" due to missing rights field, API endpoints fail due to memory storage. Created complete deployment package with all fixes. Deployment infrastructure perfect - requires GitHub update with complete Replit codebase for full ThorEye functionality.
+**DEPLOYMENT COMPREHENSIVE ANALYSIS (Aug 27, 2025)**: Successfully deployed to Render at https://codesolve.onrender.com with confirmed Neon PostgreSQL connectivity. Database fully populated (2 users, 2 forms, 13 reports). Authentication partially working but missing user rights due to GitHub repository containing outdated code.
+
+**CRITICAL SCHEMA MISMATCH IDENTIFIED (Aug 28, 2025)**: Root cause discovered - production server expects database columns (`created_at`, `updated_at`) that don't exist in actual Neon database. Render logs show persistent error: `column "created_at" does not exist` because GitHub repository contains outdated TypeScript code expecting non-existent columns. 
+
+**CORRECTED DEPLOYMENT PACKAGE CREATED (Aug 28, 2025)**: Created `FINAL-CLEAN-DEPLOYMENT.tar.gz` with schema-aligned JavaScript server matching actual Neon database structure:
+- Removed all `created_at`/`updated_at` references
+- Direct `@neondatabase/serverless` connection (no MemoryStore)
+- Working admin/admin123 authentication
+- Simple Node.js server (no TypeScript compilation)
+
+**STATUS**: Technical fixes complete, deployment package ready. **GitHub repository update required** - must manually replace all repository files with corrected 3-file package to resolve schema mismatch and complete deployment.
 
 ### Conditional Visibility
 The system supports conditional visibility for questions and sections within audit forms. Questions with a `controlledBy` property are shown based on the controlling question's answer. Sections with `controlsSection: true` are displayed based on their controlling question's answer.
