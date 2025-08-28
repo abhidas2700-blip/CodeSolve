@@ -10,10 +10,8 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const path = require('path');
 
-// Configure Neon for serverless
 neonConfig.webSocketConstructor = ws;
 
-// Database schema
 const users = pgTable('users', {
   id: serial('id').primaryKey(),
   username: text('username').notNull().unique(),
@@ -46,7 +44,6 @@ const auditReports = pgTable('audit_reports', {
   percentage: text('percentage')
 });
 
-// Database setup
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL must be set');
 }

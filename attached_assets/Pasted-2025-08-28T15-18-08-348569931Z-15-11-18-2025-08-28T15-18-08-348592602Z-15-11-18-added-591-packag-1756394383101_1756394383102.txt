@@ -1,0 +1,60 @@
+2025-08-28T15:18:08.348569931Z #15 11.18 
+2025-08-28T15:18:08.348592602Z #15 11.18 added 591 packages, and audited 592 packages in 11s
+2025-08-28T15:18:08.348596151Z #15 11.18 
+2025-08-28T15:18:08.348600302Z #15 11.18 78 packages are looking for funding
+2025-08-28T15:18:08.348603192Z #15 11.18   run `npm fund` for details
+2025-08-28T15:18:08.348606172Z #15 11.24 
+2025-08-28T15:18:08.348609042Z #15 11.24 10 vulnerabilities (6 low, 2 moderate, 2 high)
+2025-08-28T15:18:08.348611832Z #15 11.24 
+2025-08-28T15:18:08.348614622Z #15 11.24 To address issues that do not require attention, run:
+2025-08-28T15:18:08.348618012Z #15 11.24   npm audit fix
+2025-08-28T15:18:08.348620832Z #15 11.24 
+2025-08-28T15:18:08.348623622Z #15 11.24 Some issues need review, and may require choosing
+2025-08-28T15:18:08.348626422Z #15 11.24 a different dependency.
+2025-08-28T15:18:08.348629262Z #15 11.24 
+2025-08-28T15:18:08.348632612Z #15 11.24 Run `npm audit` for details.
+2025-08-28T15:18:08.348636282Z #15 11.24 npm notice
+2025-08-28T15:18:08.348639802Z #15 11.24 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-08-28T15:18:08.348642602Z #15 11.24 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-08-28T15:18:08.348645412Z #15 11.24 npm notice To update run: npm install -g npm@11.5.2
+2025-08-28T15:18:08.348648262Z #15 11.24 npm notice
+2025-08-28T15:18:08.598993291Z #15 DONE 11.6s
+2025-08-28T15:18:08.599020901Z 
+2025-08-28T15:18:08.599028942Z #16 [stage-1 6/6] COPY start-render.cjs ./
+2025-08-28T15:18:09.050564824Z #16 DONE 0.3s
+2025-08-28T15:18:09.050586955Z 
+2025-08-28T15:18:09.050593675Z #17 exporting to docker image format
+2025-08-28T15:18:09.050598135Z #17 exporting layers
+2025-08-28T15:18:22.885525269Z #17 exporting layers 13.8s done
+2025-08-28T15:18:22.885592941Z #17 exporting manifest sha256:5f473816539d5cb9cca60f8b411b20361bbfc647897bb513a7e1f12acf7975f9 done
+2025-08-28T15:18:22.885602341Z #17 exporting config sha256:d69d64b8d397260720523363c17f60eb7c0e23fa48336a38f258a8046ac010b1 done
+2025-08-28T15:18:25.037282549Z #17 DONE 16.0s
+2025-08-28T15:18:25.037303589Z 
+2025-08-28T15:18:25.037311119Z #18 exporting cache to client directory
+2025-08-28T15:18:25.037317659Z #18 preparing build cache for export
+2025-08-28T15:18:46.894454808Z #18 writing cache manifest sha256:0c9383c06444a1011ad5d9b79e1efd4098bcf64550f84237d45db3bf6d8dc0c3 done
+2025-08-28T15:18:46.894479508Z #18 DONE 21.9s
+2025-08-28T15:18:47.965598991Z Pushing image to registry...
+2025-08-28T15:18:53.848788534Z Upload succeeded
+2025-08-28T15:18:57.089923009Z ==> Deploying...
+2025-08-28T15:19:07.799647122Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-08-28T15:19:07.80030133Z NODE_ENV: production
+2025-08-28T15:19:07.800335763Z PORT: 10000
+2025-08-28T15:19:07.800704184Z ✅ Using production server: /app/dist/production.js
+2025-08-28T15:19:07.800728496Z Starting server with: /app/dist/production.js
+2025-08-28T15:19:10.406691721Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-28T15:19:10.407990348Z No localStorage file found at /app/localStorage.json, starting with empty store
+2025-08-28T15:19:10.408298846Z Warning: connect.session() MemoryStore is not
+2025-08-28T15:19:10.408305936Z designed for a production environment, as it will leak
+2025-08-28T15:19:10.408308307Z memory, and will not scale past a single process.
+2025-08-28T15:19:10.741484495Z 3:19:10 PM [express] serving on 0.0.0.0:10000
+2025-08-28T15:19:18.033603557Z ==> Your service is live 🎉
+2025-08-28T15:19:18.061373304Z ==> 
+2025-08-28T15:19:18.086269761Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T15:19:18.111603069Z ==> 
+2025-08-28T15:19:18.137310497Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-28T15:19:18.163695834Z ==> 
+2025-08-28T15:19:18.189596262Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T15:19:22.163992218Z 3:19:22 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-28T15:19:22.667710394Z 3:19:22 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T15:19:32.613080543Z 3:19:32 PM [express] POST /api/login 401 in 1214ms :: {"error":"Invalid username or password"}
