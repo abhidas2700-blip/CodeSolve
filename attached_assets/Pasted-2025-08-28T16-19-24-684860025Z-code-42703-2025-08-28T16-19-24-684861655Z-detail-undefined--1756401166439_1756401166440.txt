@@ -1,0 +1,344 @@
+2025-08-28T16:19:24.684860025Z   code: '42703',
+2025-08-28T16:19:24.684861655Z   detail: undefined,
+2025-08-28T16:19:24.684863285Z   hint: undefined,
+2025-08-28T16:19:24.684864985Z   position: '72',
+2025-08-28T16:19:24.684866936Z   internalPosition: undefined,
+2025-08-28T16:19:24.684868656Z   internalQuery: undefined,
+2025-08-28T16:19:24.684871056Z   where: undefined,
+2025-08-28T16:19:24.684873726Z   schema: undefined,
+2025-08-28T16:19:24.684876586Z   table: undefined,
+2025-08-28T16:19:24.684879126Z   column: undefined,
+2025-08-28T16:19:24.684881726Z   dataType: undefined,
+2025-08-28T16:19:24.684884166Z   constraint: undefined,
+2025-08-28T16:19:24.684886847Z   file: 'parse_relation.c',
+2025-08-28T16:19:24.684889487Z   line: '3716',
+2025-08-28T16:19:24.684892017Z   routine: 'errorMissingColumn'
+2025-08-28T16:19:24.684894797Z }
+2025-08-28T16:19:24.687976056Z ThorEye server running on port 10000
+2025-08-28T16:19:24.688181279Z Database connected to Neon PostgreSQL
+2025-08-28T16:19:24.68818786Z Ready to serve ThorEye dashboard
+2025-08-28T16:19:24.83719949Z 4:19:24 PM [express] serving on 0.0.0.0:10000
+2025-08-28T16:19:24.837809379Z Error initializing admin: error: column "created_at" does not exist
+2025-08-28T16:19:24.83781764Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-08-28T16:19:24.83782113Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-08-28T16:19:24.8378251Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-08-28T16:19:24.837827891Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29) {
+2025-08-28T16:19:24.837830641Z   length: 110,
+2025-08-28T16:19:24.837833461Z   severity: 'ERROR',
+2025-08-28T16:19:24.837835981Z   code: '42703',
+2025-08-28T16:19:24.837838741Z   detail: undefined,
+2025-08-28T16:19:24.837841191Z   hint: undefined,
+2025-08-28T16:19:24.837843672Z   position: '72',
+2025-08-28T16:19:24.837846842Z   internalPosition: undefined,
+2025-08-28T16:19:24.837857072Z   internalQuery: undefined,
+2025-08-28T16:19:24.837859802Z   where: undefined,
+2025-08-28T16:19:24.837862423Z   schema: undefined,
+2025-08-28T16:19:24.837865003Z   table: undefined,
+2025-08-28T16:19:24.837867493Z   column: undefined,
+2025-08-28T16:19:24.837869873Z   dataType: undefined,
+2025-08-28T16:19:24.837872473Z   constraint: undefined,
+2025-08-28T16:19:24.837875083Z   file: 'parse_relation.c',
+2025-08-28T16:19:24.837877564Z   line: '3716',
+2025-08-28T16:19:24.837880074Z   routine: 'errorMissingColumn'
+2025-08-28T16:19:24.837882504Z }
+2025-08-28T16:19:29.053434707Z ==> Your service is live 🎉
+2025-08-28T16:19:29.081109345Z ==> 
+2025-08-28T16:19:29.108963712Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T16:19:29.13431137Z ==> 
+2025-08-28T16:19:29.160846507Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-28T16:19:29.188014605Z ==> 
+2025-08-28T16:19:29.214451572Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T16:20:05.362765446Z 4:20:05 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-28T16:20:05.661374149Z 4:20:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:20:05.974879254Z 4:20:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:20:06.515321243Z 4:20:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:20:10.773476643Z 4:20:10 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:21:05.411484459Z 4:21:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:21:05.944063083Z 4:21:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:21:06.230275502Z 4:21:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:21:06.535922067Z 4:21:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:22:05.294635404Z 4:22:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:22:05.593289954Z 4:22:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:22:05.895116139Z 4:22:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:22:06.224076667Z 4:22:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:22:06.596808654Z 4:22:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:23:05.359367883Z 4:23:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:23:05.649119214Z 4:23:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:23:05.97483876Z 4:23:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:23:06.270936881Z 4:23:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:23:06.570364658Z 4:23:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:05.28703989Z 4:24:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:05.586068248Z 4:24:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:05.881995375Z 4:24:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:06.185691575Z 4:24:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:06.623196497Z 4:24:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:24:30.407267997Z ==> Detected service running on port 10000
+2025-08-28T16:24:30.555193298Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-08-28T16:25:05.36770107Z 4:25:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:25:05.692156119Z 4:25:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:25:05.977268523Z 4:25:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:25:06.275287052Z 4:25:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:25:06.578322376Z 4:25:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:26:05.291675524Z 4:26:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:26:05.591187756Z 4:26:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:26:05.890034725Z 4:26:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:26:06.185390648Z 4:26:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:26:06.662271138Z 4:26:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:27:06.094609893Z 4:27:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:27:06.416462448Z 4:27:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:27:06.737318798Z 4:27:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:27:07.067185432Z 4:27:07 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:27:07.384064845Z 4:27:07 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:28:05.31021007Z 4:28:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:28:05.603714206Z 4:28:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:28:05.900953574Z 4:28:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:28:06.196230734Z 4:28:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:28:06.492504359Z 4:28:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:29:05.311341152Z 4:29:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:29:05.657423269Z 4:29:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:29:05.962388664Z 4:29:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:29:06.303938038Z 4:29:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:29:06.59419706Z 4:29:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:30:05.345292467Z 4:30:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:30:05.618535882Z 4:30:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:30:05.912436386Z 4:30:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:30:06.243348707Z 4:30:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:30:06.552433965Z 4:30:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:31:05.31523392Z 4:31:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:31:05.627600156Z 4:31:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:31:05.961490568Z 4:31:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:31:06.270986608Z 4:31:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:31:06.63156293Z 4:31:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:32:05.320917478Z 4:32:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:32:05.621319205Z 4:32:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:32:05.912428879Z 4:32:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:32:06.220310281Z 4:32:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:32:06.510992208Z 4:32:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:33:05.336929456Z 4:33:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:33:05.649717202Z 4:33:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:33:05.958439625Z 4:33:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:33:06.272613301Z 4:33:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:33:06.657959893Z 4:33:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:34:05.425318775Z 4:34:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:34:05.714838888Z 4:34:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:34:06.001657445Z 4:34:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:34:06.287757337Z 4:34:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:34:06.568317718Z 4:34:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:35:05.337914496Z 4:35:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:35:05.885626449Z 4:35:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:35:06.18689727Z 4:35:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:35:06.546041217Z 4:35:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:35:06.830331626Z 4:35:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:36:05.413920841Z 4:36:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:36:05.707748435Z 4:36:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:36:05.99745072Z 4:36:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:36:06.293979449Z 4:36:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:36:06.613355811Z 4:36:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:37:05.337694719Z 4:37:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:37:05.652310018Z 4:37:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:37:05.93832935Z 4:37:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:37:06.231279762Z 4:37:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:37:06.535242139Z 4:37:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:38:05.407952715Z 4:38:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:38:05.714914893Z 4:38:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:38:06.002522503Z 4:38:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:38:06.297738838Z 4:38:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:38:06.612747687Z 4:38:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:39:05.400130163Z 4:39:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:39:05.690295515Z 4:39:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:39:05.979149901Z 4:39:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:39:06.279395678Z 4:39:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:39:06.570297848Z 4:39:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:40:05.331266478Z 4:40:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:40:05.625484969Z 4:40:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:40:05.917602772Z 4:40:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:40:06.207280517Z 4:40:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:40:06.585671328Z 4:40:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:41:05.346467607Z 4:41:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:41:05.64909807Z 4:41:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:41:05.962685614Z 4:41:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:41:06.258563077Z 4:41:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:41:06.579418204Z 4:41:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:42:05.360281847Z 4:42:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:42:05.66145803Z 4:42:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:42:05.973450816Z 4:42:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:42:06.281652756Z 4:42:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:42:06.579621801Z 4:42:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:43:05.419782919Z 4:43:05 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-28T16:43:05.754732403Z 4:43:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:43:06.753235294Z 4:43:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:43:07.056851871Z 4:43:07 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:43:07.354427115Z 4:43:07 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:44:05.41355059Z 4:44:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:44:05.707167642Z 4:44:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:44:06.020070278Z 4:44:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:44:06.31340291Z 4:44:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:44:06.613673824Z 4:44:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:45:05.414765286Z 4:45:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:45:05.719602042Z 4:45:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:45:06.046852026Z 4:45:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:45:06.344164913Z 4:45:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:45:06.654260512Z 4:45:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:46:05.423465023Z 4:46:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:46:05.713817541Z 4:46:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:46:06.027810618Z 4:46:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:46:06.339033075Z 4:46:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:46:06.647039203Z 4:46:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:47:05.481968703Z 4:47:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:47:05.800884026Z 4:47:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:47:06.106642662Z 4:47:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:47:06.417016229Z 4:47:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:47:06.741493763Z 4:47:06 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-08-28T16:48:05.446525394Z 4:48:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:48:05.769994748Z 4:48:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:48:06.069840424Z 4:48:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:48:06.420482348Z 4:48:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:48:06.733055712Z 4:48:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:49:05.424842664Z 4:49:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:49:05.747085923Z 4:49:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:49:06.272971547Z 4:49:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:49:06.587739909Z 4:49:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:49:06.886834501Z 4:49:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:50:05.389313319Z 4:50:05 PM [express] GET /api/user 401 in 4ms :: {"error":"Not authenticated"}
+2025-08-28T16:50:05.745225337Z 4:50:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:50:06.030045613Z 4:50:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:50:06.329016881Z 4:50:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:50:06.711327199Z 4:50:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:51:05.367790711Z 4:51:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:51:05.689981407Z 4:51:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:51:06.018356105Z 4:51:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:51:06.378031894Z 4:51:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:51:06.667607034Z 4:51:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:52:05.540021232Z 4:52:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:52:05.872807943Z 4:52:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:52:06.173680845Z 4:52:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:52:06.464286436Z 4:52:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:52:06.765733915Z 4:52:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:53:05.352482071Z 4:53:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:53:05.665655668Z 4:53:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:53:05.967438143Z 4:53:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:53:06.279634867Z 4:53:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:53:06.719184103Z 4:53:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:54:05.371400492Z 4:54:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:54:05.676360249Z 4:54:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:54:05.982511101Z 4:54:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:54:06.277357472Z 4:54:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:54:06.574983778Z 4:54:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:55:05.43026365Z 4:55:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:55:05.755518294Z 4:55:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:55:06.067879087Z 4:55:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:55:06.365537805Z 4:55:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:55:06.654142042Z 4:55:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:56:05.399759793Z 4:56:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:56:05.747469011Z 4:56:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:56:06.051329758Z 4:56:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:56:06.340202042Z 4:56:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:56:06.719227593Z 4:56:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:57:05.562216545Z 4:57:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:57:05.875393699Z 4:57:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:57:06.165915225Z 4:57:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:57:06.457401161Z 4:57:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:57:06.755667095Z 4:57:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:58:05.371594753Z 4:58:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:58:05.668370714Z 4:58:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:58:06.00813104Z 4:58:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:58:06.295620543Z 4:58:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:58:06.612250072Z 4:58:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:59:05.588160785Z 4:59:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:59:05.876805818Z 4:59:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T16:59:06.163649817Z 4:59:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:59:06.458938921Z 4:59:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T16:59:06.750758116Z 4:59:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:00:05.523160705Z 5:00:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:00:05.818844481Z 5:00:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:00:06.123735691Z 5:00:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:00:06.419679395Z 5:00:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:00:06.71329958Z 5:00:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:01:05.454108193Z 5:01:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:01:05.748341115Z 5:01:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:01:06.044154386Z 5:01:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:01:06.351232893Z 5:01:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:01:06.655859153Z 5:01:06 PM [express] GET /api/user 401 in 3ms :: {"error":"Not authenticated"}
+2025-08-28T17:02:05.394212301Z 5:02:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:02:05.706712629Z 5:02:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:02:06.033551237Z 5:02:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:02:06.334617109Z 5:02:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:02:06.63329431Z 5:02:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:03:05.458818061Z 5:03:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:03:05.755711925Z 5:03:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:03:06.049433737Z 5:03:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:03:06.344919902Z 5:03:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:03:06.644420051Z 5:03:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:04:05.387982798Z 5:04:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:04:05.683604688Z 5:04:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:04:06.039820076Z 5:04:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:04:06.329447876Z 5:04:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:04:06.704922318Z 5:04:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:05:05.42382389Z 5:05:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:05:05.74735863Z 5:05:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:05:06.058715826Z 5:05:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:05:06.354675974Z 5:05:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:05:06.646130526Z 5:05:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:06:05.497344467Z 5:06:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:06:05.815691015Z 5:06:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:06:06.149057307Z 5:06:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:06:06.441904893Z 5:06:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:06:06.731954462Z 5:06:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:07:05.494749465Z 5:07:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:07:05.794837648Z 5:07:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:07:06.10559654Z 5:07:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:07:06.414724078Z 5:07:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:07:06.704364257Z 5:07:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:08:05.531955276Z 5:08:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:08:05.838667837Z 5:08:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:08:06.384736874Z 5:08:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:08:06.755257884Z 5:08:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:08:07.060519853Z 5:08:07 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:09:05.416725238Z 5:09:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:09:05.71597081Z 5:09:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:09:06.012845362Z 5:09:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:09:06.310261198Z 5:09:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:09:06.605942433Z 5:09:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:10:05.551168881Z 5:10:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:10:05.863465111Z 5:10:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:10:06.176114262Z 5:10:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:10:06.470606428Z 5:10:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:10:06.759770845Z 5:10:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:11:05.432375884Z 5:11:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:11:05.755711296Z 5:11:05 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:11:06.043961781Z 5:11:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:11:06.347333582Z 5:11:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:11:06.6365575Z 5:11:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:05.54517726Z 5:12:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:05.856021861Z 5:12:05 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:06.152249929Z 5:12:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:06.455013489Z 5:12:06 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:06.742498415Z 5:12:06 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:29.22879113Z 5:12:29 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:32.301590694Z 5:12:32 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:33.005679912Z 5:12:33 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-08-28T17:12:34.244240958Z Login attempt: admin
+2025-08-28T17:12:35.390565335Z Login error: error: column "created_at" does not exist
+2025-08-28T17:12:35.390621769Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-08-28T17:12:35.390627049Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-08-28T17:12:35.39064679Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-08-28T17:12:35.390649491Z     at async Strategy._verify (file:///app/dist/production.js:69:20) {
+2025-08-28T17:12:35.39065192Z   length: 110,
+2025-08-28T17:12:35.390655611Z   severity: 'ERROR',
+2025-08-28T17:12:35.390658891Z   code: '42703',
+2025-08-28T17:12:35.390661461Z   detail: undefined,
+2025-08-28T17:12:35.390663961Z   hint: undefined,
+2025-08-28T17:12:35.390666512Z   position: '72',
+2025-08-28T17:12:35.390669512Z   internalPosition: undefined,
+2025-08-28T17:12:35.390672142Z   internalQuery: undefined,
+2025-08-28T17:12:35.390674652Z   where: undefined,
+2025-08-28T17:12:35.390677232Z   schema: undefined,
+2025-08-28T17:12:35.390679722Z   table: undefined,
+2025-08-28T17:12:35.390682193Z   column: undefined,
+2025-08-28T17:12:35.390684813Z   dataType: undefined,
+2025-08-28T17:12:35.390687273Z   constraint: undefined,
+2025-08-28T17:12:35.390689673Z   file: 'parse_relation.c',
+2025-08-28T17:12:35.390692473Z   line: '3716',
+2025-08-28T17:12:35.390695133Z   routine: 'errorMissingColumn'
+2025-08-28T17:12:35.390697903Z }
+2025-08-28T17:12:35.391292651Z 5:12:35 PM [express] POST /api/login 500 in 1148ms :: {"error":"Internal server error"}
