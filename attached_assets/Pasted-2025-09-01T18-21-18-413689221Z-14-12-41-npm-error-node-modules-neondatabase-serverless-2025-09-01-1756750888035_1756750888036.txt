@@ -1,0 +1,50 @@
+2025-09-01T18:21:18.413689221Z #14 12.41 npm error node_modules/@neondatabase/serverless
+2025-09-01T18:21:18.413693401Z #14 12.41 npm error   @neondatabase/serverless@"^0.9.4" from the root project
+2025-09-01T18:21:18.413696601Z #14 12.41 npm error
+2025-09-01T18:21:18.413699471Z #14 12.41 npm error Could not resolve dependency:
+2025-09-01T18:21:18.413702861Z #14 12.41 npm error peerOptional @neondatabase/serverless@">=0.10.0" from drizzle-orm@0.39.3
+2025-09-01T18:21:18.413706322Z #14 12.41 npm error node_modules/drizzle-orm
+2025-09-01T18:21:18.413709282Z #14 12.41 npm error   drizzle-orm@"^0.39.1" from the root project
+2025-09-01T18:21:18.413712182Z #14 12.41 npm error
+2025-09-01T18:21:18.413715232Z #14 12.41 npm error Conflicting peer dependency: @neondatabase/serverless@0.10.4
+2025-09-01T18:21:18.413718232Z #14 12.41 npm error node_modules/@neondatabase/serverless
+2025-09-01T18:21:18.413721102Z #14 12.41 npm error   peerOptional @neondatabase/serverless@">=0.10.0" from drizzle-orm@0.39.3
+2025-09-01T18:21:18.413724022Z #14 12.41 npm error   node_modules/drizzle-orm
+2025-09-01T18:21:18.413726872Z #14 12.41 npm error     drizzle-orm@"^0.39.1" from the root project
+2025-09-01T18:21:18.413730402Z #14 12.41 npm error
+2025-09-01T18:21:18.413733322Z #14 12.41 npm error Fix the upstream dependency conflict, or retry
+2025-09-01T18:21:18.413736182Z #14 12.41 npm error this command with --force or --legacy-peer-deps
+2025-09-01T18:21:18.413739093Z #14 12.41 npm error to accept an incorrect (and potentially broken) dependency resolution.
+2025-09-01T18:21:18.413742083Z #14 12.41 npm error
+2025-09-01T18:21:18.413744903Z #14 12.41 npm error
+2025-09-01T18:21:18.413747683Z #14 12.41 npm error For a full report see:
+2025-09-01T18:21:18.413750683Z #14 12.41 npm error /root/.npm/_logs/2025-09-01T18_21_05_994Z-eresolve-report.txt
+2025-09-01T18:21:18.413753593Z #14 12.41 npm notice
+2025-09-01T18:21:18.413756343Z #14 12.41 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-09-01T18:21:18.413759993Z #14 12.41 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-09-01T18:21:18.413762883Z #14 12.41 npm notice To update run: npm install -g npm@11.5.2
+2025-09-01T18:21:18.413765793Z #14 12.41 npm notice
+2025-09-01T18:21:18.413769313Z #14 12.41 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T18_21_05_994Z-debug-0.log
+2025-09-01T18:21:18.773032523Z #14 ERROR: process "/bin/sh -c npm install --production" did not complete successfully: exit code: 1
+2025-09-01T18:21:18.773053334Z ------
+2025-09-01T18:21:18.773058064Z  > [stage-1 5/6] RUN npm install --production:
+2025-09-01T18:21:18.773061834Z 12.41 npm error
+2025-09-01T18:21:18.773065414Z 12.41 npm error
+2025-09-01T18:21:18.773069854Z 12.41 npm error For a full report see:
+2025-09-01T18:21:18.773074114Z 12.41 npm error /root/.npm/_logs/2025-09-01T18_21_05_994Z-eresolve-report.txt
+2025-09-01T18:21:18.773077614Z 12.41 npm notice
+2025-09-01T18:21:18.773081494Z 12.41 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-09-01T18:21:18.773085025Z 12.41 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-09-01T18:21:18.773088935Z 12.41 npm notice To update run: npm install -g npm@11.5.2
+2025-09-01T18:21:18.773092435Z 12.41 npm notice
+2025-09-01T18:21:18.773096645Z 12.41 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T18_21_05_994Z-debug-0.log
+2025-09-01T18:21:18.773100265Z ------
+2025-09-01T18:21:18.774199376Z Dockerfile:31
+2025-09-01T18:21:18.774211857Z --------------------
+2025-09-01T18:21:18.774216197Z   29 |     
+2025-09-01T18:21:18.774234067Z   30 |     # Install only production dependencies
+2025-09-01T18:21:18.774238567Z   31 | >>> RUN npm install --production
+2025-09-01T18:21:18.774241267Z   32 |     
+2025-09-01T18:21:18.774243917Z   33 |     # Expose the port the app runs on
+2025-09-01T18:21:18.774246478Z --------------------
+2025-09-01T18:21:18.774249727Z error: failed to solve: process "/bin/sh -c npm install --production" did not complete successfully: exit code: 1
