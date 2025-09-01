@@ -1,0 +1,83 @@
+2025-09-01T17:51:50.452881321Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T17:51:50.452886111Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T17:51:50.452889551Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T17:51:50.452893912Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29)
+2025-09-01T17:51:50.452896762Z     at async startServer (file:///app/dist/production.js:246:5) {
+2025-09-01T17:51:50.452899532Z   length: 110,
+2025-09-01T17:51:50.452902632Z   severity: 'ERROR',
+2025-09-01T17:51:50.452905423Z   code: '42703',
+2025-09-01T17:51:50.452908093Z   detail: undefined,
+2025-09-01T17:51:50.452910553Z   hint: undefined,
+2025-09-01T17:51:50.452913133Z   position: '72',
+2025-09-01T17:51:50.452916453Z   internalPosition: undefined,
+2025-09-01T17:51:50.452918893Z   internalQuery: undefined,
+2025-09-01T17:51:50.452921484Z   where: undefined,
+2025-09-01T17:51:50.452924054Z   schema: undefined,
+2025-09-01T17:51:50.452926504Z   table: undefined,
+2025-09-01T17:51:50.452928924Z   column: undefined,
+2025-09-01T17:51:50.452931454Z   dataType: undefined,
+2025-09-01T17:51:50.452934225Z   constraint: undefined,
+2025-09-01T17:51:50.452936685Z   file: 'parse_relation.c',
+2025-09-01T17:51:50.452939435Z   line: '3716',
+2025-09-01T17:51:50.452941975Z   routine: 'errorMissingColumn'
+2025-09-01T17:51:50.452956766Z }
+2025-09-01T17:51:50.455770344Z ThorEye server running on port 10000
+2025-09-01T17:51:50.455799136Z Database connected to Neon PostgreSQL
+2025-09-01T17:51:50.455889722Z Ready to serve ThorEye dashboard
+2025-09-01T17:51:50.616484412Z 5:51:50 PM [express] serving on 0.0.0.0:10000
+2025-09-01T17:51:50.617921413Z Error initializing admin: error: column "created_at" does not exist
+2025-09-01T17:51:50.617937564Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T17:51:50.617941915Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T17:51:50.617944755Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T17:51:50.617946625Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29) {
+2025-09-01T17:51:50.617948345Z   length: 110,
+2025-09-01T17:51:50.617950665Z   severity: 'ERROR',
+2025-09-01T17:51:50.617952295Z   code: '42703',
+2025-09-01T17:51:50.617954036Z   detail: undefined,
+2025-09-01T17:51:50.617956076Z   hint: undefined,
+2025-09-01T17:51:50.617957676Z   position: '72',
+2025-09-01T17:51:50.617959756Z   internalPosition: undefined,
+2025-09-01T17:51:50.617973847Z   internalQuery: undefined,
+2025-09-01T17:51:50.617976887Z   where: undefined,
+2025-09-01T17:51:50.617979707Z   schema: undefined,
+2025-09-01T17:51:50.617982258Z   table: undefined,
+2025-09-01T17:51:50.617985018Z   column: undefined,
+2025-09-01T17:51:50.617987808Z   dataType: undefined,
+2025-09-01T17:51:50.617989538Z   constraint: undefined,
+2025-09-01T17:51:50.617991158Z   file: 'parse_relation.c',
+2025-09-01T17:51:50.617992798Z   line: '3716',
+2025-09-01T17:51:50.617994438Z   routine: 'errorMissingColumn'
+2025-09-01T17:51:50.617996148Z }
+2025-09-01T17:51:55.599421724Z ==> Your service is live 🎉
+2025-09-01T17:51:55.626816471Z ==> 
+2025-09-01T17:51:55.650808589Z ==> ///////////////////////////////////////////////////////////
+2025-09-01T17:51:55.674884326Z ==> 
+2025-09-01T17:51:55.699505604Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-09-01T17:51:55.723409722Z ==> 
+2025-09-01T17:51:55.74757732Z ==> ///////////////////////////////////////////////////////////
+2025-09-01T17:51:59.902914452Z 5:51:59 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-09-01T17:52:06.316534851Z Login attempt: admin
+2025-09-01T17:52:06.973160079Z Login error: error: column "created_at" does not exist
+2025-09-01T17:52:06.973187221Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T17:52:06.973191782Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T17:52:06.973197592Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T17:52:06.973200372Z     at async Strategy._verify (file:///app/dist/production.js:69:20) {
+2025-09-01T17:52:06.973202982Z   length: 110,
+2025-09-01T17:52:06.973206343Z   severity: 'ERROR',
+2025-09-01T17:52:06.973209213Z   code: '42703',
+2025-09-01T17:52:06.973211693Z   detail: undefined,
+2025-09-01T17:52:06.973214003Z   hint: undefined,
+2025-09-01T17:52:06.973216473Z   position: '72',
+2025-09-01T17:52:06.973219514Z   internalPosition: undefined,
+2025-09-01T17:52:06.973222214Z   internalQuery: undefined,
+2025-09-01T17:52:06.973224944Z   where: undefined,
+2025-09-01T17:52:06.973228124Z   schema: undefined,
+2025-09-01T17:52:06.973230044Z   table: undefined,
+2025-09-01T17:52:06.973231704Z   column: undefined,
+2025-09-01T17:52:06.973233755Z   dataType: undefined,
+2025-09-01T17:52:06.973235415Z   constraint: undefined,
+2025-09-01T17:52:06.973237045Z   file: 'parse_relation.c',
+2025-09-01T17:52:06.973238685Z   line: '3716',
+2025-09-01T17:52:06.973240315Z   routine: 'errorMissingColumn'
+2025-09-01T17:52:06.973242095Z }
+2025-09-01T17:52:06.974063883Z 5:52:06 PM [express] POST /api/login 500 in 657ms :: {"error":"Internal server error"}
