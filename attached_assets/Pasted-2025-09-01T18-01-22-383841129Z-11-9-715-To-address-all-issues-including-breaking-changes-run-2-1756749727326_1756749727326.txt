@@ -1,0 +1,50 @@
+2025-09-01T18:01:22.383841129Z #11 9.715 To address all issues (including breaking changes), run:
+2025-09-01T18:01:22.383844629Z #11 9.715   npm audit fix --force
+2025-09-01T18:01:22.383848089Z #11 9.715 
+2025-09-01T18:01:22.383851479Z #11 9.715 Run `npm audit` for details.
+2025-09-01T18:01:22.383855909Z #11 9.716 npm notice
+2025-09-01T18:01:22.383859349Z #11 9.716 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-09-01T18:01:22.38386282Z #11 9.716 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-09-01T18:01:22.3838662Z #11 9.716 npm notice To update run: npm install -g npm@11.5.2
+2025-09-01T18:01:22.38386966Z #11 9.716 npm notice
+2025-09-01T18:01:33.197087057Z #11 DONE 20.6s
+2025-09-01T18:01:33.34798959Z 
+2025-09-01T18:01:33.348010321Z #12 [builder 6/7] COPY . .
+2025-09-01T18:01:33.499001586Z #12 DONE 0.2s
+2025-09-01T18:01:33.499022076Z 
+2025-09-01T18:01:33.499027427Z #13 [builder 7/7] RUN npx vite build
+2025-09-01T18:01:34.400538592Z #13 0.838 failed to load config from /app/vite.config.ts
+2025-09-01T18:01:34.400556272Z #13 0.839 error during build:
+2025-09-01T18:01:34.400561072Z #13 0.839 Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/vite.config.ts.timestamp-1756749694250-3c0924f5f75af.mjs
+2025-09-01T18:01:34.400564832Z #13 0.839     at new NodeError (node:internal/errors:405:5)
+2025-09-01T18:01:34.400568793Z #13 0.839     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-09-01T18:01:34.400572243Z #13 0.839     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-09-01T18:01:34.400575693Z #13 0.839     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-09-01T18:01:34.400579683Z #13 0.839     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-09-01T18:01:34.400594943Z #13 0.839     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-09-01T18:01:34.400597373Z #13 0.839     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-09-01T18:01:34.400599493Z #13 0.839     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-09-01T18:01:34.400601744Z #13 0.839     at link (node:internal/modules/esm/module_job:75:36)
+2025-09-01T18:01:34.664303041Z #13 ERROR: process "/bin/sh -c npx vite build" did not complete successfully: exit code: 1
+2025-09-01T18:01:34.732773953Z ------
+2025-09-01T18:01:34.732812164Z  > [builder 7/7] RUN npx vite build:
+2025-09-01T18:01:34.732820764Z 0.839 Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@vitejs/plugin-react' imported from /app/vite.config.ts.timestamp-1756749694250-3c0924f5f75af.mjs
+2025-09-01T18:01:34.732826175Z 0.839     at new NodeError (node:internal/errors:405:5)
+2025-09-01T18:01:34.732831044Z 0.839     at packageResolve (node:internal/modules/esm/resolve:916:9)
+2025-09-01T18:01:34.732835185Z 0.839     at moduleResolve (node:internal/modules/esm/resolve:973:20)
+2025-09-01T18:01:34.732839345Z 0.839     at defaultResolve (node:internal/modules/esm/resolve:1206:11)
+2025-09-01T18:01:34.732844745Z 0.839     at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:404:12)
+2025-09-01T18:01:34.732848855Z 0.839     at ModuleLoader.resolve (node:internal/modules/esm/loader:373:25)
+2025-09-01T18:01:34.732853635Z 0.839     at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:250:38)
+2025-09-01T18:01:34.732856735Z 0.839     at ModuleWrap.<anonymous> (node:internal/modules/esm/module_job:76:39)
+2025-09-01T18:01:34.732859555Z 0.839     at link (node:internal/modules/esm/module_job:75:36)
+2025-09-01T18:01:34.732862365Z ------
+2025-09-01T18:01:34.73419028Z Dockerfile:16
+2025-09-01T18:01:34.734249212Z --------------------
+2025-09-01T18:01:34.734257382Z   14 |     
+2025-09-01T18:01:34.734261702Z   15 |     # Build the frontend only
+2025-09-01T18:01:34.734266413Z   16 | >>> RUN npx vite build
+2025-09-01T18:01:34.734270473Z   17 |     
+2025-09-01T18:01:34.734274683Z   18 |     # Production stage - use a clean image for running the app
+2025-09-01T18:01:34.734278503Z --------------------
+2025-09-01T18:01:34.734282743Z error: failed to solve: process "/bin/sh -c npx vite build" did not complete successfully: exit code: 1

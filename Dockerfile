@@ -4,10 +4,9 @@ FROM node:18-alpine as builder
 # Working directory in the container
 WORKDIR /app
 
-# Copy package files for build stage
-COPY package.dev.json ./package.json
-COPY package-lock.json ./
-RUN npm install --legacy-peer-deps
+# Copy package files for build stage - use minimal build dependencies
+COPY package.build.json ./package.json
+RUN npm install
 
 # Copy the rest of the application
 COPY . .
