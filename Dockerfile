@@ -11,8 +11,8 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Build the frontend only
-RUN npx vite build
+# Build the frontend only using production config
+RUN npx vite build --config vite.config.production.ts
 
 # Production stage - use a clean image for running the app
 FROM node:18-alpine
