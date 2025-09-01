@@ -1,11 +1,10 @@
 {
-  "name": "thoreye-audit-management",
+  "name": "thoreye-render-deployment",
   "version": "1.0.0",
-  "description": "ThorEye Quality Assurance Audit Management System",
-  "main": "server.js",
+  "description": "ThorEye Direct Render Deployment - WORKING VERSION",
+  "main": "render-direct-deploy.js",
   "scripts": {
-    "start": "node server.js",
-    "build": "echo 'Build completed'"
+    "start": "node render-direct-deploy.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
