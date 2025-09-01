@@ -1,7 +1,7 @@
 const express = require('express');
 const { Pool, neonConfig } = require('@neondatabase/serverless');
 const { drizzle } = require('drizzle-orm/neon-serverless');
-const { pgTable, serial, text, jsonb, timestamp, boolean } = require('drizzle-orm/pg-core');
+const { pgTable, serial, text, jsonb, boolean } = require('drizzle-orm/pg-core');
 const { eq } = require('drizzle-orm');
 const ws = require('ws');
 const bcrypt = require('bcrypt');
@@ -12,6 +12,7 @@ const path = require('path');
 
 neonConfig.webSocketConstructor = ws;
 
+// Database schema - matches your ACTUAL Neon database structure
 const users = pgTable('users', {
   id: serial('id').primaryKey(),
   username: text('username').notNull().unique(),
@@ -40,16 +41,29 @@ const auditReports = pgTable('audit_reports', {
   percentage: text('percentage')
 });
 
+const auditSamples = pgTable('audit_samples', {
+  id: serial('id').primaryKey(),
+  sampleId: text('sample_id').notNull().unique(),
+  customerName: text('customer_name').notNull(),
+  ticketId: text('ticket_id').notNull(),
+  formType: text('form_type').notNull(),
+  priority: text('priority').default('medium'),
+  status: text('status').default('pending'),
+  metadata: jsonb('metadata'),
+  uploadedBy: serial('uploaded_by')
+});
+
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL must be set');
 }
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle(pool, { schema: { users, auditForms, auditReports } });
+const db = drizzle(pool, { schema: { users, auditForms, auditReports, auditSamples } });
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname)));
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'thor-eye-secret-2025',
@@ -128,6 +142,7 @@ async function initializeAdmin() {
   }
 }
 
+// Authentication routes
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
   const user = req.user;
   console.log('Login successful for:', user.username);
@@ -154,6 +169,7 @@ app.post('/api/logout', (req, res) => {
   });
 });
 
+// API routes
 app.get('/api/users', async (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
   
@@ -193,6 +209,19 @@ app.get('/api/forms', async (req, res) => {
   }
 });
 
+app.get('/api/audit-samples', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'Not authenticated' });
+  
+  try {
+    const samples = await db.select().from(auditSamples);
+    console.log('Retrieved samples:', samples.length);
+    res.json(samples);
+  } catch (error) {
+    console.error('Error fetching samples:', error);
+    res.status(500).json({ error: 'Failed to fetch samples' });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
@@ -201,6 +230,7 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Serve dashboard for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });

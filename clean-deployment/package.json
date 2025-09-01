@@ -4,8 +4,7 @@
   "description": "ThorEye Quality Assurance Audit Management System",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "build": "echo 'Build completed'"
+    "start": "node server.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.9.0",
