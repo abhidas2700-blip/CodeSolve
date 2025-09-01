@@ -1,0 +1,134 @@
+2025-09-01T18:28:12.944127154Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 20.97MB / 156.86MB 0.2s
+2025-09-01T18:28:13.095203239Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 41.94MB / 156.86MB 0.3s
+2025-09-01T18:28:13.245881526Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 57.67MB / 156.86MB 0.5s
+2025-09-01T18:28:13.396065958Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 77.59MB / 156.86MB 0.6s
+2025-09-01T18:28:13.546999514Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 94.37MB / 156.86MB 0.8s
+2025-09-01T18:28:13.69724622Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 115.34MB / 156.86MB 0.9s
+2025-09-01T18:28:13.848212888Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 131.07MB / 156.86MB 1.1s
+2025-09-01T18:28:13.998653529Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 150.99MB / 156.86MB 1.2s
+2025-09-01T18:28:14.299654358Z #16 sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 156.86MB / 156.86MB 1.5s done
+2025-09-01T18:28:14.299674769Z #16 extracting sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412
+2025-09-01T18:28:25.421497529Z #16 extracting sha256:282036a23aeb5515153870c866b32a8944d22d86c9790bfd9faf7ff780056412 11.1s done
+2025-09-01T18:28:25.421523361Z #16 sha256:e36ecdbf07cf094c56363f560591664d8f2b16cb812ad9eddf5095ca392ea335 892B / 892B done
+2025-09-01T18:28:25.421528671Z #16 extracting sha256:e36ecdbf07cf094c56363f560591664d8f2b16cb812ad9eddf5095ca392ea335
+2025-09-01T18:28:28.834518564Z #16 extracting sha256:e36ecdbf07cf094c56363f560591664d8f2b16cb812ad9eddf5095ca392ea335 3.4s done
+2025-09-01T18:28:28.834546316Z #16 CACHED
+2025-09-01T18:28:28.834552186Z 
+2025-09-01T18:28:28.834558636Z #17 exporting to docker image format
+2025-09-01T18:28:28.834565167Z #17 exporting layers done
+2025-09-01T18:28:28.834569547Z #17 exporting manifest sha256:f286cd50f0a63ceaa6dbdd3db7d87640a0dde1644ff8a776dc5103562b3465bc 0.0s done
+2025-09-01T18:28:28.834573188Z #17 exporting config sha256:d46af2d5cb72ba9c779f2cde900edf5207efb80faed91fe713435acd317c20f4 0.0s done
+2025-09-01T18:28:31.206342111Z #17 DONE 2.3s
+2025-09-01T18:28:31.206364602Z 
+2025-09-01T18:28:31.206369832Z #18 exporting cache to client directory
+2025-09-01T18:28:31.206373983Z #18 preparing build cache for export
+2025-09-01T18:28:31.746432976Z #18 writing cache manifest sha256:4fe96f0de13f43df49e9609d2c427a629af5533c536b2cfd7b1266db21f09593 0.0s done
+2025-09-01T18:28:31.746482479Z #18 DONE 0.6s
+2025-09-01T18:28:33.581466621Z Pushing image to registry...
+2025-09-01T18:28:34.279097099Z Upload succeeded
+2025-09-01T18:28:35.863856999Z ==> Deploying...
+2025-09-01T18:28:48.628315064Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-09-01T18:28:48.629117117Z NODE_ENV: production
+2025-09-01T18:28:48.629142108Z PORT: 10000
+2025-09-01T18:28:48.629494788Z ✅ Using production server: /app/dist/production.js
+2025-09-01T18:28:48.629510809Z Starting server with: /app/dist/production.js
+2025-09-01T18:28:51.230587144Z Warning: connect.session() MemoryStore is not
+2025-09-01T18:28:51.230610964Z designed for a production environment, as it will leak
+2025-09-01T18:28:51.230613614Z memory, and will not scale past a single process.
+2025-09-01T18:28:51.232808898Z Checking for admin user...
+2025-09-01T18:28:51.234247929Z ThorEye starting...
+2025-09-01T18:28:51.23426581Z Environment: production
+2025-09-01T18:28:51.234309551Z Database URL configured: Yes
+2025-09-01T18:28:51.234320071Z Checking for admin user...
+2025-09-01T18:28:52.385801403Z Error initializing admin: error: column "created_at" does not exist
+2025-09-01T18:28:52.385819113Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T18:28:52.385822554Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T18:28:52.385825374Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T18:28:52.385828864Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29)
+2025-09-01T18:28:52.385830994Z     at async startServer (file:///app/dist/production.js:246:5) {
+2025-09-01T18:28:52.385833144Z   length: 110,
+2025-09-01T18:28:52.385835834Z   severity: 'ERROR',
+2025-09-01T18:28:52.385838224Z   code: '42703',
+2025-09-01T18:28:52.385840324Z   detail: undefined,
+2025-09-01T18:28:52.385842704Z   hint: undefined,
+2025-09-01T18:28:52.385844784Z   position: '72',
+2025-09-01T18:28:52.385847704Z   internalPosition: undefined,
+2025-09-01T18:28:52.385849874Z   internalQuery: undefined,
+2025-09-01T18:28:52.385852074Z   where: undefined,
+2025-09-01T18:28:52.385866395Z   schema: undefined,
+2025-09-01T18:28:52.385868775Z   table: undefined,
+2025-09-01T18:28:52.385870915Z   column: undefined,
+2025-09-01T18:28:52.385872975Z   dataType: undefined,
+2025-09-01T18:28:52.385875045Z   constraint: undefined,
+2025-09-01T18:28:52.385877175Z   file: 'parse_relation.c',
+2025-09-01T18:28:52.385879285Z   line: '3716',
+2025-09-01T18:28:52.385881435Z   routine: 'errorMissingColumn'
+2025-09-01T18:28:52.385883475Z }
+2025-09-01T18:28:52.389010886Z ThorEye server running on port 10000
+2025-09-01T18:28:52.389538931Z Database connected to Neon PostgreSQL
+2025-09-01T18:28:52.389547231Z Ready to serve ThorEye dashboard
+2025-09-01T18:28:52.545360654Z 6:28:52 PM [express] serving on 0.0.0.0:10000
+2025-09-01T18:28:52.547120145Z Error initializing admin: error: column "created_at" does not exist
+2025-09-01T18:28:52.547147166Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T18:28:52.547151296Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T18:28:52.547154566Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T18:28:52.547157046Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29) {
+2025-09-01T18:28:52.547159446Z   length: 110,
+2025-09-01T18:28:52.547162507Z   severity: 'ERROR',
+2025-09-01T18:28:52.547165417Z   code: '42703',
+2025-09-01T18:28:52.547167897Z   detail: undefined,
+2025-09-01T18:28:52.547170447Z   hint: undefined,
+2025-09-01T18:28:52.547173167Z   position: '72',
+2025-09-01T18:28:52.547176237Z   internalPosition: undefined,
+2025-09-01T18:28:52.547190267Z   internalQuery: undefined,
+2025-09-01T18:28:52.547192998Z   where: undefined,
+2025-09-01T18:28:52.547195598Z   schema: undefined,
+2025-09-01T18:28:52.547198638Z   table: undefined,
+2025-09-01T18:28:52.547201178Z   column: undefined,
+2025-09-01T18:28:52.547203718Z   dataType: undefined,
+2025-09-01T18:28:52.547206078Z   constraint: undefined,
+2025-09-01T18:28:52.547208418Z   file: 'parse_relation.c',
+2025-09-01T18:28:52.547210708Z   line: '3716',
+2025-09-01T18:28:52.547213338Z   routine: 'errorMissingColumn'
+2025-09-01T18:28:52.547215708Z }
+2025-09-01T18:28:57.535845717Z ==> Your service is live 🎉
+2025-09-01T18:28:57.565074004Z ==> 
+2025-09-01T18:28:57.591071571Z ==> ///////////////////////////////////////////////////////////
+2025-09-01T18:28:57.615565749Z ==> 
+2025-09-01T18:28:57.639959646Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-09-01T18:28:57.664243974Z ==> 
+2025-09-01T18:28:57.690316502Z ==> ///////////////////////////////////////////////////////////
+2025-09-01T18:29:37.88008879Z 6:29:37 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-09-01T18:30:37.940877216Z 6:30:37 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-09-01T18:31:37.888505732Z 6:31:37 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-09-01T18:32:37.964689442Z 6:32:37 PM [express] GET /api/user 401 in 0ms :: {"error":"Not authenticated"}
+2025-09-01T18:33:38.02877682Z 6:33:38 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-09-01T18:33:59.779196093Z ==> Detected service running on port 10000
+2025-09-01T18:33:59.854441575Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-09-01T18:34:26.320791378Z 6:34:26 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-09-01T18:34:31.580235873Z Login attempt: admin
+2025-09-01T18:34:32.308716871Z Login error: error: column "created_at" does not exist
+2025-09-01T18:34:32.308741212Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T18:34:32.308745182Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T18:34:32.308748722Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T18:34:32.308751572Z     at async Strategy._verify (file:///app/dist/production.js:69:20) {
+2025-09-01T18:34:32.308754432Z   length: 110,
+2025-09-01T18:34:32.308757812Z   severity: 'ERROR',
+2025-09-01T18:34:32.308760873Z   code: '42703',
+2025-09-01T18:34:32.308763713Z   detail: undefined,
+2025-09-01T18:34:32.308766903Z   hint: undefined,
+2025-09-01T18:34:32.308769653Z   position: '72',
+2025-09-01T18:34:32.308772823Z   internalPosition: undefined,
+2025-09-01T18:34:32.308775643Z   internalQuery: undefined,
+2025-09-01T18:34:32.308778393Z   where: undefined,
+2025-09-01T18:34:32.308781153Z   schema: undefined,
+2025-09-01T18:34:32.308783953Z   table: undefined,
+2025-09-01T18:34:32.308786723Z   column: undefined,
+2025-09-01T18:34:32.308789483Z   dataType: undefined,
+2025-09-01T18:34:32.308792223Z   constraint: undefined,
+2025-09-01T18:34:32.308795043Z   file: 'parse_relation.c',
+2025-09-01T18:34:32.308797854Z   line: '3716',
+2025-09-01T18:34:32.308800614Z   routine: 'errorMissingColumn'
+2025-09-01T18:34:32.308803404Z }
+2025-09-01T18:34:32.309509524Z 6:34:32 PM [express] POST /api/login 500 in 730ms :: {"error":"Internal server error"}
+2025-09-01T18:34:38.882411771Z 6:34:38 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
