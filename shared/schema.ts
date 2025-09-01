@@ -24,8 +24,9 @@ export const auditForms = pgTable("audit_forms", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   sections: json("sections").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  createdBy: integer("created_by"),
+  settings: json("settings"),
 });
 
 export const insertAuditFormSchema = createInsertSchema(auditForms).pick({
