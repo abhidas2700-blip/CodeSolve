@@ -4,9 +4,10 @@ FROM node:18-alpine as builder
 # Working directory in the container
 WORKDIR /app
 
-# Install dependencies with dev dependencies first (needed for build)
-COPY package*.json ./
-RUN npm install
+# Copy package files for build stage
+COPY package.dev.json ./package.json
+COPY package-lock.json ./
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application
 COPY . .
@@ -28,7 +29,7 @@ COPY --from=builder /app/dist ./dist
 COPY package.production.json ./package.json
 
 # Install only production dependencies
-RUN npm install
+RUN npm install --production
 
 # Expose the port the app runs on
 EXPOSE 10000

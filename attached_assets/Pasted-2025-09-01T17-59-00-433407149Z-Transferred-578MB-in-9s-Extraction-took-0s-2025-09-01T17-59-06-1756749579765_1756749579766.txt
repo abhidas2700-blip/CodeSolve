@@ -1,0 +1,115 @@
+2025-09-01T17:59:00.433407149Z ==> Transferred 578MB in 9s. Extraction took 0s.
+2025-09-01T17:59:06.058190423Z #1 [internal] load build definition from Dockerfile
+2025-09-01T17:59:06.208639683Z #1 transferring dockerfile: 1.05kB done
+2025-09-01T17:59:06.208661733Z #1 DONE 0.0s
+2025-09-01T17:59:06.208664193Z 
+2025-09-01T17:59:06.208667574Z #2 [internal] load metadata for docker.io/library/node:18-alpine
+2025-09-01T17:59:06.35935231Z #2 ...
+2025-09-01T17:59:06.35937295Z 
+2025-09-01T17:59:06.35937791Z #3 [auth] library/node:pull render-prod/docker-mirror-repository/library/node:pull token for us-west1-docker.pkg.dev
+2025-09-01T17:59:06.359382201Z #3 DONE 0.0s
+2025-09-01T17:59:06.509640115Z 
+2025-09-01T17:59:06.509663885Z #2 [internal] load metadata for docker.io/library/node:18-alpine
+2025-09-01T17:59:06.845834314Z #2 DONE 0.6s
+2025-09-01T17:59:06.845855124Z 
+2025-09-01T17:59:06.845859304Z #4 [internal] load .dockerignore
+2025-09-01T17:59:06.845863474Z #4 transferring context: 166B done
+2025-09-01T17:59:06.845866074Z #4 DONE 0.0s
+2025-09-01T17:59:06.845868504Z 
+2025-09-01T17:59:06.845871904Z #5 importing cache manifest from local:10184376943740069868
+2025-09-01T17:59:06.845875485Z #5 inferred cache manifest type: application/vnd.oci.image.index.v1+json done
+2025-09-01T17:59:06.845878545Z #5 DONE 0.0s
+2025-09-01T17:59:06.845880955Z 
+2025-09-01T17:59:06.845884425Z #6 [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-09-01T17:59:06.845887105Z #6 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.0s done
+2025-09-01T17:59:06.845889575Z #6 DONE 0.0s
+2025-09-01T17:59:06.845892165Z 
+2025-09-01T17:59:06.845894645Z #7 [internal] load build context
+2025-09-01T17:59:06.996368236Z #7 transferring context: 5.88MB 0.1s done
+2025-09-01T17:59:06.996386356Z #7 DONE 0.1s
+2025-09-01T17:59:06.996389806Z 
+2025-09-01T17:59:06.996393656Z #8 [builder 2/6] WORKDIR /app
+2025-09-01T17:59:06.996396956Z #8 sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 3.64MB / 3.64MB 0.0s done
+2025-09-01T17:59:06.996400126Z #8 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870
+2025-09-01T17:59:07.146787794Z #8 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0.1s done
+2025-09-01T17:59:07.297369278Z #8 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 16.78MB / 40.01MB 0.2s
+2025-09-01T17:59:07.441680784Z #8 sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 40.01MB / 40.01MB 0.4s done
+2025-09-01T17:59:07.592615797Z #8 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e
+2025-09-01T17:59:09.08496307Z #8 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 1.6s done
+2025-09-01T17:59:09.1923598Z #8 sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 1.26MB / 1.26MB 0.0s done
+2025-09-01T17:59:09.192378661Z #8 extracting sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0.1s done
+2025-09-01T17:59:09.192382791Z #8 sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 446B / 446B done
+2025-09-01T17:59:09.342649366Z #8 extracting sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0.0s done
+2025-09-01T17:59:09.342675926Z #8 sha256:0ed32084fadde396718c0cd5ba35782ec009a47e85b42c27829774a6b8c27370 92B / 92B done
+2025-09-01T17:59:09.342682636Z #8 extracting sha256:0ed32084fadde396718c0cd5ba35782ec009a47e85b42c27829774a6b8c27370 0.0s done
+2025-09-01T17:59:09.342688576Z #8 CACHED
+2025-09-01T17:59:09.342694057Z 
+2025-09-01T17:59:09.342699907Z #9 [builder 3/6] COPY package*.json ./
+2025-09-01T17:59:09.342723308Z #9 DONE 0.0s
+2025-09-01T17:59:09.342725908Z 
+2025-09-01T17:59:09.342728178Z #10 [builder 4/6] RUN npm install
+2025-09-01T17:59:23.472613844Z #10 14.13 npm error code ERESOLVE
+2025-09-01T17:59:23.472634265Z #10 14.13 npm error ERESOLVE could not resolve
+2025-09-01T17:59:23.472639234Z #10 14.13 npm error
+2025-09-01T17:59:23.472643295Z #10 14.13 npm error While resolving: thoreye-audit-management@1.0.0
+2025-09-01T17:59:23.472646845Z #10 14.13 npm error Found: drizzle-orm@0.39.1
+2025-09-01T17:59:23.472650905Z #10 14.13 npm error node_modules/drizzle-orm
+2025-09-01T17:59:23.472654355Z #10 14.13 npm error   drizzle-orm@"^0.33.0" from the root project
+2025-09-01T17:59:23.472658005Z #10 14.13 npm error   peer drizzle-orm@">=0.36.0" from drizzle-zod@0.7.0
+2025-09-01T17:59:23.472661465Z #10 14.13 npm error   node_modules/drizzle-zod
+2025-09-01T17:59:23.472664865Z #10 14.13 npm error
+2025-09-01T17:59:23.472668895Z #10 14.13 npm error Could not resolve dependency:
+2025-09-01T17:59:23.472672555Z #10 14.13 npm error drizzle-orm@"^0.33.0" from the root project
+2025-09-01T17:59:23.472675966Z #10 14.13 npm error
+2025-09-01T17:59:23.472679376Z #10 14.13 npm error Conflicting peer dependency: react@19.1.1
+2025-09-01T17:59:23.472682756Z #10 14.13 npm error node_modules/react
+2025-09-01T17:59:23.472686166Z #10 14.13 npm error   peer react@"^19.1.0" from react-native@0.80.2
+2025-09-01T17:59:23.472689576Z #10 14.13 npm error   node_modules/react-native
+2025-09-01T17:59:23.472693496Z #10 14.13 npm error     peer react-native@"*" from @op-engineering/op-sqlite@15.0.1
+2025-09-01T17:59:23.472696876Z #10 14.13 npm error     node_modules/@op-engineering/op-sqlite
+2025-09-01T17:59:23.472700336Z #10 14.13 npm error       peerOptional @op-engineering/op-sqlite@">=2" from drizzle-orm@0.33.0
+2025-09-01T17:59:23.472703727Z #10 14.13 npm error       node_modules/drizzle-orm
+2025-09-01T17:59:23.472707136Z #10 14.13 npm error         drizzle-orm@"^0.33.0" from the root project
+2025-09-01T17:59:23.472710517Z #10 14.13 npm error     peer react-native@"*" from expo-sqlite@15.2.14
+2025-09-01T17:59:23.472714017Z #10 14.13 npm error     node_modules/expo-sqlite
+2025-09-01T17:59:23.472717437Z #10 14.13 npm error       peerOptional expo-sqlite@">=13.2.0" from drizzle-orm@0.33.0
+2025-09-01T17:59:23.472721017Z #10 14.13 npm error       node_modules/drizzle-orm
+2025-09-01T17:59:23.472724467Z #10 14.13 npm error         drizzle-orm@"^0.33.0" from the root project
+2025-09-01T17:59:23.472728837Z #10 14.13 npm error     4 more (expo, @expo/dom-webview, @expo/metro-runtime, react-native-webview)
+2025-09-01T17:59:23.472732617Z #10 14.13 npm error
+2025-09-01T17:59:23.472736017Z #10 14.13 npm error Fix the upstream dependency conflict, or retry
+2025-09-01T17:59:23.472739457Z #10 14.13 npm error this command with --force or --legacy-peer-deps
+2025-09-01T17:59:23.472742877Z #10 14.13 npm error to accept an incorrect (and potentially broken) dependency resolution.
+2025-09-01T17:59:23.472746298Z #10 14.13 npm error
+2025-09-01T17:59:23.472749708Z #10 14.13 npm error
+2025-09-01T17:59:23.472755338Z #10 14.13 npm error For a full report see:
+2025-09-01T17:59:23.472758878Z #10 14.13 npm error /root/.npm/_logs/2025-09-01T17_59_09_404Z-eresolve-report.txt
+2025-09-01T17:59:23.472762318Z #10 14.14 npm notice
+2025-09-01T17:59:23.472765708Z #10 14.14 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-09-01T17:59:23.472769088Z #10 14.14 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-09-01T17:59:23.472772528Z #10 14.14 npm notice To update run: npm install -g npm@11.5.2
+2025-09-01T17:59:23.472775909Z #10 14.14 npm notice
+2025-09-01T17:59:23.472788819Z #10 14.14 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T17_59_09_404Z-debug-0.log
+2025-09-01T17:59:23.646686622Z #10 ERROR: process "/bin/sh -c npm install" did not complete successfully: exit code: 1
+2025-09-01T17:59:23.646700493Z ------
+2025-09-01T17:59:23.646704503Z  > [builder 4/6] RUN npm install:
+2025-09-01T17:59:23.646707503Z 14.13 npm error
+2025-09-01T17:59:23.646710513Z 14.13 npm error
+2025-09-01T17:59:23.646713323Z 14.13 npm error For a full report see:
+2025-09-01T17:59:23.646716783Z 14.13 npm error /root/.npm/_logs/2025-09-01T17_59_09_404Z-eresolve-report.txt
+2025-09-01T17:59:23.646719593Z 14.14 npm notice
+2025-09-01T17:59:23.646723343Z 14.14 npm notice New major version of npm available! 10.8.2 -> 11.5.2
+2025-09-01T17:59:23.646728654Z 14.14 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+2025-09-01T17:59:23.646733554Z 14.14 npm notice To update run: npm install -g npm@11.5.2
+2025-09-01T17:59:23.646738234Z 14.14 npm notice
+2025-09-01T17:59:23.646743444Z 14.14 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T17_59_09_404Z-debug-0.log
+2025-09-01T17:59:23.646747834Z ------
+2025-09-01T17:59:23.64873538Z Dockerfile:9
+2025-09-01T17:59:23.648748441Z --------------------
+2025-09-01T17:59:23.648752101Z    7 |     # Install dependencies with dev dependencies first (needed for build)
+2025-09-01T17:59:23.648755671Z    8 |     COPY package*.json ./
+2025-09-01T17:59:23.648758461Z    9 | >>> RUN npm install
+2025-09-01T17:59:23.648761481Z   10 |     
+2025-09-01T17:59:23.648765101Z   11 |     # Copy the rest of the application
+2025-09-01T17:59:23.648767911Z --------------------
+2025-09-01T17:59:23.648771381Z error: failed to solve: process "/bin/sh -c npm install" did not complete successfully: exit code: 1
