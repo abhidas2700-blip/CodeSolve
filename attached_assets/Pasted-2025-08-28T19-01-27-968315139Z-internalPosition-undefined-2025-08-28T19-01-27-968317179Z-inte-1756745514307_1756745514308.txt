@@ -1,0 +1,50 @@
+2025-08-28T19:01:27.968315139Z   internalPosition: undefined,
+2025-08-28T19:01:27.968317179Z   internalQuery: undefined,
+2025-08-28T19:01:27.968319089Z   where: undefined,
+2025-08-28T19:01:27.968321079Z   schema: undefined,
+2025-08-28T19:01:27.968323439Z   table: undefined,
+2025-08-28T19:01:27.968325499Z   column: undefined,
+2025-08-28T19:01:27.96834643Z   dataType: undefined,
+2025-08-28T19:01:27.96834896Z   constraint: undefined,
+2025-08-28T19:01:27.96835118Z   file: 'parse_relation.c',
+2025-08-28T19:01:27.9683533Z   line: '3716',
+2025-08-28T19:01:27.96835558Z   routine: 'errorMissingColumn'
+2025-08-28T19:01:27.96835757Z }
+2025-08-28T19:01:27.972117629Z ThorEye server running on port 10000
+2025-08-28T19:01:27.97214716Z Database connected to Neon PostgreSQL
+2025-08-28T19:01:27.972216441Z Ready to serve ThorEye dashboard
+2025-08-28T19:01:28.047347698Z 7:01:27 PM [express] serving on 0.0.0.0:10000
+2025-08-28T19:01:32.362232857Z ==> Your service is live 🎉
+2025-08-28T19:01:32.393524153Z ==> 
+2025-08-28T19:01:32.422228999Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T19:01:32.457429394Z ==> 
+2025-08-28T19:01:32.484249621Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-08-28T19:01:32.512066777Z ==> 
+2025-08-28T19:01:32.539926953Z ==> ///////////////////////////////////////////////////////////
+2025-08-28T19:01:48.416286118Z 7:01:48 PM [express] GET /api/user 401 in 3ms :: {"error":"Not authenticated"}
+2025-08-28T19:01:48.705655989Z 7:01:48 PM [express] GET /api/user 401 in 1ms :: {"error":"Not authenticated"}
+2025-08-28T19:01:53.601490996Z Login attempt: admin
+2025-08-28T19:01:54.266212485Z Login error: error: column "created_at" does not exist
+2025-08-28T19:01:54.266245545Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-08-28T19:01:54.266251796Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-08-28T19:01:54.266256696Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-08-28T19:01:54.266261326Z     at async Strategy._verify (file:///app/dist/production.js:69:20) {
+2025-08-28T19:01:54.266265656Z   length: 110,
+2025-08-28T19:01:54.266271476Z   severity: 'ERROR',
+2025-08-28T19:01:54.266275866Z   code: '42703',
+2025-08-28T19:01:54.266280026Z   detail: undefined,
+2025-08-28T19:01:54.266284326Z   hint: undefined,
+2025-08-28T19:01:54.266288446Z   position: '72',
+2025-08-28T19:01:54.266292986Z   internalPosition: undefined,
+2025-08-28T19:01:54.266296926Z   internalQuery: undefined,
+2025-08-28T19:01:54.266300946Z   where: undefined,
+2025-08-28T19:01:54.266305006Z   schema: undefined,
+2025-08-28T19:01:54.266309437Z   table: undefined,
+2025-08-28T19:01:54.266313437Z   column: undefined,
+2025-08-28T19:01:54.266317697Z   dataType: undefined,
+2025-08-28T19:01:54.266321497Z   constraint: undefined,
+2025-08-28T19:01:54.266325447Z   file: 'parse_relation.c',
+2025-08-28T19:01:54.266329477Z   line: '3716',
+2025-08-28T19:01:54.266333577Z   routine: 'errorMissingColumn'
+2025-08-28T19:01:54.266337777Z }
+2025-08-28T19:01:54.26705134Z 7:01:54 PM [express] POST /api/login 500 in 666ms :: {"error":"Internal server error"}
