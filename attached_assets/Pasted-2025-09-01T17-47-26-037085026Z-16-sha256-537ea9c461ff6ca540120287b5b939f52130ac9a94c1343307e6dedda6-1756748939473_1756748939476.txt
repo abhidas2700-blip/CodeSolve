@@ -1,0 +1,100 @@
+2025-09-01T17:47:26.037085026Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 20.97MB / 156.85MB 0.2s
+2025-09-01T17:47:26.187635707Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 37.84MB / 156.85MB 0.3s
+2025-09-01T17:47:26.338155168Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 58.72MB / 156.85MB 0.5s
+2025-09-01T17:47:26.488365592Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 74.45MB / 156.85MB 0.6s
+2025-09-01T17:47:26.638645127Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 95.42MB / 156.85MB 0.8s
+2025-09-01T17:47:26.789996716Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 111.15MB / 156.85MB 0.9s
+2025-09-01T17:47:26.94021679Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 131.07MB / 156.85MB 1.1s
+2025-09-01T17:47:27.091272892Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 148.90MB / 156.85MB 1.2s
+2025-09-01T17:47:27.198316781Z #16 sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 156.85MB / 156.85MB 1.5s done
+2025-09-01T17:47:27.348412762Z #16 extracting sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927
+2025-09-01T17:47:37.374340967Z #16 extracting sha256:537ea9c461ff6ca540120287b5b939f52130ac9a94c1343307e6dedda679d927 10.2s done
+2025-09-01T17:47:37.525468471Z #16 sha256:be1b04a88b3f39b605a3a42168811068471fc70e7070060c4f5c7c194b0bdf93 891B / 891B done
+2025-09-01T17:47:37.525496182Z #16 extracting sha256:be1b04a88b3f39b605a3a42168811068471fc70e7070060c4f5c7c194b0bdf93
+2025-09-01T17:47:37.644501124Z #16 extracting sha256:be1b04a88b3f39b605a3a42168811068471fc70e7070060c4f5c7c194b0bdf93 0.2s done
+2025-09-01T17:47:37.644522225Z #16 CACHED
+2025-09-01T17:47:37.830366464Z 
+2025-09-01T17:47:37.830394544Z #17 exporting to docker image format
+2025-09-01T17:47:37.830401425Z #17 exporting layers done
+2025-09-01T17:47:37.831014957Z #17 exporting manifest sha256:ac0ea19a7a607787d5fc3fa34b7f3e26a7305433f87e1d7e6add6548b571a0f6 done
+2025-09-01T17:47:37.831055478Z #17 exporting config sha256:3de97a87bfe5b579653bb87ada02f6fbe31be8729d322ae66890ea0e1b647549 done
+2025-09-01T17:47:39.859624686Z #17 DONE 2.2s
+2025-09-01T17:47:39.859642227Z 
+2025-09-01T17:47:39.859645507Z #18 exporting cache to client directory
+2025-09-01T17:47:39.859647417Z #18 preparing build cache for export
+2025-09-01T17:47:40.415450258Z #18 writing cache manifest sha256:9fe545b26dd3675ab06d1f62b94b54dedcc478f736112ae166fc8906c48b7c26 0.0s done
+2025-09-01T17:47:40.415467518Z #18 DONE 0.5s
+2025-09-01T17:47:45.015747016Z Pushing image to registry...
+2025-09-01T17:47:45.713549067Z Upload succeeded
+2025-09-01T17:47:50.289882476Z ==> Deploying...
+2025-09-01T17:48:02.57801135Z 🚀 ThorEye Emergency Startup Script (CommonJS)
+2025-09-01T17:48:02.578733217Z NODE_ENV: production
+2025-09-01T17:48:02.57885736Z PORT: 10000
+2025-09-01T17:48:02.57931006Z ✅ Using production server: /app/dist/production.js
+2025-09-01T17:48:02.579403252Z Starting server with: /app/dist/production.js
+2025-09-01T17:48:04.989582272Z Warning: connect.session() MemoryStore is not
+2025-09-01T17:48:04.989606232Z designed for a production environment, as it will leak
+2025-09-01T17:48:04.989609703Z memory, and will not scale past a single process.
+2025-09-01T17:48:04.991780232Z Checking for admin user...
+2025-09-01T17:48:04.993176864Z ThorEye starting...
+2025-09-01T17:48:04.993197845Z Environment: production
+2025-09-01T17:48:04.993252516Z Database URL configured: Yes
+2025-09-01T17:48:04.993257136Z Checking for admin user...
+2025-09-01T17:48:06.098284575Z Error initializing admin: error: column "created_at" does not exist
+2025-09-01T17:48:06.098315085Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T17:48:06.098319485Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T17:48:06.098322775Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T17:48:06.098327085Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29) {
+2025-09-01T17:48:06.098329725Z   length: 110,
+2025-09-01T17:48:06.098333165Z   severity: 'ERROR',
+2025-09-01T17:48:06.098335616Z   code: '42703',
+2025-09-01T17:48:06.098338066Z   detail: undefined,
+2025-09-01T17:48:06.098341066Z   hint: undefined,
+2025-09-01T17:48:06.098344066Z   position: '72',
+2025-09-01T17:48:06.098346666Z   internalPosition: undefined,
+2025-09-01T17:48:06.098348376Z   internalQuery: undefined,
+2025-09-01T17:48:06.098349996Z   where: undefined,
+2025-09-01T17:48:06.098351846Z   schema: undefined,
+2025-09-01T17:48:06.098353456Z   table: undefined,
+2025-09-01T17:48:06.098355076Z   column: undefined,
+2025-09-01T17:48:06.098356816Z   dataType: undefined,
+2025-09-01T17:48:06.098361466Z   constraint: undefined,
+2025-09-01T17:48:06.098363176Z   file: 'parse_relation.c',
+2025-09-01T17:48:06.098364836Z   line: '3716',
+2025-09-01T17:48:06.098366856Z   routine: 'errorMissingColumn'
+2025-09-01T17:48:06.098369776Z }
+2025-09-01T17:48:06.13136074Z Error initializing admin: error: column "created_at" does not exist
+2025-09-01T17:48:06.131389591Z     at file:///app/node_modules/@neondatabase/serverless/index.mjs:1345:74
+2025-09-01T17:48:06.131394041Z     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-09-01T17:48:06.131397151Z     at async NeonPreparedQuery.execute (file:///app/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+2025-09-01T17:48:06.131399531Z     at async initializeDefaultUser (file:///app/dist/production.js:112:29)
+2025-09-01T17:48:06.131401711Z     at async startServer (file:///app/dist/production.js:246:5) {
+2025-09-01T17:48:06.131403921Z   length: 110,
+2025-09-01T17:48:06.131407371Z   severity: 'ERROR',
+2025-09-01T17:48:06.131409841Z   code: '42703',
+2025-09-01T17:48:06.131412172Z   detail: undefined,
+2025-09-01T17:48:06.131414381Z   hint: undefined,
+2025-09-01T17:48:06.131416561Z   position: '72',
+2025-09-01T17:48:06.131419261Z   internalPosition: undefined,
+2025-09-01T17:48:06.131421442Z   internalQuery: undefined,
+2025-09-01T17:48:06.131423522Z   where: undefined,
+2025-09-01T17:48:06.131425642Z   schema: undefined,
+2025-09-01T17:48:06.131427732Z   table: undefined,
+2025-09-01T17:48:06.131429932Z   column: undefined,
+2025-09-01T17:48:06.131451212Z   dataType: undefined,
+2025-09-01T17:48:06.131453972Z   constraint: undefined,
+2025-09-01T17:48:06.131456362Z   file: 'parse_relation.c',
+2025-09-01T17:48:06.131459173Z   line: '3716',
+2025-09-01T17:48:06.131461342Z   routine: 'errorMissingColumn'
+2025-09-01T17:48:06.131463563Z }
+2025-09-01T17:48:06.134304907Z ThorEye server running on port 10000
+2025-09-01T17:48:06.13443253Z Database connected to Neon PostgreSQL
+2025-09-01T17:48:06.134453441Z Ready to serve ThorEye dashboard
+2025-09-01T17:48:06.303742049Z 5:48:06 PM [express] serving on 0.0.0.0:10000
+2025-09-01T17:48:11.693955668Z ==> Your service is live 🎉
+2025-09-01T17:48:11.722414585Z ==> 
+2025-09-01T17:48:11.746644663Z ==> ///////////////////////////////////////////////////////////
+2025-09-01T17:48:11.77531029Z ==> 
+2025-09-01T17:48:11.799964458Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-09-01T17:48:11.824535705Z ==> 
+2025-09-01T17:48:11.851186523Z ==> ///////////////////////////////////////////////////////////
