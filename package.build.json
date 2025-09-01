@@ -47,6 +47,7 @@
     "postcss": "^8.4.41",
     "date-fns": "^3.6.0",
     "drizzle-zod": "^0.7.0",
-    "@types/node": "^22.5.4"
+    "@types/node": "^22.5.4",
+    "xlsx": "^0.18.5"
   }
 }
