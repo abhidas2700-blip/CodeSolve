@@ -4,15 +4,15 @@ FROM node:18-alpine as builder
 # Working directory in the container
 WORKDIR /app
 
-# Copy complete package for build stage with all dependencies
-COPY package.complete.json ./package.json
+# Install dependencies with dev dependencies first (needed for build)
+COPY package*.json ./
 RUN npm install
 
 # Copy the rest of the application
 COPY . .
 
-# Build the frontend only using production config
-RUN npx vite build --config vite.config.production.ts
+# Build the application with production server
+RUN npx vite build && npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
 
 # Production stage - use a clean image for running the app
 FROM node:18-alpine
@@ -25,10 +25,10 @@ WORKDIR /app
 
 # Copy only the built application and production dependencies
 COPY --from=builder /app/dist ./dist
-COPY package.production.json ./package.json
+COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --production
+RUN npm install --omit=dev
 
 # Expose the port the app runs on
 EXPOSE 10000
@@ -37,6 +37,6 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/health || exit 1
 
-# Start with production server
-COPY server.js ./
-CMD ["node", "server.js"]
+# Start with emergency startup script that handles both scenarios  
+COPY start-render.cjs ./
+CMD ["node", "start-render.cjs"]

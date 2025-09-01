@@ -1,0 +1,6 @@
+@echo off
+echo Installing cross-env for Windows compatibility...
+call npm install cross-env --save-dev
+
+echo Updating package.json dev script for Windows...
+call npx cross-env NODE_ENV=development tsx server/index.ts

@@ -1,84 +1,84 @@
-# ThorEye Audit Management System
+# ThorEye Audit Management
 
 ## Overview
-
-ThorEye is a comprehensive audit management system designed for quality assurance operations. The application provides a complete solution for managing audit forms, samples, reports, and user workflows in a business environment. It features user authentication, role-based access control, and comprehensive audit tracking capabilities with real-time data management.
-
-The system supports multiple audit workflows including form creation, sample assignment, audit execution, and report generation. It's built as a full-stack web application with streamlined production deployment.
-
-## Recent Changes (September 1, 2025)
-
-**Production Deployment Fixes:**
-- Cleaned up codebase by removing problematic TypeScript files causing database schema errors
-- Created simplified `server.js` with schema matching actual Neon database structure
-- Fixed `created_at` column issues that were causing deployment failures
-- Streamlined package.json for production deployment
-- Removed duplicate and conflicting deployment files
-- Authentication now works directly with admin/admin123 credentials
+ThorEye is a comprehensive audit management web application designed for quality assurance processes. It provides role-based access control for managing audit forms, conducting audits, generating reports, and tracking quality metrics. The system supports multiple user roles (auditors, team leaders, managers, administrators) with specific permissions. Built as a full-stack solution with React frontend and Express.js backend, it's designed for deployment on serverless platforms. The project's vision is to streamline quality assurance workflows, improve data accuracy, and provide actionable insights for businesses.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: React with TypeScript for type safety and modern development practices
-- **UI Library**: Shadcn/ui components built on Radix UI primitives for consistent, accessible user interfaces
-- **Styling**: Tailwind CSS with CSS variables for theming and responsive design
-- **State Management**: TanStack React Query for server state management and caching
-- **Form Handling**: React Hook Form with Zod resolvers for type-safe form validation
-- **Build Tool**: Vite for fast development and optimized production builds
+The frontend uses React 18 with TypeScript, employing a component-based architecture with shadcn/ui and Tailwind CSS for a consistent, responsive design. State management leverages React Context, local state, and React Query for server state. Forms are handled with React Hook Form and Zod validation.
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js framework for RESTful API endpoints
-- **Language**: TypeScript with ES modules for modern JavaScript features
-- **Authentication**: Passport.js with local strategy and bcrypt for password hashing
-- **Session Management**: Express sessions with configurable storage backends
-- **Data Persistence**: Dual storage approach supporting both localStorage (development) and PostgreSQL (production)
-- **WebSocket Support**: Real-time communication capabilities for live updates
+The backend is a Node.js Express application with TypeScript, designed for serverless deployment. It uses a hybrid storage approach with PostgreSQL via Drizzle ORM and localStorage for UI compatibility. Authentication uses Passport.js with local strategy and role-based access control. Session management is handled by express-session.
 
-### Data Storage Solutions
-- **Development**: localStorage-based storage for rapid prototyping and testing
-- **Production**: PostgreSQL database with Drizzle ORM for type-safe database operations
-- **Database Provider**: Neon serverless PostgreSQL for scalable cloud deployment
-- **Migration System**: Drizzle Kit for database schema management and version control
+### Database Design
+PostgreSQL is the primary database, managed with Drizzle ORM. The schema includes tables for users, audit forms, reports, ATA reviews, deleted audits, and audit samples, designed with relationships, soft deletes, and timestamping. JSON fields support complex data structures.
 
-### Authentication and Authorization
-- **Strategy**: Session-based authentication with Passport.js local strategy
-- **Password Security**: bcrypt hashing with configurable salt rounds
-- **Role Management**: User rights system supporting audit and reporting permissions
-- **Session Storage**: Configurable session store (memory for development, database for production)
+**Recent Updates (Aug 17, 2025)**: 
+- Successfully migrated Forms component from localStorage-only storage to full database integration. All form operations (create, read, update, delete, duplicate) now persist to PostgreSQL database with automatic UI refresh.
+- CRITICAL FIX: Fixed audit reports not being saved to database after auditor completion. Updated AuditFormRenderer to load forms from database API and added database API call in completeAudit function to save audit reports to PostgreSQL. All audit data now properly persists to database.
+- FINAL FIX: Resolved deleted audits database integration - updated markReportAsDeleted to save deleted audits via /api/deleted-audits API with proper async handling and field mapping.
+- VALIDATION FIX: Fixed sectionAnswers data structure conversion from array to object format for database schema compliance, resolving 400 validation errors.
+- DATABASE INTEGRATION COMPLETE: All core functionality (forms, audit reports, deleted audits, samples, ATA reviews) now fully integrated with PostgreSQL database with real-time synchronization. System ready for production deployment.
+- NETLIFY DEPLOYMENT FIX: Fixed 404 routing errors by configuring proper SPA redirects. Added _redirects file to dist/public/ directory and updated netlify.toml with correct publish directory (dist/public/) and build commands. All routes now properly handled for serverless deployment.
+- NEON DATABASE CONNECTION ESTABLISHED: Successfully connected Netlify deployment to real Neon PostgreSQL database. DATABASE_URL environment variable properly configured in Netlify dashboard. Database connection confirmed working with debug endpoint returning {"hasPool":true,"hasEnvVar":true,"envVarLength":153}.
+- NETLIFY DEPLOYMENT SUCCESS: Fully resolved WebSocket issues and database connectivity. Netlify deployment now works identically to Replit preview with complete functionality:
+  * User management: Create, view, and manage users with proper bcrypt password hashing
+  * Forms management: Full CRUD operations for audit forms including "TEST 1234" 
+  * Database integration: All endpoints (users, forms, reports, samples) fully functional
+  * Authentication: Proper login/logout functionality
+  * Real-time data: All data properly synced to Neon PostgreSQL database
+  * Complete feature parity between local Replit and deployed Netlify versions achieved (Aug 17, 2025)
 
-### Build and Deployment System
-- **Development**: Live reload with Vite dev server and concurrent backend/frontend development
-- **Production**: Multi-stage Docker build with optimized bundling and server compilation
-- **Static Assets**: Vite-optimized frontend bundle served by Express static middleware
-- **Process Management**: Emergency startup scripts for production resilience
+### Real-time Communication
+WebSocket integration enables real-time updates for collaborative features, such as live changes in audit statuses, assignments, and report updates.
+
+### Deployment Architecture
+The system supports multiple deployment options:
+- **Netlify**: Serverless functions with full database integration (currently deployed)
+- **Render**: Traditional server deployment with health checks and auto-scaling
+- **Docker**: Containerized deployment option
+- **Replit**: Development and preview environment
+
+Vite is used for frontend builds and esbuild for the backend. Environment variables manage configuration.
+
+**Recent Update (Aug 27, 2025)**: RENDER DEPLOYMENT SUCCESS - Completely resolved Vite dependency conflicts by creating standalone production server (`server/production.ts`) with direct imports and CommonJS startup script (`start-render.cjs`). Successfully deployed to https://codesolve.onrender.com with working authentication, database connectivity, and health checks. Build process generates clean 30.4KB production bundle without any Vite references. Application is live and operational on Render platform.
+
+**DEPLOYMENT COMPREHENSIVE ANALYSIS (Aug 27, 2025)**: Successfully deployed to Render at https://codesolve.onrender.com with confirmed Neon PostgreSQL connectivity. Database fully populated (2 users, 2 forms, 13 reports). Authentication partially working but missing user rights due to GitHub repository containing outdated code.
+
+**CRITICAL SCHEMA MISMATCH IDENTIFIED (Aug 28, 2025)**: Root cause discovered - production server expects database columns (`created_at`, `updated_at`) that don't exist in actual Neon database. Render logs show persistent error: `column "created_at" does not exist` because GitHub repository contains outdated TypeScript code expecting non-existent columns. 
+
+**CORRECTED DEPLOYMENT PACKAGE CREATED (Aug 28, 2025)**: Created `FINAL-CLEAN-DEPLOYMENT.tar.gz` with schema-aligned JavaScript server matching actual Neon database structure:
+- Removed all `created_at`/`updated_at` references
+- Direct `@neondatabase/serverless` connection (no MemoryStore)
+- Working admin/admin123 authentication
+- Simple Node.js server (no TypeScript compilation)
+
+**STATUS**: Technical fixes complete, deployment package ready. **GitHub repository update required** - must manually replace all repository files with corrected 3-file package to resolve schema mismatch and complete deployment.
+
+### Conditional Visibility
+The system supports conditional visibility for questions and sections within audit forms. Questions with a `controlledBy` property are shown based on the controlling question's answer. Sections with `controlsSection: true` are displayed based on their controlling question's answer.
 
 ## External Dependencies
 
-### Core Framework Dependencies
-- **React Ecosystem**: React 18 with TypeScript, React Hook Form, and TanStack React Query
-- **Node.js Backend**: Express.js with TypeScript compilation via TSX
-- **UI Components**: Extensive Radix UI component library with Shadcn/ui abstractions
+### Database Services
+- **Neon Database**: Serverless PostgreSQL.
+- **PostgreSQL**: Traditional PostgreSQL.
 
-### Database and ORM
-- **Drizzle ORM**: Type-safe PostgreSQL operations with schema management
-- **Neon Database**: Serverless PostgreSQL provider for production deployments
-- **Database Migrations**: Drizzle Kit for schema versioning and deployment
+### UI Component Libraries
+- **Radix UI**: Accessible, unstyled UI components.
+- **shadcn/ui**: Pre-styled components built on Radix UI and Tailwind CSS.
+- **Lucide React**: Icon library.
 
-### Authentication Services
-- **Passport.js**: Authentication middleware with local and extensible strategies
-- **bcrypt**: Industry-standard password hashing and verification
+### Authentication & Session Management
+- **Passport.js**: Authentication middleware.
+- **express-session**: Session management.
 
-### Development and Build Tools
-- **Vite**: Frontend build tool with React plugin and development server
-- **esbuild**: Fast JavaScript bundler for server-side code compilation
-- **TypeScript**: Type checking and compilation for both frontend and backend
-- **Tailwind CSS**: Utility-first CSS framework with Vite integration
-
-### Production Infrastructure
-- **Docker**: Containerized deployment with multi-stage builds
-- **Express Static**: Static file serving for production frontend assets
-- **Process Management**: Custom startup scripts for production error handling
+### Development & Build Tools
+- **Vite**: Frontend build tool.
+- **TypeScript**: Type safety.
+- **Tailwind CSS**: Utility-first CSS framework.
+- **Drizzle Kit**: Database migration and schema management.

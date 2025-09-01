@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: thoreye-audit-system
+    env: node
+    region: singapore
+    plan: starter
+    buildCommand: npm install && vite build && esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+    startCommand: NODE_ENV=production node dist/production.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: PORT
+        value: 10000
+    autoDeploy: true
+    rootDir: .
+    scaling:
+      minInstances: 1
+      maxInstances: 3
