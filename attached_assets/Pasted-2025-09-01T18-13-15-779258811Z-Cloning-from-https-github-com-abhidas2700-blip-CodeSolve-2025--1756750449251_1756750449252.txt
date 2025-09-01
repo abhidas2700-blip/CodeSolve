@@ -1,0 +1,99 @@
+2025-09-01T18:13:15.779258811Z ==> Cloning from https://github.com/abhidas2700-blip/CodeSolve
+2025-09-01T18:13:16.333620698Z ==> Checking out commit a8df873f328c24b904ef04f74af8b512a2782a57 in branch main
+2025-09-01T18:13:17.321752139Z ==> Downloading cache...
+2025-09-01T18:13:24.10820955Z ==> Still downloading cache...
+2025-09-01T18:13:25.580581595Z ==> No cache found, continuing without cache
+2025-09-01T18:13:27.098004541Z #1 [internal] load build definition from Dockerfile
+2025-09-01T18:13:27.098039453Z #1 transferring dockerfile: 1.15kB done
+2025-09-01T18:13:27.098043614Z #1 DONE 0.0s
+2025-09-01T18:13:27.098046324Z 
+2025-09-01T18:13:27.098049514Z #2 [internal] load metadata for docker.io/library/node:18-alpine
+2025-09-01T18:13:27.249087675Z #2 ...
+2025-09-01T18:13:27.249100926Z 
+2025-09-01T18:13:27.249104047Z #3 [auth] library/node:pull render-prod/docker-mirror-repository/library/node:pull token for us-west1-docker.pkg.dev
+2025-09-01T18:13:27.249107277Z #3 DONE 0.0s
+2025-09-01T18:13:27.399447736Z 
+2025-09-01T18:13:27.399472167Z #2 [internal] load metadata for docker.io/library/node:18-alpine
+2025-09-01T18:13:27.539574591Z #2 DONE 0.6s
+2025-09-01T18:13:27.706723646Z 
+2025-09-01T18:13:27.706748008Z #4 [internal] load .dockerignore
+2025-09-01T18:13:27.706752618Z #4 transferring context: 166B done
+2025-09-01T18:13:27.706871415Z #4 DONE 0.0s
+2025-09-01T18:13:27.706882906Z 
+2025-09-01T18:13:27.706887676Z #5 [stage-1 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-09-01T18:13:27.706891277Z #5 resolve docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e 0.0s done
+2025-09-01T18:13:27.857817821Z #5 ...
+2025-09-01T18:13:27.857835662Z 
+2025-09-01T18:13:27.857840683Z #6 [internal] load build context
+2025-09-01T18:13:27.857844433Z #6 transferring context: 5.93MB 0.1s done
+2025-09-01T18:13:27.857847623Z #6 DONE 0.2s
+2025-09-01T18:13:27.857850853Z 
+2025-09-01T18:13:27.857854923Z #5 [stage-1 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-09-01T18:13:28.008930667Z #5 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870
+2025-09-01T18:13:28.139017209Z #5 extracting sha256:f18232174bc91741fdf3da96d85011092101a032a93a388b79e99e69c2d5c870 0.1s done
+2025-09-01T18:13:28.289510818Z #5 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e
+2025-09-01T18:13:29.489226286Z #5 extracting sha256:dd71dde834b5c203d162902e6b8994cb2309ae049a0eabc4efea161b2b5a3d0e 1.3s done
+2025-09-01T18:13:29.489249737Z #5 extracting sha256:1e5a4c89cee5c0826c540ab06d4b6b491c96eda01837f430bd47f0d26702d6e3 0.1s done
+2025-09-01T18:13:29.489254758Z #5 DONE 1.9s
+2025-09-01T18:13:29.639755046Z 
+2025-09-01T18:13:29.639790978Z #5 [stage-1 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+2025-09-01T18:13:29.639804189Z #5 extracting sha256:25ff2da83641908f65c3a74d80409d6b1b62ccfaab220b9ea70b80df5a2e0549 0.0s done
+2025-09-01T18:13:29.639809339Z #5 DONE 1.9s
+2025-09-01T18:13:29.63981457Z 
+2025-09-01T18:13:29.63982018Z #7 [stage-1 2/6] WORKDIR /app
+2025-09-01T18:13:29.639829821Z #7 DONE 0.0s
+2025-09-01T18:13:29.639834541Z 
+2025-09-01T18:13:29.639843901Z #8 [builder 3/6] COPY package.complete.json ./package.json
+2025-09-01T18:13:29.639848992Z #8 DONE 0.0s
+2025-09-01T18:13:29.639857972Z 
+2025-09-01T18:13:29.639863123Z #9 [builder 4/6] RUN npm ci --only=production=false
+2025-09-01T18:13:29.790533602Z #9 0.184 npm warn invalid config only="production=false" set in command line options
+2025-09-01T18:13:29.790556843Z #9 0.185 npm warn invalid config Must be one of: null, prod, production
+2025-09-01T18:13:30.086517593Z #9 0.547 npm error code EUSAGE
+2025-09-01T18:13:30.141077554Z #9 0.547 npm error
+2025-09-01T18:13:30.141097065Z #9 0.547 npm error The `npm ci` command can only install with an existing package-lock.json or
+2025-09-01T18:13:30.141102185Z #9 0.547 npm error npm-shrinkwrap.json with lockfileVersion >= 1. Run an install with npm@5 or
+2025-09-01T18:13:30.141120707Z #9 0.547 npm error later to generate a package-lock.json file, then try again.
+2025-09-01T18:13:30.141123797Z #9 0.547 npm error
+2025-09-01T18:13:30.141128187Z #9 0.547 npm error Clean install a project
+2025-09-01T18:13:30.141131027Z #9 0.547 npm error
+2025-09-01T18:13:30.141134898Z #9 0.547 npm error Usage:
+2025-09-01T18:13:30.141137118Z #9 0.547 npm error npm ci
+2025-09-01T18:13:30.141138878Z #9 0.547 npm error
+2025-09-01T18:13:30.141140578Z #9 0.547 npm error Options:
+2025-09-01T18:13:30.141142328Z #9 0.547 npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+2025-09-01T18:13:30.141145808Z #9 0.547 npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+2025-09-01T18:13:30.141147628Z #9 0.547 npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+2025-09-01T18:13:30.141149358Z #9 0.547 npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+2025-09-01T18:13:30.141152328Z #9 0.547 npm error [--no-bin-links] [--no-fund] [--dry-run]
+2025-09-01T18:13:30.141154019Z #9 0.547 npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+2025-09-01T18:13:30.141155689Z #9 0.547 npm error [-ws|--workspaces] [--include-workspace-root] [--install-links]
+2025-09-01T18:13:30.141157679Z #9 0.547 npm error
+2025-09-01T18:13:30.141159479Z #9 0.547 npm error aliases: clean-install, ic, install-clean, isntall-clean
+2025-09-01T18:13:30.141161159Z #9 0.547 npm error
+2025-09-01T18:13:30.141162839Z #9 0.547 npm error Run "npm help ci" for more info
+2025-09-01T18:13:30.141165659Z #9 0.549 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T18_13_29_682Z-debug-0.log
+2025-09-01T18:13:30.141167489Z #9 ERROR: process "/bin/sh -c npm ci --only=production=false" did not complete successfully: exit code: 1
+2025-09-01T18:13:30.1411692Z ------
+2025-09-01T18:13:30.14117098Z  > [builder 4/6] RUN npm ci --only=production=false:
+2025-09-01T18:13:30.14117271Z 0.547 npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+2025-09-01T18:13:30.14117441Z 0.547 npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts] [--no-audit]
+2025-09-01T18:13:30.14117612Z 0.547 npm error [--no-bin-links] [--no-fund] [--dry-run]
+2025-09-01T18:13:30.14117781Z 0.547 npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+2025-09-01T18:13:30.14117956Z 0.547 npm error [-ws|--workspaces] [--include-workspace-root] [--install-links]
+2025-09-01T18:13:30.14118162Z 0.547 npm error
+2025-09-01T18:13:30.141183381Z 0.547 npm error aliases: clean-install, ic, install-clean, isntall-clean
+2025-09-01T18:13:30.14118509Z 0.547 npm error
+2025-09-01T18:13:30.141186781Z 0.547 npm error Run "npm help ci" for more info
+2025-09-01T18:13:30.141188541Z 0.549 npm error A complete log of this run can be found in: /root/.npm/_logs/2025-09-01T18_13_29_682Z-debug-0.log
+2025-09-01T18:13:30.141202132Z ------
+2025-09-01T18:13:30.142791519Z Dockerfile:9
+2025-09-01T18:13:30.142803159Z --------------------
+2025-09-01T18:13:30.14280592Z    7 |     # Copy complete package for build stage with all dependencies
+2025-09-01T18:13:30.14280858Z    8 |     COPY package.complete.json ./package.json
+2025-09-01T18:13:30.14281118Z    9 | >>> RUN npm ci --only=production=false
+2025-09-01T18:13:30.14281343Z   10 |     
+2025-09-01T18:13:30.14281552Z   11 |     # Copy the rest of the application
+2025-09-01T18:13:30.14281757Z --------------------
+2025-09-01T18:13:30.14282027Z error: failed to solve: process "/bin/sh -c npm ci --only=production=false" did not complete successfully: exit code: 1
+2025-09-01T18:13:30.156881679Z error: exit status 1

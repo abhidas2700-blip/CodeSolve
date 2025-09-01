@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy complete package for build stage with all dependencies
 COPY package.complete.json ./package.json
-RUN npm ci --only=production=false
+RUN npm install
 
 # Copy the rest of the application
 COPY . .
