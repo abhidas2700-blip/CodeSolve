@@ -4,9 +4,9 @@ FROM node:18-alpine as builder
 # Working directory in the container
 WORKDIR /app
 
-# Copy package files for build stage - use minimal build dependencies
-COPY package.build.json ./package.json
-RUN npm install
+# Copy complete package for build stage with all dependencies
+COPY package.complete.json ./package.json
+RUN npm ci --only=production=false
 
 # Copy the rest of the application
 COPY . .
