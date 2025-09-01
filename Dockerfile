@@ -11,8 +11,8 @@ RUN npm install
 # Copy the rest of the application
 COPY . .
 
-# Build the application with production server
-RUN npx vite build && npx esbuild server/production.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+# Build the frontend only
+RUN npx vite build
 
 # Production stage - use a clean image for running the app
 FROM node:18-alpine
@@ -25,10 +25,10 @@ WORKDIR /app
 
 # Copy only the built application and production dependencies
 COPY --from=builder /app/dist ./dist
-COPY package*.json ./
+COPY package.production.json ./package.json
 
 # Install only production dependencies
-RUN npm install --omit=dev
+RUN npm install
 
 # Expose the port the app runs on
 EXPOSE 10000
@@ -37,6 +37,6 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:10000/api/health || exit 1
 
-# Start with emergency startup script that handles both scenarios  
-COPY start-render.cjs ./
-CMD ["node", "start-render.cjs"]
+# Start with production server
+COPY server.js ./
+CMD ["node", "server.js"]
