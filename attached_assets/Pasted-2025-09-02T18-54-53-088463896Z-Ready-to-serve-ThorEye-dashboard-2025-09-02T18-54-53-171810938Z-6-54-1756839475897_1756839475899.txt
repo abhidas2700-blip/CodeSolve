@@ -1,0 +1,53 @@
+2025-09-02T18:54:53.088463896Z Ready to serve ThorEye dashboard
+2025-09-02T18:54:53.171810938Z 6:54:53 PM [express] serving on 0.0.0.0:10000
+2025-09-02T18:54:59.550796963Z ==> Your service is live 🎉
+2025-09-02T18:54:59.578425693Z ==> 
+2025-09-02T18:54:59.603208703Z ==> ///////////////////////////////////////////////////////////
+2025-09-02T18:54:59.627489602Z ==> 
+2025-09-02T18:54:59.651776062Z ==> Available at your primary URL https://codesolve.onrender.com
+2025-09-02T18:54:59.676212632Z ==> 
+2025-09-02T18:54:59.701002942Z ==> ///////////////////////////////////////////////////////////
+2025-09-02T18:55:03.642015129Z 6:55:03 PM [express] GET /api/user 401 in 2ms :: {"error":"Not authenticated"}
+2025-09-02T18:55:09.99582184Z Login attempt: admin
+2025-09-02T18:55:10.653240725Z Admin login with default password
+2025-09-02T18:55:10.653261946Z Login successful: admin
+2025-09-02T18:55:10.655249266Z 6:55:10 PM [express] POST /api/login 200 in 660ms :: {"user":{"id":1,"username":"admin","rights":["a…
+2025-09-02T18:55:37.73490738Z 6:55:37 PM [express] GET /api/user 200 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:55:48.874639212Z 6:55:48 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:56:04.772809568Z 6:56:04 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:56:37.731981304Z 6:56:37 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:56:48.876331125Z 6:56:48 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:57:00.671994328Z Retrieved users: 2
+2025-09-02T18:57:00.673035385Z 6:57:00 PM [express] GET /api/users 200 in 164ms :: [{"id":2,"username":"Abhishek","password":"$2b$1…
+2025-09-02T18:57:03.974083969Z Retrieved users: 2
+2025-09-02T18:57:03.976525341Z 6:57:03 PM [express] GET /api/users 304 in 165ms :: [{"id":2,"username":"Abhishek","password":"$2b$1…
+2025-09-02T18:57:04.407999043Z 6:57:04 PM [express] GET /api/user 304 in 1ms :: {"id":1,"username":"admin","password":"37d560d24beb…
+2025-09-02T18:57:04.525798201Z Retrieved forms: 2
+2025-09-02T18:57:04.526824157Z 6:57:04 PM [express] GET /api/forms 200 in 173ms :: [{"id":12,"name":"Test Form - Available Pool Fix…
+2025-09-02T18:57:04.834170739Z 6:57:04 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:05.193430532Z 6:57:05 PM [express] DELETE /api/audit-samples/AUD-17851296 404 in 1ms
+2025-09-02T18:57:05.328295865Z 6:57:05 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:06.621722533Z 6:57:06 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:07.077875593Z 6:57:07 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:07.486607555Z 6:57:07 PM [express] DELETE /api/audit-samples/AUD-17851296 404 in 4ms
+2025-09-02T18:57:07.583928542Z 6:57:07 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:07.898461907Z 6:57:07 PM [express] DELETE /api/audit-samples/AUD-17851296 404 in 2ms
+2025-09-02T18:57:09.356225938Z 6:57:09 PM [express] POST /api/audit-samples 404 in 0ms
+2025-09-02T18:57:10.144245293Z 6:57:10 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:10.609384251Z 6:57:10 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:11.060081302Z 6:57:11 PM [express] POST /api/audit-samples 404 in 0ms
+2025-09-02T18:57:11.513161063Z 6:57:11 PM [express] POST /api/audit-samples 404 in 0ms
+2025-09-02T18:57:25.359501464Z 6:57:25 PM [express] DELETE /api/audit-samples/AUD-17851296 404 in 1ms
+2025-09-02T18:57:28.015849728Z Retrieved forms: 2
+2025-09-02T18:57:28.017144251Z 6:57:28 PM [express] GET /api/forms 304 in 165ms :: [{"id":12,"name":"Test Form - Available Pool Fix…
+2025-09-02T18:57:28.795619153Z Retrieved users: 2
+2025-09-02T18:57:28.796714031Z 6:57:28 PM [express] GET /api/users 304 in 172ms :: [{"id":2,"username":"Abhishek","password":"$2b$1…
+2025-09-02T18:57:30.404785986Z Retrieved forms: 2
+2025-09-02T18:57:30.405564996Z 6:57:30 PM [express] GET /api/forms 304 in 171ms :: [{"id":12,"name":"Test Form - Available Pool Fix…
+2025-09-02T18:57:33.612987403Z Retrieved forms: 2
+2025-09-02T18:57:33.613797344Z 6:57:33 PM [express] GET /api/forms 304 in 165ms :: [{"id":12,"name":"Test Form - Available Pool Fix…
+2025-09-02T18:57:33.614175353Z Retrieved users: 2
+2025-09-02T18:57:33.614934802Z 6:57:33 PM [express] GET /api/users 304 in 173ms :: [{"id":2,"username":"Abhishek","password":"$2b$1…
+2025-09-02T18:57:35.231483043Z 6:57:35 PM [express] POST /api/audit-samples 404 in 1ms
+2025-09-02T18:57:35.684374888Z Received SIGTERM, shutting down...
+2025-09-02T18:57:35.692833284Z Server exited with code null
