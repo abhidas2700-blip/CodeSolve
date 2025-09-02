@@ -10,6 +10,8 @@ export const users = pgTable("users", {
   email: text("email"),
   rights: json("rights").notNull().default(['audit']),
   isInactive: boolean("is_inactive").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -25,6 +27,7 @@ export const auditForms = pgTable("audit_forms", {
   name: text("name").notNull(),
   sections: json("sections").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
   createdBy: integer("created_by").references(() => users.id),
 });
 
@@ -55,6 +58,8 @@ export const auditReports = pgTable("audit_reports", {
   deleted: boolean("deleted").notNull().default(false),
   deletedBy: integer("deleted_by").references(() => users.id),
   deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertAuditReportSchema = createInsertSchema(auditReports).omit({
@@ -144,6 +149,8 @@ export const auditSamples = pgTable("audit_samples", {
   uploadedBy: integer("uploaded_by").references(() => users.id),
   uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
   batchId: text("batch_id"),  // To group samples uploaded together
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 export const insertAuditSampleSchema = createInsertSchema(auditSamples).pick({
