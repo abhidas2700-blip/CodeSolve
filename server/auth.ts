@@ -122,7 +122,7 @@ export async function comparePasswords(supplied: string, stored: string, usernam
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "thoreye-secret-key",
+    secret: process.env.SESSION_SECRET || "solvextra-secret-key",
     resave: false,
     saveUninitialized: false,
     store: new MemoryStore({

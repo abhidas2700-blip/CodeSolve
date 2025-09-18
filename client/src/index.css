@@ -21,7 +21,7 @@
   100% { background-position: 0% 50%; }
 }
 
-.thor-eye-text {
+.solvextra-text {
   background-size: 200% 200%;
   animation: textGradientShift 8s ease-in-out infinite;
 }

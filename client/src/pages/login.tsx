@@ -38,12 +38,16 @@ export default function Login() {
         <Card className="w-[400px] border-opacity-50 shadow-xl animate-in slide-in-from-bottom-10 duration-700">
           <CardHeader className="pb-6">
             <div className="w-full flex justify-center mb-4 animate-in zoom-in-50 duration-1000">
-              <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
-                <div className="text-3xl font-bold text-white">S</div>
+              <div className="h-20 w-20 flex items-center justify-center">
+                <img 
+                  src="@assets/IMG_3463-removebg-preview_1758213332163.png" 
+                  alt="SolveXtra Logo" 
+                  className="h-16 w-16 object-contain"
+                />
               </div>
             </div>
             <CardTitle className="text-center text-2xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent animate-in fade-in-25 duration-1000 delay-300">
-              SolveXtra By Qualithor
+              SolveXtra
             </CardTitle>
             <CardDescription className="text-center animate-in fade-in-50 duration-1000 delay-500">
               Sign in to your quality assurance platform
