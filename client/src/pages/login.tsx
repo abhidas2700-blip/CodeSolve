@@ -39,11 +39,11 @@ export default function Login() {
           <CardHeader className="pb-6">
             <div className="w-full flex justify-center mb-4 animate-in zoom-in-50 duration-1000">
               <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg">
-                <div className="text-3xl font-bold text-white">T</div>
+                <div className="text-3xl font-bold text-white">S</div>
               </div>
             </div>
             <CardTitle className="text-center text-2xl bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent animate-in fade-in-25 duration-1000 delay-300">
-              ThorEye By Qualithor
+              SolveXtra By Qualithor
             </CardTitle>
             <CardDescription className="text-center animate-in fade-in-50 duration-1000 delay-500">
               Sign in to your quality assurance platform

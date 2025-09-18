@@ -308,7 +308,7 @@ export default function Dashboard() {
   return (
     <div className="container py-6">
       <h1 className="text-3xl font-bold tracking-tight mb-6">
-        <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">ThorEye</span> - Quality Assurance Dashboard
+        <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">SolveXtra</span> - Quality Assurance Dashboard
         {isAuditor && <span className="ml-2 text-md font-medium text-muted-foreground">({userRole} View)</span>}
       </h1>
       

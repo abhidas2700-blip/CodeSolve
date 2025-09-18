@@ -52,7 +52,7 @@ export function Header() {
         <div className="flex items-center">
           <div className="mr-6 flex items-center space-x-2">
             <Link href="/">
-              <span className="font-bold text-xl cursor-pointer">ThorEye</span>
+              <span className="font-bold text-xl cursor-pointer">SolveXtra</span>
             </Link>
           </div>
           
