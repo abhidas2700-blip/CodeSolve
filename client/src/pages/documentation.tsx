@@ -18,13 +18,13 @@ export default function Documentation() {
         <TabsContent value="getting-started">
           <Card>
             <CardHeader>
-              <CardTitle>Getting Started with ThorEye</CardTitle>
+              <CardTitle>Getting Started with SolveXtra</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h3 className="font-medium text-lg">Welcome to ThorEye</h3>
+                <h3 className="font-medium text-lg">Welcome to SolveXtra</h3>
                 <p className="text-muted-foreground">
-                  ThorEye is a comprehensive quality auditing platform designed to help organizations manage and improve their quality control processes.
+                  SolveXtra is a comprehensive quality auditing platform designed to help organizations manage and improve their quality control processes.
                 </p>
               </div>
               
@@ -59,7 +59,7 @@ export default function Documentation() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This section contains detailed information for regular users of the ThorEye platform.
+                This section contains detailed information for regular users of the SolveXtra platform.
               </p>
               <p className="text-muted-foreground">
                 Detailed user guide content will be added here.
@@ -75,7 +75,7 @@ export default function Documentation() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                This section contains administrative documentation for managing ThorEye.
+                This section contains administrative documentation for managing SolveXtra.
               </p>
               <p className="text-muted-foreground">
                 Detailed administrator guide content will be added here.
@@ -91,7 +91,7 @@ export default function Documentation() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                API documentation for developers integrating with ThorEye.
+                API documentation for developers integrating with SolveXtra.
               </p>
               <p className="text-muted-foreground">
                 Detailed API reference content will be added here.

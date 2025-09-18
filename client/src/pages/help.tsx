@@ -14,7 +14,7 @@ export default function Help() {
             <CardHeader>
               <CardTitle>Frequently Asked Questions</CardTitle>
               <CardDescription>
-                Find answers to common questions about using ThorEye
+                Find answers to common questions about using SolveXtra
               </CardDescription>
             </CardHeader>
             <CardContent>

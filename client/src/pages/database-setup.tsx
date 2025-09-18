@@ -84,7 +84,7 @@ const DatabaseSetupPage = () => {
       
       const a = document.createElement('a');
       a.href = url;
-      a.download = `thoreye-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `solvextra-export-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -141,7 +141,7 @@ const DatabaseSetupPage = () => {
     <div className="container py-8 max-w-3xl">
       <h1 className="text-3xl font-bold mb-6 flex items-center">
         <Database className="mr-2 h-8 w-8" />
-        ThorEye Local Storage
+        SolveXtra Local Storage
       </h1>
       
       <div className="grid gap-6">
@@ -156,7 +156,7 @@ const DatabaseSetupPage = () => {
               </Badge>
             </div>
             <CardDescription>
-              ThorEye is configured to use browser's local storage for data persistence
+              SolveXtra is configured to use browser's local storage for data persistence
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -224,7 +224,7 @@ const DatabaseSetupPage = () => {
           <CardHeader>
             <CardTitle>Import / Export Data</CardTitle>
             <CardDescription>
-              Backup your data or import from another ThorEye instance
+              Backup your data or import from another SolveXtra instance
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -265,7 +265,7 @@ const DatabaseSetupPage = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Upload a previously exported ThorEye JSON file.
+                    Upload a previously exported SolveXtra JSON file.
                   </p>
                   <input
                     type="file"

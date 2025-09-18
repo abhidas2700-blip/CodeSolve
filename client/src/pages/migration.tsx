@@ -314,7 +314,7 @@ export default function MigrationPage() {
               <p>✅ Data persistence across sessions</p>
               <p>✅ Multi-user support enabled</p>
               <p className="pt-2 text-muted-foreground">
-                You can now use all features of the ThorEye audit system with database backing.
+                You can now use all features of the SolveXtra audit system with database backing.
               </p>
             </div>
           </CardContent>

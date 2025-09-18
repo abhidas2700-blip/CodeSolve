@@ -458,7 +458,7 @@ export default function Settings() {
               <div className="space-y-2">
                 <Button variant="outline" className="w-full">Download My Data</Button>
                 <p className="text-xs text-muted-foreground">
-                  Download a copy of all your data stored in ThorEye
+                  Download a copy of all your data stored in SolveXtra
                 </p>
               </div>
               

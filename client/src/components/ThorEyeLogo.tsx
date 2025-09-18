@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { Eye } from 'lucide-react';
 
-interface ThorEyeLogoProps {
+interface SolveXtraLogoProps {
   className?: string;
 }
 
-export default function ThorEyeLogo({ className = '' }: ThorEyeLogoProps) {
+export default function SolveXtraLogo({ className = '' }: SolveXtraLogoProps) {
   const [animationComplete, setAnimationComplete] = useState(false);
   const eyeRef = useRef<HTMLDivElement>(null);
   
@@ -18,10 +18,10 @@ export default function ThorEyeLogo({ className = '' }: ThorEyeLogoProps) {
   }, []);
   
   return (
-    <div className={`thor-eye-container relative ${className}`}>
+    <div className={`solvextra-container relative ${className}`}>
       <h2 className="text-3xl font-extrabold tracking-tight flex items-center">
-        <span className="thor-text thor-eye-text bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-700 text-transparent bg-clip-text transition-all duration-700">
-          Thor
+        <span className="solve-text solvextra-text bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-700 text-transparent bg-clip-text transition-all duration-700">
+          Solve
         </span>
         <div 
           ref={eyeRef}
@@ -46,20 +46,20 @@ export default function ThorEyeLogo({ className = '' }: ThorEyeLogoProps) {
             strokeWidth={2.5}
           />
         </div>
-        <span className="eye-text thor-eye-text bg-gradient-to-r from-indigo-600 via-blue-500 to-indigo-700 text-transparent bg-clip-text transition-all duration-700">
-          Eye
+        <span className="xtra-text solvextra-text bg-gradient-to-r from-indigo-600 via-blue-500 to-indigo-700 text-transparent bg-clip-text transition-all duration-700">
+          Xtra
         </span>
       </h2>
       <style dangerouslySetInnerHTML={{ __html: `        
-        .thor-eye-container:hover .thor-text {
+        .solvextra-container:hover .solve-text {
           letter-spacing: 0.05em;
         }
         
-        .thor-eye-container:hover .eye-text {
+        .solvextra-container:hover .xtra-text {
           letter-spacing: 0.05em;
         }
         
-        .thor-eye-container:hover .eye-container {
+        .solvextra-container:hover .eye-container {
           transform: scale(1.1) rotate(5deg);
         }
       `}} />

@@ -184,7 +184,7 @@ const DataMigrationModal = ({ onClose }: DataMigrationModalProps) => {
               <Info className="h-4 w-4" />
               <AlertTitle>Local Storage Information</AlertTitle>
               <AlertDescription>
-                ThorEye is currently using your browser's local storage to save all data.
+                SolveXtra is currently using your browser's local storage to save all data.
                 This means your data is stored only on this device and will be lost if you clear your browser data.
               </AlertDescription>
             </Alert>
