@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Send initial connection message
     ws.send(JSON.stringify({
       type: 'connection',
-      message: 'Connected to ThorEye server'
+      message: 'Connected to SolveXtra server'
     }));
     
     ws.on('message', (message) => {

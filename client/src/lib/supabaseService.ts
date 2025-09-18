@@ -1,5 +1,5 @@
 /**
- * ThorEye Local Storage Service
+ * SolveXtra Local Storage Service
  * Handles all data operations using localStorage
  * 
  * This file originally used Supabase but was modified to use local storage only

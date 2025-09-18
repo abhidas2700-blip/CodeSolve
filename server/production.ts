@@ -294,16 +294,16 @@ const PORT = parseInt(process.env.PORT || "10000");
 
 async function startServer() {
   try {
-    console.log('ThorEye starting...');
+    console.log('SolveXtra starting...');
     console.log('Environment:', process.env.NODE_ENV || 'development');
     console.log('Database URL configured:', process.env.DATABASE_URL ? 'Yes' : 'No');
     
     await initializeDefaultUser();
     
     app.listen(PORT, "0.0.0.0", () => {
-      console.log('ThorEye server running on port', PORT);
+      console.log('SolveXtra server running on port', PORT);
       console.log('Database connected to Neon PostgreSQL');
-      console.log('Ready to serve ThorEye dashboard');
+      console.log('Ready to serve SolveXtra dashboard');
       log(`serving on 0.0.0.0:${PORT}`);
     });
   } catch (error) {

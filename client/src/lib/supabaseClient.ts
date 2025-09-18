@@ -5,7 +5,7 @@
  * The application now uses browser localStorage exclusively with no external dependencies.
  */
 
-console.log('ThorEye is using local storage only - no database connection');
+console.log('SolveXtra is using local storage only - no database connection');
 
 /**
  * Local storage keys

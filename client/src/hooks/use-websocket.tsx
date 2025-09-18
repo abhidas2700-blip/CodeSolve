@@ -1,5 +1,5 @@
 /**
- * WebSocket hook for ThorEye Audit System
+ * WebSocket hook for SolveXtra Audit System
  * Handles WebSocket connections, reconnection logic, and message handling
  * with full support for Netlify serverless functions
  */
