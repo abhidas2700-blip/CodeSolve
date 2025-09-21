@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/context/auth-context';
 import { Loader2 } from 'lucide-react';
+import logoImage from '@assets/IMG_3463-removebg-preview_1758466252112.png';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -40,7 +41,7 @@ export default function Login() {
             <div className="w-full flex justify-center mb-4 animate-in zoom-in-50 duration-1000">
               <div className="h-20 w-20 flex items-center justify-center">
                 <img 
-                  src="@assets/IMG_3463-removebg-preview_1758466252112.png" 
+                  src={logoImage} 
                   alt="SolveXtra Logo" 
                   className="h-16 w-16 object-contain"
                 />
