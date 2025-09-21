@@ -1,5 +1,5 @@
 import { db } from "../db";
-import { users, auditForms, auditReports, ataReviews, deletedAudits, skippedSamples, auditSamples } from "@shared/schema";
+import { users, auditForms, auditReports, ataReviews, deletedAudits, skippedSamples, auditSamples, rebuttals } from "@shared/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
@@ -220,6 +220,60 @@ export class DatabaseService {
       averageScore: averageScore[0]?.avg || 0,
       fatalCount: fatalCount[0]?.count || 0
     };
+  }
+
+  // Rebuttal management
+  async createRebuttal(rebuttalData: any) {
+    const [rebuttal] = await db.insert(rebuttals).values(rebuttalData).returning();
+    return rebuttal;
+  }
+
+  async getRebuttalsByPartnerId(partnerId: number) {
+    return await db.query.rebuttals.findMany({
+      where: eq(rebuttals.partnerId, partnerId),
+      orderBy: desc(rebuttals.createdAt)
+    });
+  }
+
+  async getRebuttalsByAuditReportId(auditReportId: number) {
+    return await db.query.rebuttals.findMany({
+      where: eq(rebuttals.auditReportId, auditReportId),
+      orderBy: desc(rebuttals.createdAt)
+    });
+  }
+
+  async getAllRebuttals() {
+    return await db.query.rebuttals.findMany({
+      orderBy: desc(rebuttals.createdAt)
+    });
+  }
+
+  async updateRebuttalStatus(id: number, updates: any) {
+    const [updatedRebuttal] = await db.update(rebuttals)
+      .set(updates)
+      .where(eq(rebuttals.id, id))
+      .returning();
+    return updatedRebuttal;
+  }
+
+  async getAuditReportsByPartnerId(partnerId: number) {
+    return await db.query.auditReports.findMany({
+      where: and(
+        eq(auditReports.partnerId, partnerId),
+        eq(auditReports.deleted, false)
+      ),
+      orderBy: desc(auditReports.timestamp)
+    });
+  }
+
+  async getPartnersOnly() {
+    return await db.query.users.findMany({
+      where: and(
+        eq(users.isInactive, false),
+        sql`JSON_CONTAINS(rights, '"partner"')`
+      ),
+      orderBy: desc(users.id)
+    });
   }
 
   // Database health check

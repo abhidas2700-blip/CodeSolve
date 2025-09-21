@@ -46,6 +46,8 @@ export const auditReports = pgTable("audit_reports", {
   agentId: text("agent_id").notNull(),
   auditor: integer("auditor").references(() => users.id),
   auditorName: text("auditor_name").notNull(),
+  partnerId: integer("partner_id").references(() => users.id),
+  partnerName: text("partner_name"),
   sectionAnswers: json("section_answers").notNull(),
   score: integer("score").notNull(),
   maxScore: integer("max_score").notNull(),
@@ -70,7 +72,9 @@ export const insertAuditReportSchema = createInsertSchema(auditReports).omit({
   deletedAt: true
 }).extend({
   sectionAnswers: z.record(z.any()).optional().default({}),
-  auditor: z.number().optional()
+  auditor: z.number().optional(),
+  partnerId: z.number().optional(),
+  partnerName: z.string().optional()
 });
 
 // ATA (Master Auditor) review schema
@@ -196,6 +200,39 @@ export const insertSkippedSampleSchema = createInsertSchema(skippedSamples).pick
   timestamp: z.union([z.number(), z.string(), z.date()]).optional(),
 });
 
+// Rebuttals schema
+export const rebuttals = pgTable("rebuttals", {
+  id: serial("id").primaryKey(),
+  auditReportId: integer("audit_report_id").references(() => auditReports.id).notNull(),
+  partnerId: integer("partner_id").references(() => users.id).notNull(),
+  partnerName: text("partner_name").notNull(),
+  rebuttalText: text("rebuttal_text").notNull(),
+  rebuttalType: text("rebuttal_type").notNull().default("rebuttal"), // 'rebuttal' or 're_rebuttal'
+  status: text("status").notNull().default("pending"), // 'pending', 'accepted', 'rejected'
+  handledBy: integer("handled_by").references(() => users.id),
+  handledByName: text("handled_by_name"),
+  handlerResponse: text("handler_response"),
+  handledAt: timestamp("handled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertRebuttalSchema = createInsertSchema(rebuttals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+}).extend({
+  auditReportId: z.number(),
+  partnerId: z.number(),
+  partnerName: z.string(),
+  rebuttalText: z.string().min(1, "Rebuttal text is required"),
+  rebuttalType: z.enum(["rebuttal", "re_rebuttal"]).default("rebuttal"),
+  status: z.enum(["pending", "accepted", "rejected"]).default("pending"),
+  handledBy: z.number().optional(),
+  handledByName: z.string().optional(),
+  handlerResponse: z.string().optional(),
+});
+
 // Type definitions
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -217,3 +254,6 @@ export type InsertAuditSample = z.infer<typeof insertAuditSampleSchema>;
 
 export type SkippedSample = typeof skippedSamples.$inferSelect;
 export type InsertSkippedSample = z.infer<typeof insertSkippedSampleSchema>;
+
+export type Rebuttal = typeof rebuttals.$inferSelect;
+export type InsertRebuttal = z.infer<typeof insertRebuttalSchema>;
