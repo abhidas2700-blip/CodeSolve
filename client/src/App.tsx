@@ -12,6 +12,7 @@ import Reports from "@/pages/reports";
 import Ata from "@/pages/ata";
 import Forms from "@/pages/forms";
 import Users from "@/pages/users";
+import Partners from "@/pages/partners";
 import Login from "@/pages/login";
 import Help from "@/pages/help";
 import Documentation from "@/pages/documentation";
@@ -163,6 +164,8 @@ function AppRouter() {
         return ['audit']; // Audits requires audit right
       case "reports":
         return ['reports']; // Reports requires reports right
+      case "partners":
+        return ['partner']; // Partners requires partner right
       case "ata":
         return ['masterAuditor', 'admin']; // ATA requires either masterAuditor or admin rights
       case "forms":
@@ -229,6 +232,9 @@ function AppRouter() {
         break;
       case "users":
         pageComponent = <Users />;
+        break;
+      case "partners":
+        pageComponent = <Partners />;
         break;
       default:
         return <NotFound />;
@@ -307,6 +313,15 @@ function AppRouter() {
                 </Button>
               )}
               
+              {/* Show Partners tab only to users with partner rights */}
+              {hasRight('partner') && (
+                <Button 
+                  variant={currentView === "partners" ? "default" : "ghost"}
+                  onClick={() => setCurrentView("partners")}
+                >
+                  Rebuttals
+                </Button>
+              )}
 
             </nav>
           </div>

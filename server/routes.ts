@@ -1100,6 +1100,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Partner and Rebuttal Management Routes
 
+  // Get audit reports assigned to current partner
+  app.get('/api/partners/reports', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+
+    // Only partners can access this endpoint
+    if (!user.rights.includes('partner')) {
+      return res.status(403).json({ error: 'Only partners can access this endpoint' });
+    }
+
+    try {
+      const reports = await db.query.auditReports.findMany({
+        where: and(
+          eq(auditReports.partnerId, user.id),
+          eq(auditReports.deleted, false)
+        ),
+        orderBy: desc(auditReports.timestamp)
+      });
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching partner reports:', error);
+      res.status(500).json({ error: 'Failed to fetch partner reports' });
+    }
+  });
+
+  // Get rebuttals for current partner with audit report details
+  app.get('/api/partners/rebuttals', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+
+    // Only partners can access this endpoint
+    if (!user.rights.includes('partner')) {
+      return res.status(403).json({ error: 'Only partners can access this endpoint' });
+    }
+
+    try {
+      const rebuttalsList = await db.query.rebuttals.findMany({
+        where: eq(rebuttals.partnerId, user.id),
+        orderBy: desc(rebuttals.createdAt)
+      });
+      res.json(rebuttalsList);
+    } catch (error) {
+      console.error('Error fetching partner rebuttals:', error);
+      res.status(500).json({ error: 'Failed to fetch partner rebuttals' });
+    }
+  });
+
   // Get all partners (users with partner rights)
   app.get('/api/partners', async (req: Request, res: Response) => {
     if (!req.isAuthenticated()) {
@@ -1173,7 +1226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create rebuttal
+  // Create rebuttal and handle rebuttal actions
   app.post('/api/rebuttals', async (req: Request, res: Response) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -1187,17 +1240,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const validatedData = insertRebuttalSchema.parse(req.body);
+      // Validate request body
+      const bodySchema = z.object({
+        auditReportId: z.number(),
+        rebuttalText: z.string().optional(),
+        action: z.enum(['accept', 'reject', 'rebuttal', 're_rebuttal', 'bod']),
+        handlerResponse: z.string().optional()
+      });
       
-      // Ensure partner can only create rebuttals for themselves
-      if (validatedData.partnerId !== user.id) {
-        return res.status(403).json({ error: 'Partners can only create rebuttals for themselves' });
+      const { auditReportId, rebuttalText, action } = bodySchema.parse(req.body);
+      
+      // Require rebuttalText for rebuttal actions  
+      if ((action === 'reject' || action === 'rebuttal' || action === 're_rebuttal') && !rebuttalText?.trim()) {
+        return res.status(400).json({ error: 'Rebuttal text is required for reject, rebuttal, and re-rebuttal actions' });
       }
       
-      // Verify that the audit report belongs to this partner and is not deleted
+      // Verify that the audit report exists, is not deleted, and belongs to this partner
       const auditReport = await db.query.auditReports.findFirst({
         where: and(
-          eq(auditReports.id, validatedData.auditReportId),
+          eq(auditReports.id, auditReportId),
           eq(auditReports.partnerId, user.id),
           eq(auditReports.deleted, false)
         )
@@ -1206,26 +1267,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!auditReport) {
         return res.status(403).json({ error: 'Audit report not found or not accessible to this partner' });
       }
-      
-      const [newRebuttal] = await db.insert(rebuttals).values(validatedData).returning();
 
-      // Update audit report status to "under_rebuttal"
-      await db.update(auditReports)
-        .set({ status: 'under_rebuttal' })
-        .where(eq(auditReports.id, validatedData.auditReportId));
+      // Handle different actions
+      if (action === 'accept') {
+        // Partner accepts the audit report
+        await db.update(auditReports)
+          .set({ status: 'accepted' })
+          .where(eq(auditReports.id, auditReportId));
 
-      broadcast({
-        type: 'rebuttal_created',
-        rebuttal: newRebuttal
-      });
+        res.json({ message: 'Report accepted successfully' });
+        return;
+      }
 
-      res.status(201).json(newRebuttal);
+      if (action === 'reject' || action === 'rebuttal' || action === 're_rebuttal' || action === 'bod') {
+        const rebuttalType = action === 're_rebuttal' ? 're_rebuttal' : 'rebuttal';
+        const rebuttalData = {
+          auditReportId,
+          partnerId: user.id,
+          partnerName: user.username,
+          rebuttalText: rebuttalText || (action === 'bod' ? 'Benefit of Doubt applied' : ''),
+          rebuttalType,
+          status: action === 'bod' ? 'accepted' : 'pending'
+        };
+
+        const validatedRebuttalData = insertRebuttalSchema.parse(rebuttalData);
+        const [newRebuttal] = await db.insert(rebuttals).values(validatedRebuttalData).returning();
+
+        // Update audit report status
+        let reportStatus = 'under_rebuttal';
+        if (action === 'bod') {
+          reportStatus = 'bod_applied';
+        } else if (rebuttalType === 're_rebuttal') {
+          reportStatus = 'under_re_rebuttal';
+        }
+
+        await db.update(auditReports)
+          .set({ status: reportStatus })
+          .where(eq(auditReports.id, auditReportId));
+
+        broadcast({
+          type: 'rebuttal_created',
+          rebuttal: newRebuttal
+        });
+
+        res.json(newRebuttal);
+        return;
+      }
+
+      res.status(400).json({ error: 'Invalid action' });
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ errors: error.errors });
       }
-      console.error('Error creating rebuttal:', error);
-      res.status(500).json({ error: 'Failed to create rebuttal' });
+      console.error('Error processing rebuttal action:', error);
+      res.status(500).json({ error: 'Failed to process rebuttal action' });
     }
   });
 

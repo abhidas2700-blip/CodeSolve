@@ -53,7 +53,7 @@ export const auditReports = pgTable("audit_reports", {
   maxScore: integer("max_score").notNull(),
   hasFatal: boolean("has_fatal").notNull().default(false),
   timestamp: timestamp("timestamp").notNull().defaultNow(),
-  status: text("status").notNull().default("completed"),
+  status: text("status").$type<"completed" | "accepted" | "under_rebuttal" | "rebuttal_rejected" | "under_re_rebuttal" | "bod_applied">().notNull().default("completed"),
   edited: boolean("edited").notNull().default(false),
   editedBy: integer("edited_by").references(() => users.id),
   editedAt: timestamp("edited_at"),
