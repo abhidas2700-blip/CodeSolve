@@ -270,7 +270,7 @@ export class DatabaseService {
     return await db.query.users.findMany({
       where: and(
         eq(users.isInactive, false),
-        sql`JSON_CONTAINS(rights, '"partner"')`
+        sql`rights @> '["partner"]'`
       ),
       orderBy: desc(users.id)
     });

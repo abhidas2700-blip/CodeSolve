@@ -130,6 +130,7 @@ export default function Users() {
     if (rights.includes('audit') && rights.includes('createLowerUsers')) return 'Team Leader';
     if (rights.includes('audit')) return 'Auditor';
     if (rights.includes('reports') && rights.includes('dashboard') && rights.includes('createLowerUsers')) return 'Manager';
+    if (rights.includes('partner')) return 'Partner';
     return 'User';
   };
   
@@ -150,6 +151,8 @@ export default function Users() {
         return ['reports', 'dashboard', 'createLowerUsers', 'userManage', 'manager'];
       case 'teamLeader':
         return ['audit', 'reports', 'dashboard', 'createLowerUsers', 'userManage', 'teamleader'];
+      case 'partner':
+        return ['partner'];
       default:
         return [];
     }
@@ -1034,6 +1037,7 @@ export default function Users() {
                   {(currentUser?.rights.includes('admin') || currentUser?.rights.includes('createLowerUsers')) && (
                     <SelectItem value="teamLeader">Team Leader</SelectItem>
                   )}
+                  <SelectItem value="partner">Partner</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1074,16 +1078,17 @@ export default function Users() {
                     <option value="administrator">Administrator</option>
                   )}
                   {currentUser?.rights.includes('admin') && (
-                    <option value="masterauditor">Master Auditor</option>
+                    <option value="masterAuditor">Master Auditor</option>
                   )}
                   <option value="auditor">Auditor</option>
-                  <option value="formbuilder">Form Builder</option>
+                  <option value="formBuilder">Form Builder</option>
                   {(currentUser?.rights.includes('admin') || currentUser?.rights.includes('createLowerUsers')) && (
                     <option value="manager">Manager</option>
                   )}
                   {(currentUser?.rights.includes('admin') || currentUser?.rights.includes('createLowerUsers')) && (
-                    <option value="teamleader">Team Leader</option>
+                    <option value="teamLeader">Team Leader</option>
                   )}
+                  <option value="partner">Partner</option>
                 </select>
               </div>
               <div className="space-y-2">

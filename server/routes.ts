@@ -10,13 +10,15 @@ import {
   insertSkippedSampleSchema,
   insertDeletedAuditSchema,
   insertAuditSampleSchema,
+  insertRebuttalSchema,
   users,
   auditForms,
   auditReports,
   ataReviews,
   deletedAudits,
   skippedSamples,
-  auditSamples
+  auditSamples,
+  rebuttals
 } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, hashPassword } from "./auth";
@@ -119,13 +121,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get all users
   app.get('/api/users', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin, manager, or users with createLowerUsers rights can view users list
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('createLowerUsers')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view users' });
+    }
+    
     try {
       const users = await storage.getAllUsers();
       
-      // Show ALL users including admin for proper user management
-      const filteredUsers = users;
+      // Remove password from response for security
+      const sanitizedUsers = users.map(({ password, ...userWithoutPassword }) => userWithoutPassword);
       
-      res.json(filteredUsers);
+      res.json(sanitizedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       res.status(500).json({ error: 'Failed to fetch users' });
@@ -393,6 +408,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all audit reports
   app.get('/api/reports', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin, manager, teamleader, or audit-related users can view reports
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader') &&
+        !user.rights.includes('audit') &&
+        !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view reports' });
+    }
+    
     try {
       const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
       res.json(reports);
@@ -404,6 +434,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Alternative endpoint for audit reports (for compatibility)
   app.get('/api/audit-reports', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin, manager, teamleader, or audit-related users can view audit reports
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader') &&
+        !user.rights.includes('audit') &&
+        !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view audit reports' });
+    }
+    
     try {
       const reports = await db.select().from(auditReports).orderBy(desc(auditReports.timestamp));
       res.json(reports);
@@ -968,6 +1013,265 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting audit sample:', error);
       res.status(500).json({ error: 'Failed to delete audit sample' });
+    }
+  });
+
+  // Partner and Rebuttal Management Routes
+
+  // Get all partners (users with partner rights)
+  app.get('/api/partners', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    // Only admin, manager, or team lead can view partners list
+    const user = req.user as any;
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader') &&
+        !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view partners' });
+    }
+    
+    try {
+      const partners = await db.query.users.findMany({
+        where: and(
+          eq(users.isInactive, false),
+          sql`rights @> '["partner"]'`
+        ),
+        orderBy: desc(users.id),
+        columns: {
+          id: true,
+          username: true,
+          email: true,
+          rights: true
+        }
+      });
+      res.json(partners);
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+      res.status(500).json({ error: 'Failed to fetch partners' });
+    }
+  });
+
+  // Get audit reports by partner ID
+  app.get('/api/audit-reports/partner/:partnerId', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    const partnerId = parseInt(req.params.partnerId);
+    
+    // Partners can only view their own audit reports, others need appropriate permissions
+    if (user.rights.includes('partner') && user.id !== partnerId) {
+      return res.status(403).json({ error: 'Partners can only view their own audit reports' });
+    }
+    
+    // Non-partners need admin, manager, or teamleader rights
+    if (!user.rights.includes('partner') && 
+        !user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view partner audit reports' });
+    }
+    
+    try {
+      const reports = await db.query.auditReports.findMany({
+        where: and(
+          eq(auditReports.partnerId, partnerId),
+          eq(auditReports.deleted, false)
+        ),
+        orderBy: desc(auditReports.timestamp)
+      });
+      res.json(reports);
+    } catch (error) {
+      console.error('Error fetching partner audit reports:', error);
+      res.status(500).json({ error: 'Failed to fetch partner audit reports' });
+    }
+  });
+
+  // Create rebuttal
+  app.post('/api/rebuttals', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only partners can create rebuttals
+    if (!user.rights.includes('partner')) {
+      return res.status(403).json({ error: 'Only partners can create rebuttals' });
+    }
+    
+    try {
+      const validatedData = insertRebuttalSchema.parse(req.body);
+      
+      // Ensure partner can only create rebuttals for themselves
+      if (validatedData.partnerId !== user.id) {
+        return res.status(403).json({ error: 'Partners can only create rebuttals for themselves' });
+      }
+      
+      // Verify that the audit report belongs to this partner and is not deleted
+      const auditReport = await db.query.auditReports.findFirst({
+        where: and(
+          eq(auditReports.id, validatedData.auditReportId),
+          eq(auditReports.partnerId, user.id),
+          eq(auditReports.deleted, false)
+        )
+      });
+      
+      if (!auditReport) {
+        return res.status(403).json({ error: 'Audit report not found or not accessible to this partner' });
+      }
+      
+      const [newRebuttal] = await db.insert(rebuttals).values(validatedData).returning();
+
+      // Update audit report status to "under_rebuttal"
+      await db.update(auditReports)
+        .set({ status: 'under_rebuttal' })
+        .where(eq(auditReports.id, validatedData.auditReportId));
+
+      broadcast({
+        type: 'rebuttal_created',
+        rebuttal: newRebuttal
+      });
+
+      res.status(201).json(newRebuttal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ errors: error.errors });
+      }
+      console.error('Error creating rebuttal:', error);
+      res.status(500).json({ error: 'Failed to create rebuttal' });
+    }
+  });
+
+  // Get rebuttals by partner ID
+  app.get('/api/rebuttals/partner/:partnerId', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    const partnerId = parseInt(req.params.partnerId);
+    
+    // Partners can only view their own rebuttals, others need appropriate permissions
+    if (user.rights.includes('partner') && user.id !== partnerId) {
+      return res.status(403).json({ error: 'Partners can only view their own rebuttals' });
+    }
+    
+    // Non-partners need admin, manager, or teamleader rights
+    if (!user.rights.includes('partner') && 
+        !user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view rebuttals' });
+    }
+    
+    try {
+      const rebuttalsList = await db.query.rebuttals.findMany({
+        where: eq(rebuttals.partnerId, partnerId),
+        orderBy: desc(rebuttals.createdAt)
+      });
+      res.json(rebuttalsList);
+    } catch (error) {
+      console.error('Error fetching partner rebuttals:', error);
+      res.status(500).json({ error: 'Failed to fetch partner rebuttals' });
+    }
+  });
+
+  // Get rebuttals by audit report ID
+  app.get('/api/rebuttals/audit/:auditReportId', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      const auditReportId = parseInt(req.params.auditReportId);
+      const rebuttalsList = await db.query.rebuttals.findMany({
+        where: eq(rebuttals.auditReportId, auditReportId),
+        orderBy: desc(rebuttals.createdAt)
+      });
+      res.json(rebuttalsList);
+    } catch (error) {
+      console.error('Error fetching audit rebuttals:', error);
+      res.status(500).json({ error: 'Failed to fetch audit rebuttals' });
+    }
+  });
+
+  // Get all rebuttals (for Admin/Manager/TL)
+  app.get('/api/rebuttals', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    try {
+      const rebuttalsList = await db.query.rebuttals.findMany({
+        orderBy: desc(rebuttals.createdAt)
+      });
+      res.json(rebuttalsList);
+    } catch (error) {
+      console.error('Error fetching rebuttals:', error);
+      res.status(500).json({ error: 'Failed to fetch rebuttals' });
+    }
+  });
+
+  // Update rebuttal status (Accept/Reject)
+  app.patch('/api/rebuttals/:rebuttalId', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin, manager, or team lead can handle rebuttals
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('manager') && 
+        !user.rights.includes('teamleader')) {
+      return res.status(403).json({ error: 'Insufficient permissions to handle rebuttals' });
+    }
+    
+    try {
+      const rebuttalId = parseInt(req.params.rebuttalId);
+      const { status, handledBy, handledByName, handlerResponse } = req.body;
+
+      const updateData: any = {
+        status,
+        handledBy,
+        handledByName,
+        handlerResponse,
+        handledAt: new Date()
+      };
+
+      const [updatedRebuttal] = await db.update(rebuttals)
+        .set(updateData)
+        .where(eq(rebuttals.id, rebuttalId))
+        .returning();
+
+      if (!updatedRebuttal) {
+        return res.status(404).json({ error: 'Rebuttal not found' });
+      }
+
+      // Update audit report status based on rebuttal decision
+      let auditStatus = 'completed';
+      if (status === 'accepted') {
+        auditStatus = 'rebuttal_accepted';
+      } else if (status === 'rejected') {
+        auditStatus = 'rebuttal_rejected';
+      }
+
+      await db.update(auditReports)
+        .set({ status: auditStatus })
+        .where(eq(auditReports.id, updatedRebuttal.auditReportId));
+
+      broadcast({
+        type: 'rebuttal_updated',
+        rebuttal: updatedRebuttal
+      });
+
+      res.json(updatedRebuttal);
+    } catch (error) {
+      console.error('Error updating rebuttal:', error);
+      res.status(500).json({ error: 'Failed to update rebuttal' });
     }
   });
 
