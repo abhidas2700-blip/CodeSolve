@@ -8,11 +8,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useQuery } from "@tanstack/react-query";
 
 interface Question {
   id: string;
   text: string;
-  type: "text" | "dropdown" | "multiSelect" | "number";
+  type: "text" | "dropdown" | "multiSelect" | "number" | "partner";
   options?: string;
   weightage: number;
   deductionPoints?: number;
@@ -55,6 +56,12 @@ export default function AdminFormBuilder() {
   const [showPreview, setShowPreview] = useState(false);
   const [editingForm, setEditingForm] = useState<AuditForm | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Fetch partners for partner dropdown
+  const { data: partners = [], isLoading: partnersLoading, error: partnersError } = useQuery({
+    queryKey: ['/api/partners'],
+    enabled: showPreview || newQuestion.type === 'partner'
+  });
 
   // Check if the user is an admin
   useEffect(() => {
@@ -245,10 +252,8 @@ export default function AdminFormBuilder() {
     let total = 0;
     sections.forEach(section => {
       section.questions.forEach(question => {
-        // Include all questions with weightage in the total score
-        // Even fatal questions should contribute to the total possible points
-        // Only when answering with "Fatal" does the score become 0
-        if (question.weightage > 0) {
+        // Exclude partner questions from scoring calculation
+        if (question.type !== "partner" && question.weightage > 0) {
           total += question.weightage;
         }
       });
@@ -276,11 +281,16 @@ export default function AdminFormBuilder() {
           <Label htmlFor="questionType">Response Type</Label>
           <Select
             value={newQuestion.type}
-            onValueChange={(value: "text" | "dropdown" | "multiSelect" | "number") => {
+            onValueChange={(value: "text" | "dropdown" | "multiSelect" | "number" | "partner") => {
               setNewQuestion({
                 ...newQuestion,
                 type: value,
-                options: value === "dropdown" ? "Yes,No,N/A" : ""
+                options: value === "dropdown" ? "Yes,No,N/A" : "",
+                // For partner fields, set weightage to 0 and disable scoring
+                weightage: value === "partner" ? 0 : newQuestion.weightage,
+                deductionPoints: value === "partner" ? 0 : newQuestion.deductionPoints,
+                isFatal: value === "partner" ? false : newQuestion.isFatal,
+                grazingLogic: value === "partner" ? false : newQuestion.grazingLogic
               });
             }}
           >
@@ -292,6 +302,7 @@ export default function AdminFormBuilder() {
               <SelectItem value="text">Text Input</SelectItem>
               <SelectItem value="multiSelect">Multi Select</SelectItem>
               <SelectItem value="number">Number Input</SelectItem>
+              <SelectItem value="partner">Partner Dropdown</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -308,51 +319,66 @@ export default function AdminFormBuilder() {
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="weightage">Weightage (Points)</Label>
-          <Input
-            id="weightage"
-            type="number"
-            value={newQuestion.weightage.toString()}
-            onChange={(e) => setNewQuestion({
-              ...newQuestion,
-              weightage: Number.parseInt(e.target.value) || 0
-            })}
-          />
-        </div>
+        {newQuestion.type === "partner" && (
+          <div className="space-y-2">
+            <Label>Partner Selection</Label>
+            <div className="text-sm text-gray-500">
+              This field will automatically populate with available partners from the system.
+            </div>
+          </div>
+        )}
 
-        <div className="space-y-2">
-          <Label htmlFor="deductionPoints">Deduction Points for "No"</Label>
-          <Input
-            id="deductionPoints"
-            type="number"
-            value={newQuestion.deductionPoints?.toString() || "0"}
-            onChange={(e) => setNewQuestion({
-              ...newQuestion,
-              deductionPoints: Number.parseInt(e.target.value) || 0
-            })}
-          />
-        </div>
+        {newQuestion.type !== "partner" && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="weightage">Weightage (Points)</Label>
+              <Input
+                id="weightage"
+                type="number"
+                value={newQuestion.weightage.toString()}
+                onChange={(e) => setNewQuestion({
+                  ...newQuestion,
+                  weightage: Number.parseInt(e.target.value) || 0
+                })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="deductionPoints">Deduction Points for "No"</Label>
+              <Input
+                id="deductionPoints"
+                type="number"
+                value={newQuestion.deductionPoints?.toString() || "0"}
+                onChange={(e) => setNewQuestion({
+                  ...newQuestion,
+                  deductionPoints: Number.parseInt(e.target.value) || 0
+                })}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="flex flex-col space-y-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="isFatal"
-            checked={newQuestion.isFatal}
-            onCheckedChange={(checked) => setNewQuestion({
-              ...newQuestion,
-              isFatal: checked === true
-            })}
-          />
-          <Label htmlFor="isFatal" className="font-medium text-red-600">
-            Fatal Parameter (selecting "Fatal" will set total score to zero)
-          </Label>
-          <div className="text-xs text-gray-500 ml-6">
-            When this box is checked, the question will show a "Fatal" option. Selecting "Fatal" sets score to 0%.
-            Selecting "No" will just deduct points based on weightage.
+        {newQuestion.type !== "partner" && (
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="isFatal"
+              checked={newQuestion.isFatal}
+              onCheckedChange={(checked) => setNewQuestion({
+                ...newQuestion,
+                isFatal: checked === true
+              })}
+            />
+            <Label htmlFor="isFatal" className="font-medium text-red-600">
+              Fatal Parameter (selecting "Fatal" will set total score to zero)
+            </Label>
+            <div className="text-xs text-gray-500 ml-6">
+              When this box is checked, the question will show a "Fatal" option. Selecting "Fatal" sets score to 0%.
+              Selecting "No" will just deduct points based on weightage.
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -378,43 +404,45 @@ export default function AdminFormBuilder() {
           <Label htmlFor="mandatory">Mandatory Question</Label>
         </div>
 
-        <div className="pt-2">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="grazingLogic"
-              checked={newQuestion.grazingLogic}
-              onCheckedChange={(checked) => setNewQuestion({
-                ...newQuestion,
-                grazingLogic: checked
-              })}
-            />
-            <Label htmlFor="grazingLogic">Apply Grazing Logic for "No" Responses</Label>
-          </div>
-
-          {newQuestion.grazingLogic && (
-            <div className="mt-2 ml-8 space-y-2">
-              <Label htmlFor="grazingPercentage">Grazing Percentage</Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id="grazingPercentage"
-                  type="number"
-                  className="w-20"
-                  min="1"
-                  max="100"
-                  value={newQuestion.grazingPercentage?.toString() || "50"}
-                  onChange={(e) => setNewQuestion({
-                    ...newQuestion,
-                    grazingPercentage: Number.parseInt(e.target.value) || 50
-                  })}
-                />
-                <span>%</span>
-              </div>
-              <p className="text-xs text-gray-500">
-                When "No" is selected, this percentage of points will be deducted instead of losing all points.
-              </p>
+        {newQuestion.type !== "partner" && (
+          <div className="pt-2">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="grazingLogic"
+                checked={newQuestion.grazingLogic}
+                onCheckedChange={(checked) => setNewQuestion({
+                  ...newQuestion,
+                  grazingLogic: checked
+                })}
+              />
+              <Label htmlFor="grazingLogic">Apply Grazing Logic for "No" Responses</Label>
             </div>
-          )}
-        </div>
+
+            {newQuestion.grazingLogic && (
+              <div className="mt-2 ml-8 space-y-2">
+                <Label htmlFor="grazingPercentage">Grazing Percentage</Label>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="grazingPercentage"
+                    type="number"
+                    className="w-20"
+                    min="1"
+                    max="100"
+                    value={newQuestion.grazingPercentage?.toString() || "50"}
+                    onChange={(e) => setNewQuestion({
+                      ...newQuestion,
+                      grazingPercentage: Number.parseInt(e.target.value) || 50
+                    })}
+                  />
+                  <span>%</span>
+                </div>
+                <p className="text-xs text-gray-500">
+                  When "No" is selected, this percentage of points will be deducted instead of losing all points.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <Button onClick={handleAddQuestion} className="w-full">
@@ -459,6 +487,34 @@ export default function AdminFormBuilder() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  )}
+                  
+                  {question.type === "partner" && (
+                    <div className="mt-2">
+                      <Select disabled>
+                        <SelectTrigger className="w-60">
+                          <SelectValue placeholder="Select Partner..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {partnersLoading ? (
+                            <SelectItem value="loading" disabled>Loading partners...</SelectItem>
+                          ) : partnersError ? (
+                            <SelectItem value="error" disabled>Error loading partners</SelectItem>
+                          ) : partners.length > 0 ? (
+                            partners.map((partner: any) => (
+                              <SelectItem key={partner.id} value={partner.id.toString()}>
+                                {partner.username}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="none" disabled>No partners available</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Partner selection - does not affect scoring
+                      </div>
                     </div>
                   )}
                   

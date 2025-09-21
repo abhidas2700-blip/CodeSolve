@@ -149,12 +149,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Get user by ID
   app.get('/api/users/:id', async (req: Request, res: Response) => {
-    try {
-      const userId = parseInt(req.params.id);
-      if (isNaN(userId)) {
-        return res.status(400).json({ error: 'Invalid user ID' });
-      }
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const currentUser = req.user as any;
+    const userId = parseInt(req.params.id);
+    
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    
+    // Users can only view their own profile, or need admin/manager/createLowerUsers rights
+    if (currentUser.id !== userId && 
+        !currentUser.rights.includes('admin') && 
+        !currentUser.rights.includes('manager') && 
+        !currentUser.rights.includes('createLowerUsers')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view this user' });
+    }
 
+    try {
       // Use storage layer instead of direct database access
       const user = await storage.getUser(userId);
       
@@ -173,6 +187,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create user
   app.post('/api/users', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const currentUser = req.user as any;
+    
+    // Only admin, manager, or users with createLowerUsers rights can create users
+    if (!currentUser.rights.includes('admin') && 
+        !currentUser.rights.includes('manager') && 
+        !currentUser.rights.includes('createLowerUsers')) {
+      return res.status(403).json({ error: 'Insufficient permissions to create users' });
+    }
+    
     try {
       const validatedData = insertUserSchema.parse(req.body);
       
@@ -187,12 +214,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: await hashPassword(validatedData.password)
       }).returning();
 
+      // Remove password from response for security
+      const { password: _, ...userWithoutPassword } = newUser;
+
       broadcast({
         type: 'user_created',
         user: { id: newUser.id, username: newUser.username, rights: newUser.rights }
       });
 
-      res.status(201).json(newUser);
+      res.status(201).json(userWithoutPassword);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ errors: error.errors });
@@ -315,6 +345,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all audit forms
   app.get('/api/forms', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin, buildForm, manager, teamleader, or audit users can view forms
+    if (!user.rights.includes('admin') && 
+        !user.rights.includes('buildForm') &&
+        !user.rights.includes('manager') &&
+        !user.rights.includes('teamleader') &&
+        !user.rights.includes('audit')) {
+      return res.status(403).json({ error: 'Insufficient permissions to view forms' });
+    }
+    
     try {
       const forms = await db.select().from(auditForms).orderBy(desc(auditForms.createdAt));
       res.json(forms);
@@ -326,6 +371,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create audit form
   app.post('/api/forms', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin or buildForm users can create forms
+    if (!user.rights.includes('admin') && !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to create forms' });
+    }
+    
     try {
       const validatedData = insertAuditFormSchema.parse(req.body);
       
@@ -351,6 +407,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update audit form
   app.put('/api/forms/:id', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin or buildForm users can update forms
+    if (!user.rights.includes('admin') && !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to update forms' });
+    }
+    
     try {
       const formId = parseInt(req.params.id);
       const validatedData = insertAuditFormSchema.parse(req.body);
@@ -381,6 +448,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Delete audit form
   app.delete('/api/forms/:id', async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    const user = req.user as any;
+    
+    // Only admin or buildForm users can delete forms
+    if (!user.rights.includes('admin') && !user.rights.includes('buildForm')) {
+      return res.status(403).json({ error: 'Insufficient permissions to delete forms' });
+    }
+    
     try {
       const formId = parseInt(req.params.id);
       
