@@ -1,0 +1,95 @@
+I already have an Audit Tool with:
+
+Form Builder (Admin/Team Lead can create forms)
+
+User Management (roles exist)
+
+Audit Module (auditors fill audits, publish reports, data, etc.)
+
+👉 Now I need to add a Partner role + full rebuttal workflow.
+
+🔑 User Roles
+
+Admin → Full control, sees everything.
+
+Manager → Can view all audits, handle rebuttals.
+
+Team Lead (TL) → Can re-audit, edit audits, accept/reject rebuttals.
+
+Auditor → Performs audits using published forms, selects Partner.
+
+Partner → Can view only their assigned audits, raise rebuttals and re-rebuttals.
+
+📝 Form Builder Update
+
+Only Admin or Team Lead can create forms.
+
+While creating a form:
+
+Add a Partner dropdown field.
+
+Dropdown values come from User Management (role = Partner).
+
+Publish form → available to Auditors for use.
+
+📝 Audit Update
+
+When an Auditor performs an audit using a form:
+
+They must select a Partner from the Partner dropdown.
+
+Submit audit → this links the audit with the chosen Partner.
+
+That Partner will now see this audit in their dashboard.
+
+🔄 Rebuttal Workflow
+
+Partner Review
+
+Partner logs in → sees audits assigned to them.
+
+If not satisfied → raise a Rebuttal by adding a note.
+
+Audit status → Under Rebuttal.
+
+Notifications go to TL, Manager, Admin.
+
+Rebuttal Handling (by TL/Manager/Admin)
+
+They re-audit the case:
+
+If error found → edit audit & mark Rebuttal Accepted.
+
+If no issue → mark Rebuttal Rejected.
+
+Partner gets notified of decision.
+
+Re-Rebuttal (second chance by Partner)
+
+If Partner still disagrees, they can raise a Re-Rebuttal.
+
+TL/Manager/Admin review again.
+
+Options:
+
+Accept → Edit audit, mark accepted.
+
+Reject → Mark rejected.
+
+After this stage, the audit becomes locked.
+
+📂 Rebuttal Section
+
+Add a Rebuttal Section in the system.
+
+This section should show:
+
+All audits that have rebuttals raised.
+
+Rejected rebuttals → still visible here for tracking.
+
+Re-Rebuttals → appear in the same section with status.
+
+Roles that can see Rebuttal Section: Admin, Manager, TL.
+
+Partners see only their own rebuttals under their audit view.
