@@ -325,6 +325,34 @@ export default function AdminFormBuilder() {
             <div className="text-sm text-gray-500">
               This field will automatically populate with available partners from the system.
             </div>
+            <div className="mt-3 p-3 bg-gray-50 rounded-md">
+              <Label className="text-sm font-medium">Available Partners Preview:</Label>
+              {partnersLoading ? (
+                <div className="text-sm text-gray-500 mt-1">Loading partners...</div>
+              ) : partnersError ? (
+                <div className="text-sm text-red-500 mt-1">Error loading partners</div>
+              ) : (partners as any[]).length > 0 ? (
+                <div className="mt-2">
+                  <Select disabled>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Partners will appear here during audit..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(partners as any[]).map((partner: any) => (
+                        <SelectItem key={partner.id} value={partner.id.toString()}>
+                          {partner.username}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Preview only - {(partners as any[]).length} partner(s) available
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-amber-600 mt-1">No partners available in system</div>
+              )}
+            </div>
           </div>
         )}
 
@@ -501,8 +529,8 @@ export default function AdminFormBuilder() {
                             <SelectItem value="loading" disabled>Loading partners...</SelectItem>
                           ) : partnersError ? (
                             <SelectItem value="error" disabled>Error loading partners</SelectItem>
-                          ) : partners.length > 0 ? (
-                            partners.map((partner: any) => (
+                          ) : (partners as any[]).length > 0 ? (
+                            (partners as any[]).map((partner: any) => (
                               <SelectItem key={partner.id} value={partner.id.toString()}>
                                 {partner.username}
                               </SelectItem>
