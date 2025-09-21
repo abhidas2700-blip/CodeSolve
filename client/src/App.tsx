@@ -165,7 +165,7 @@ function AppRouter() {
       case "reports":
         return ['reports']; // Reports requires reports right
       case "partners":
-        return ['partner']; // Partners requires partner right
+        return ['partner', 'admin', 'createLowerUsers']; // Partners requires partner right, or admin/team lead/manager access
       case "ata":
         return ['masterAuditor', 'admin']; // ATA requires either masterAuditor or admin rights
       case "forms":
@@ -313,8 +313,11 @@ function AppRouter() {
                 </Button>
               )}
               
-              {/* Show Partners tab only to users with partner rights */}
-              {hasRight('partner') && (
+              {/* Show Rebuttals tab to partners, admin, team lead, and manager */}
+              {(hasRight('partner') || 
+                hasRight('admin') || 
+                userRole === 'Manager' || 
+                userRole === 'Team Leader') && (
                 <Button 
                   variant={currentView === "partners" ? "default" : "ghost"}
                   onClick={() => setCurrentView("partners")}
