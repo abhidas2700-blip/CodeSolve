@@ -474,15 +474,15 @@ export default function Partners() {
   };
 
   if (!user) {
-    return <div>Please log in to access the partner dashboard.</div>;
+    return <div>Please log in to access the rebuttal dashboard.</div>;
   }
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Partner Dashboard</h1>
+        <h1 className="text-3xl font-bold">Rebuttal Management</h1>
         <p className="text-gray-600">
-          Welcome, {user.username}. Manage your assigned audit reports and rebuttals.
+          Welcome, {user.username}. Review and manage audit report rebuttals.
         </p>
       </div>
 
@@ -499,7 +499,7 @@ export default function Partners() {
             <CardHeader>
               <CardTitle>All Assigned Reports</CardTitle>
               <p className="text-sm text-gray-600">
-                All audit reports where you have been selected as the partner
+                All audit reports available for rebuttal review and management
               </p>
             </CardHeader>
             <CardContent>
@@ -510,7 +510,7 @@ export default function Partners() {
               ) : assignedReports.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <p>No audit reports assigned to you yet.</p>
+                  <p>No audit reports available for rebuttal review.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
