@@ -2936,6 +2936,42 @@ export default function Audits() {
       // Calculate percentage score
       const percentScore = maxScore > 0 ? Math.round((actualScore / maxScore) * 100) : 0;
       
+      // Extract partner data from form answers (looking for partner field types)
+      let partnerId: string | undefined;
+      let partnerName: string | undefined;
+      
+      // Check for partner fields in the form definition and extract their values
+      allSections.forEach((section: any) => {
+        section.questions.forEach((question: any) => {
+          if (question.type === 'partner' && answers[question.id]) {
+            const selectedPartnerId = answers[question.id];
+            if (selectedPartnerId) {
+              partnerId = selectedPartnerId;
+              // Get partner name from the question options or fetch it
+              // For now, we'll resolve the name during sync if needed
+              console.log(`Found partner selection: ${selectedPartnerId}`);
+            }
+          }
+        });
+      });
+      
+      // If we have a partnerId, try to resolve the partnerName
+      if (partnerId) {
+        try {
+          const partnersResponse = await fetch('/api/partners');
+          if (partnersResponse.ok) {
+            const partners = await partnersResponse.json();
+            const selectedPartner = partners.find((p: any) => String(p.id) === String(partnerId));
+            if (selectedPartner) {
+              partnerName = selectedPartner.username;
+              console.log(`Resolved partner name: ${partnerName} for ID: ${partnerId}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching partner name:', error);
+        }
+      }
+      
       // Create the audit record
       const completedAudit = {
         id: auditInProgress.id,
@@ -2948,7 +2984,9 @@ export default function Audits() {
         score: percentScore,
         maxScore: 100,
         hasFatal: hasFatal,
-        status: 'completed' as const
+        status: 'completed' as const,
+        partnerId: partnerId,
+        partnerName: partnerName
       };
       
       console.log('✅ Completed audit with data:', completedAudit);
@@ -3022,6 +3060,8 @@ export default function Audits() {
           agentId: auditInProgress.ticketId || auditInProgress.agentId,
           auditor: user?.id ? Number(user.id) : undefined,
           auditorName: user?.username || 'Unknown',
+          partnerId: partnerId,
+          partnerName: partnerName,
           sectionAnswers: Array.isArray(completedAudit.sectionAnswers) 
             ? completedAudit.sectionAnswers.reduce((acc, section, index) => {
                 acc[`section${index + 1}`] = section;

@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface Question {
   id: string;
   text: string;
-  type: "text" | "dropdown" | "multiSelect" | "number" | "date";
+  type: "text" | "dropdown" | "multiSelect" | "number" | "date" | "partner";
   options?: string;
   weightage: number;
   mandatory: boolean;
@@ -56,6 +57,11 @@ export default function ConditionalFormRenderer({ form, onAnswerChange }: Condit
   const [answers, setAnswers] = useState<{[key: string]: string}>({});
   const [remarks, setRemarks] = useState<{[key: string]: string}>({});
   const [dynamicSections, setDynamicSections] = useState<Section[]>([]);
+
+  // Fetch partners for partner dropdown
+  const { data: partners = [], isLoading: partnersLoading, error: partnersError } = useQuery<any[]>({
+    queryKey: ['/api/partners']
+  });
 
   // Determine if a section should be visible based on controlling question answers
   const isSectionVisible = (section: Section): boolean => {
@@ -256,6 +262,30 @@ export default function ConditionalFormRenderer({ form, onAnswerChange }: Condit
             value={value}
             onChange={(e) => handleAnswerChange(question.id, e.target.value)}
           />
+        );
+      
+      case 'partner':
+        return (
+          <Select value={value} onValueChange={(value) => handleAnswerChange(question.id, value)}>
+            <SelectTrigger data-testid={`input-partner-${question.id}`}>
+              <SelectValue placeholder="Select partner..." />
+            </SelectTrigger>
+            <SelectContent>
+              {partnersLoading ? (
+                <SelectItem value="loading" disabled>Loading partners...</SelectItem>
+              ) : partnersError ? (
+                <SelectItem value="error" disabled>Error loading partners</SelectItem>
+              ) : partners.length > 0 ? (
+                partners.map((partner: any) => (
+                  <SelectItem key={partner.id} value={partner.id.toString()}>
+                    {partner.username}
+                  </SelectItem>
+                ))
+              ) : (
+                <SelectItem value="none" disabled>No partners available</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
         );
       
       default:

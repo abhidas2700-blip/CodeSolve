@@ -97,6 +97,8 @@ export class DatabaseSyncService {
               agent: report.agent || 'Unknown Agent',
               agentId: report.agentId || 'UNKNOWN',
               auditorName: report.auditorName || 'Unknown Auditor',
+              partnerId: report.partnerId,
+              partnerName: report.partnerName,
               sectionAnswers: report.sectionAnswers || {},
               score: report.score || 0,
               maxScore: report.maxScore || 100,
@@ -299,7 +301,11 @@ export class DatabaseSyncService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(reportData)
+        body: JSON.stringify({
+          ...reportData,
+          partnerId: reportData.partnerId,
+          partnerName: reportData.partnerName
+        })
       });
 
       if (response.ok) {

@@ -73,6 +73,8 @@ interface SubmittedAudit {
   maxScore: number;
   hasFatal: boolean;
   status: 'completed' | 'draft';
+  partnerId?: number;
+  partnerName?: string;
 }
 
 export default function UserAuditPage() {
@@ -649,6 +651,28 @@ export default function UserAuditPage() {
     const form = availableForms[selectedFormIndex];
     const sectionAnswers = prepareSectionAnswers();
 
+    // Extract partner information from partner-type questions
+    let partnerId: number | undefined;
+    let partnerName: string | undefined;
+    
+    // Look through all sections and questions to find partner-type questions
+    for (const section of form.sections) {
+      for (const question of section.questions) {
+        if (question.type === 'partner' && answers[question.id]?.answer) {
+          const selectedPartnerId = parseInt(answers[question.id].answer);
+          if (!isNaN(selectedPartnerId)) {
+            partnerId = selectedPartnerId;
+            // Get partner name from the API data if available
+            // This would ideally be stored when the partner is selected
+            // For now, we'll need to fetch it or store it differently
+            console.log('Found selected partner:', selectedPartnerId);
+          }
+          break; // Assume only one partner field per form
+        }
+      }
+      if (partnerId) break;
+    }
+
     // Create the audit record with a status
     return {
       id: editingDraftId || `AUD-${Date.now()}`,
@@ -660,7 +684,9 @@ export default function UserAuditPage() {
       score: currentScore.score,
       maxScore: currentScore.maxScore,
       hasFatal: currentScore.hasFatal,
-      status: status
+      status: status,
+      partnerId: partnerId,
+      partnerName: partnerName
     };
   };
 
