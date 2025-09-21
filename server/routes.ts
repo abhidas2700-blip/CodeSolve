@@ -23,7 +23,7 @@ import {
 import { z } from "zod";
 import { setupAuth, hashPassword } from "./auth";
 import { db } from "./db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, isNotNull } from "drizzle-orm";
 import { healthCheck } from "./health";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1108,17 +1108,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const user = req.user as any;
 
-    // Only partners can access this endpoint
-    if (!user.rights.includes('partner')) {
-      return res.status(403).json({ error: 'Only partners can access this endpoint' });
+    // Allow partners, admin, team lead, and manager to access this endpoint
+    const hasPartnerAccess = user.rights.includes('partner');
+    const hasManagementAccess = user.rights.includes('admin') || 
+                               user.rights.includes('createLowerUsers');
+    
+    if (!hasPartnerAccess && !hasManagementAccess) {
+      return res.status(403).json({ error: 'Access denied. Requires partner or management rights.' });
     }
 
     try {
+      // Partners see only their assigned reports, management sees all reports with partners
+      const whereConditions = hasPartnerAccess && !hasManagementAccess
+        ? and(
+            eq(auditReports.partnerId, user.id),
+            eq(auditReports.deleted, false)
+          )
+        : and(
+            isNotNull(auditReports.partnerId), // Only reports with partners assigned
+            eq(auditReports.deleted, false)
+          );
+      
       const reports = await db.query.auditReports.findMany({
-        where: and(
-          eq(auditReports.partnerId, user.id),
-          eq(auditReports.deleted, false)
-        ),
+        where: whereConditions,
         orderBy: desc(auditReports.timestamp)
       });
       res.json(reports);
@@ -1136,14 +1148,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const user = req.user as any;
 
-    // Only partners can access this endpoint
-    if (!user.rights.includes('partner')) {
-      return res.status(403).json({ error: 'Only partners can access this endpoint' });
+    // Allow partners, admin, team lead, and manager to access this endpoint
+    const hasPartnerAccess = user.rights.includes('partner');
+    const hasManagementAccess = user.rights.includes('admin') || 
+                               user.rights.includes('createLowerUsers');
+    
+    if (!hasPartnerAccess && !hasManagementAccess) {
+      return res.status(403).json({ error: 'Access denied. Requires partner or management rights.' });
     }
 
     try {
+      // Partners see only their rebuttals, management sees all rebuttals
+      const whereConditions = hasPartnerAccess && !hasManagementAccess
+        ? eq(rebuttals.partnerId, user.id)
+        : undefined; // No filter for management - see all rebuttals
+      
       const rebuttalsList = await db.query.rebuttals.findMany({
-        where: eq(rebuttals.partnerId, user.id),
+        where: whereConditions,
         orderBy: desc(rebuttals.createdAt)
       });
       res.json(rebuttalsList);
