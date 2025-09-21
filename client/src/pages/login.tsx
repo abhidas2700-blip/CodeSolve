@@ -39,11 +39,11 @@ export default function Login() {
         <Card className="w-[400px] border-opacity-50 shadow-xl animate-in slide-in-from-bottom-10 duration-700">
           <CardHeader className="pb-6">
             <div className="w-full flex justify-center mb-4 animate-in zoom-in-50 duration-1000">
-              <div className="h-20 w-20 flex items-center justify-center">
+              <div className="h-24 w-24 flex items-center justify-center">
                 <img 
                   src={logoImage} 
                   alt="SolveXtra Logo" 
-                  className="h-16 w-16 object-contain"
+                  className="h-20 w-20 object-contain"
                 />
               </div>
             </div>
