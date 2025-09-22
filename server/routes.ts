@@ -1190,19 +1190,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const partners = await db.query.users.findMany({
-        where: and(
-          eq(users.isInactive, false),
-          sql`rights @> '["partner"]'`
-        ),
-        orderBy: desc(users.id),
-        columns: {
-          id: true,
-          username: true,
-          email: true,
-          rights: true
-        }
-      });
+      // Get all users and filter for active partners
+      const allUsers = await storage.getUsers();
+      const partners = allUsers.filter(user => 
+        !user.isInactive && 
+        user.rights && 
+        user.rights.includes('partner')
+      ).map(user => ({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        rights: user.rights
+      }));
+      
       res.json(partners);
     } catch (error) {
       console.error('Error fetching partners:', error);
