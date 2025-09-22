@@ -654,7 +654,7 @@ export default function Partners() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                    )
+                    )}
                   </div>
                 )}
                 
