@@ -1081,97 +1081,6 @@ export default function Ata() {
                                   <div className="space-y-1">
                                     <Label className="text-xs text-muted-foreground">Your Answer:</Label>
                                     {(() => {
-                                      // Helper function to check if question has dropdown options in form
-                                      const hasDropdownOptions = () => {
-                                        if (formsLoading || !forms || forms.length === 0) {
-                                          return false;
-                                        }
-
-                                        const currentForm = forms.find(form => 
-                                          form.name === selectedReport?.formName || 
-                                          form.name === 'Advanced Audit Form'
-                                        );
-
-                                        if (!currentForm || !currentForm.sections) {
-                                          return false;
-                                        }
-
-                                        // Handle both array and object structure for sections
-                                        let sections = currentForm.sections;
-                                        
-                                        // If sections is a string (JSON), parse it
-                                        if (typeof sections === 'string') {
-                                          try {
-                                            sections = JSON.parse(sections);
-                                          } catch (e) {
-                                            return false;
-                                          }
-                                        }
-                                        
-                                        // Convert to array if it's an object
-                                        const sectionsArray = Array.isArray(sections) 
-                                          ? sections 
-                                          : Object.values(sections || {});
-                                        
-                                        // Search through all sections for the question
-                                        for (const section of sectionsArray) {
-                                          if (section && section.questions && Array.isArray(section.questions)) {
-                                            const question = section.questions.find(q => q?.id === answer.questionId);
-                                            if (question && question.options && question.options.trim() !== '') {
-                                              return true;
-                                            }
-                                          }
-                                        }
-                                        
-                                        return false;
-                                      };
-
-                                      // Helper function to get dropdown options from form
-                                      const getDropdownOptions = () => {
-                                        if (formsLoading || !forms || forms.length === 0) {
-                                          return [];
-                                        }
-
-                                        const currentForm = forms.find(form => 
-                                          form.name === selectedReport?.formName || 
-                                          form.name === 'Advanced Audit Form'
-                                        );
-
-                                        if (!currentForm || !currentForm.sections) {
-                                          return [];
-                                        }
-
-                                        // Handle both array and object structure for sections
-                                        let sections = currentForm.sections;
-                                        
-                                        // If sections is a string (JSON), parse it
-                                        if (typeof sections === 'string') {
-                                          try {
-                                            sections = JSON.parse(sections);
-                                          } catch (e) {
-                                            return [];
-                                          }
-                                        }
-                                        
-                                        // Convert to array if it's an object
-                                        const sectionsArray = Array.isArray(sections) 
-                                          ? sections 
-                                          : Object.values(sections || {});
-                                        
-                                        // Search through all sections for the question
-                                        for (const section of sectionsArray) {
-                                          if (section && section.questions && Array.isArray(section.questions)) {
-                                            const question = section.questions.find(q => q?.id === answer.questionId);
-                                            if (question && question.options && question.options.trim() !== '') {
-                                              return question.options.split(',').map(opt => opt.trim());
-                                            }
-                                          }
-                                        }
-                                        
-                                        return [];
-                                      };
-
-                                      // Check if this should be a dropdown
                                       return (
                                         answer.questionId.includes("dropdown") || 
                                         answer.type === "dropdown" ||
@@ -1179,11 +1088,8 @@ export default function Ata() {
                                         answer.answer === 'No' ||
                                         // Include Partner questions (detected by text or numeric answers)
                                         answer.text?.toLowerCase().includes('partner') ||
-                                        (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ||
-                                        // Most importantly: Check if the question has options defined in the form
-                                        hasDropdownOptions()
-                                      );
-                                    })() ? (
+                                        (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50)
+                                      ) ? (
                                       <Select 
                                         value={masterAnswers[stateKey] || answer.answer} 
                                         onValueChange={(value) => {
@@ -1281,7 +1187,8 @@ export default function Ata() {
                                           }));
                                         }} 
                                       />
-                                    )}
+                                    );
+                                    })()}
                                   </div>
                                 </div>
                                 
