@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { formatDate } from '@/lib/utils';
 import { useAuth } from '@/context/auth-context';
 import { ATAReportsTab } from '@/components/audit/ata-reports-tab';
+import { useQuery } from '@tanstack/react-query';
 
 interface AuditReport {
   id: string;
@@ -60,6 +61,16 @@ export default function Ata() {
   const [answerNonCriticality, setAnswerNonCriticality] = useState<{[key: string]: boolean}>({});
   const [answerComments, setAnswerComments] = useState<{[key: string]: string}>({});
   const [selectedReportDebugDone, setSelectedReportDebugDone] = useState<boolean>(false);
+
+  // Fetch partners data for dropdown options
+  const { data: partners, isLoading: partnersLoading } = useQuery({
+    queryKey: ['/api/partners'],
+    queryFn: async () => {
+      const response = await fetch('/api/partners');
+      if (!response.ok) throw new Error('Failed to fetch partners');
+      return response.json();
+    }
+  });
 
   useEffect(() => {
     const isMasterAuditor = user?.rights?.includes('masterAuditor');
@@ -1055,8 +1066,25 @@ export default function Ata() {
                                             null
                                           ) : null}
                                           
-                                          {/* Try to parse options from the question */}
-                                          {answer.options ? (
+                                          {/* Check if this is a Partner question */}
+                                          {(answer.type === 'partner' || answer.text?.toLowerCase().includes('partner')) ? (
+                                            // Special handling for Partner questions - use API data
+                                            partnersLoading ? (
+                                              <SelectItem value="">Loading partners...</SelectItem>
+                                            ) : partners && partners.length > 0 ? (
+                                              partners.map((partner: any) => (
+                                                <SelectItem key={partner.id} value={partner.username}>
+                                                  {partner.username}
+                                                </SelectItem>
+                                              ))
+                                            ) : (
+                                              <>
+                                                <SelectItem value="Partner 1">Partner 1</SelectItem>
+                                                <SelectItem value="Partner 2">Partner 2</SelectItem>
+                                                <SelectItem value="Tech M">Tech M</SelectItem>
+                                              </>
+                                            )
+                                          ) : answer.options ? (
                                             // If there are explicit options defined, show them all
                                             (() => {
                                               try {
