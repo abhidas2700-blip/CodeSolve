@@ -72,31 +72,10 @@ export default function Ata() {
 
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
-    console.log(`Filter function called with filterPartner="${filterPartner}", reports count=${reportsToFilter.length}`);
     return reportsToFilter.filter(report => {
-      // Partner filter - map partner usernames to agent field values
-      if (filterPartner) {
-        // Create mapping from partner usernames to agent field values
-        // This handles the case where partner users (Tech M, Startek) need to match
-        // actual agent field values in reports (Open Sample, etc.)
-        let agentValueToMatch = filterPartner;
-        
-        // Map partner usernames to known agent field values
-        const partnerToAgentMapping: { [key: string]: string } = {
-          'Tech M': 'Open Sample',
-          'Startek': 'Open Sample',
-          // Add more mappings as needed
-        };
-        
-        if (partnerToAgentMapping[filterPartner]) {
-          agentValueToMatch = partnerToAgentMapping[filterPartner];
-        }
-        
-        console.log(`Partner filter debug: Selected="${filterPartner}", Mapped to="${agentValueToMatch}", Report agent="${report.agent}", Match=${report.agent === agentValueToMatch}`);
-        
-        if (report.agent !== agentValueToMatch) {
-          return false;
-        }
+      // Partner filter - filter by partnerName field directly
+      if (filterPartner && report.partnerName !== filterPartner) {
+        return false;
       }
       
       // Auditor filter - use exact matching for dropdown selection
@@ -145,10 +124,6 @@ export default function Ata() {
     const partnerUsernames = partners.map((p: any) => p.username).filter(Boolean);
     console.log('getUniquePartners: Partner users from API:', partnerUsernames);
     
-    // Debug: Show actual agent values in reports for mapping
-    const allReports = [...reports, ...reviewedReports];
-    const uniqueAgentValues = Array.from(new Set(allReports.map(r => r.agent).filter(Boolean)));
-    console.log('DEBUG: All unique agent field values in reports:', uniqueAgentValues);
     
     return partnerUsernames.sort();
   };
@@ -1054,10 +1029,7 @@ export default function Ata() {
                   {/* Partner Filter */}
                   <div>
                     <Label htmlFor="filter-partner" className="text-xs">Partner</Label>
-                    <Select value={filterPartner} onValueChange={(value) => {
-                      console.log('Partner filter changed to:', value);
-                      setFilterPartner(value);
-                    }}>
+                    <Select value={filterPartner} onValueChange={setFilterPartner}>
                       <SelectTrigger id="filter-partner" data-testid="select-filter-partner">
                         <SelectValue placeholder="All Partners" />
                       </SelectTrigger>
