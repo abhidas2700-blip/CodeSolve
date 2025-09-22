@@ -1084,6 +1084,7 @@ export default function Ata() {
                                       // Helper function to check if question has dropdown options in form
                                       const hasDropdownOptions = () => {
                                         if (formsLoading || !forms || forms.length === 0) {
+                                          console.log('No forms data available for', answer.questionId);
                                           return false;
                                         }
 
@@ -1092,7 +1093,10 @@ export default function Ata() {
                                           form.name === 'Advanced Audit Form'
                                         );
 
+                                        console.log('Current form found:', currentForm?.name, 'for question:', answer.questionId);
+
                                         if (!currentForm || !currentForm.sections) {
+                                          console.log('No current form or sections for', answer.questionId);
                                           return false;
                                         }
 
@@ -1100,14 +1104,25 @@ export default function Ata() {
                                           ? currentForm.sections 
                                           : Object.values(currentForm.sections);
                                         
+                                        console.log('Form sections:', sections.map(s => s.name || s.id));
+                                        
                                         for (const section of sections) {
                                           if (section && section.questions) {
                                             const question = section.questions.find(q => q.id === answer.questionId);
-                                            if (question && question.options && question.options.trim() !== '') {
-                                              return true;
+                                            if (question) {
+                                              console.log('Found question in form:', answer.questionId, {
+                                                text: question.text,
+                                                type: question.type,
+                                                options: question.options,
+                                                hasOptions: !!question.options && question.options.trim() !== ''
+                                              });
+                                              if (question.options && question.options.trim() !== '') {
+                                                return true;
+                                              }
                                             }
                                           }
                                         }
+                                        console.log('No options found in form for question:', answer.questionId);
                                         return false;
                                       };
 
