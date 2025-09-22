@@ -409,9 +409,36 @@ export default function Ata() {
                 foundInReports: auditorAnswer && !answer?.answer
               });
               
+              // Try to get the actual question text from form definition
+              let questionText = answer?.text || answer?.questionText || answer?.questionId || 'Question';
+              
+              // Try to find the question text from the form definition
+              if (questionText === answer?.questionId || questionText === 'Question') {
+                try {
+                  const savedForms = JSON.parse(localStorage.getItem('qa-audit-forms') || '[]');
+                  const formDef = savedForms.find((f: any) => f.name === audit.formName);
+                  
+                  if (formDef && formDef.sections) {
+                    for (const formSection of formDef.sections) {
+                      if (formSection.questions) {
+                        const matchingQuestion = formSection.questions.find((q: any) => 
+                          q.id === answer.questionId
+                        );
+                        if (matchingQuestion && matchingQuestion.text) {
+                          questionText = matchingQuestion.text;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                } catch (e) {
+                  console.log('Could not find question text in form definition:', e);
+                }
+              }
+              
               return {
                 questionId: answer?.questionId || 'unknown',
-                text: answer?.text || answer?.questionId || 'Question',
+                text: questionText,
                 answer: auditorAnswer,
                 remarks: answer?.remarks || '',
                 options: Array.isArray(answer?.options) ? answer.options : [],
@@ -1082,13 +1109,30 @@ export default function Ata() {
                                             null
                                           ) : null}
                                           
-                                          {/* Check if this is a Partner question */}
-                                          {(answer.type === 'partner' || 
-                                            answer.text?.toLowerCase().includes('partner') || 
-                                            answer.questionText?.toLowerCase().includes('partner') ||
-                                            answer.questionId?.toLowerCase().includes('partner') ||
-                                            // Also check if the answer is a number (Partner IDs are typically numeric)
-                                            (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 20)) ? (
+                                          {/* Check if this is a Partner question using multiple detection methods */}
+                                          {(() => {
+                                            const isPartnerQuestion = (
+                                              answer.type === 'partner' || 
+                                              answer.text?.toLowerCase().includes('partner') || 
+                                              answer.questionText?.toLowerCase().includes('partner') ||
+                                              answer.questionId?.toLowerCase().includes('partner') ||
+                                              // Check if the auditor answer is numeric (Partners are often stored as IDs)
+                                              (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ||
+                                              // Check specific question patterns from the UI display
+                                              (selectedReport?.sectionAnswers?.some(s => 
+                                                s.answers?.some(a => a.questionId === answer.questionId && 
+                                                  (a.text === 'Partner' || a.text?.includes('Partner')))
+                                              ))
+                                            );
+                                            
+                                            console.log('Partner question check for', answer.questionId, ':', {
+                                              isPartnerQuestion,
+                                              auditorAnswer: answer.answer,
+                                              isNumeric: !isNaN(Number(answer.answer))
+                                            });
+                                            
+                                            return isPartnerQuestion;
+                                          })() ? (
                                             // Special handling for Partner questions - use API data
                                             partnersLoading ? (
                                               <SelectItem value="">Loading partners...</SelectItem>
