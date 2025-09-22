@@ -1084,7 +1084,6 @@ export default function Ata() {
                                       // Helper function to check if question has dropdown options in form
                                       const hasDropdownOptions = () => {
                                         if (formsLoading || !forms || forms.length === 0) {
-                                          console.log('No forms data available for', answer.questionId);
                                           return false;
                                         }
 
@@ -1093,39 +1092,83 @@ export default function Ata() {
                                           form.name === 'Advanced Audit Form'
                                         );
 
-                                        console.log('Current form found:', currentForm?.name, 'for question:', answer.questionId);
-                                        console.log('Raw form sections data:', currentForm.sections);
-
                                         if (!currentForm || !currentForm.sections) {
-                                          console.log('No current form or sections for', answer.questionId);
                                           return false;
                                         }
 
-                                        const sections = Array.isArray(currentForm.sections) 
-                                          ? currentForm.sections 
-                                          : Object.values(currentForm.sections);
+                                        // Handle both array and object structure for sections
+                                        let sections = currentForm.sections;
                                         
-                                        console.log('Form sections after processing:', sections);
-                                        console.log('Form sections names:', sections.map(s => s?.name || s?.id || 'Unknown'));
+                                        // If sections is a string (JSON), parse it
+                                        if (typeof sections === 'string') {
+                                          try {
+                                            sections = JSON.parse(sections);
+                                          } catch (e) {
+                                            return false;
+                                          }
+                                        }
                                         
-                                        for (const section of sections) {
-                                          if (section && section.questions) {
-                                            const question = section.questions.find(q => q.id === answer.questionId);
-                                            if (question) {
-                                              console.log('Found question in form:', answer.questionId, {
-                                                text: question.text,
-                                                type: question.type,
-                                                options: question.options,
-                                                hasOptions: !!question.options && question.options.trim() !== ''
-                                              });
-                                              if (question.options && question.options.trim() !== '') {
-                                                return true;
-                                              }
+                                        // Convert to array if it's an object
+                                        const sectionsArray = Array.isArray(sections) 
+                                          ? sections 
+                                          : Object.values(sections || {});
+                                        
+                                        // Search through all sections for the question
+                                        for (const section of sectionsArray) {
+                                          if (section && section.questions && Array.isArray(section.questions)) {
+                                            const question = section.questions.find(q => q?.id === answer.questionId);
+                                            if (question && question.options && question.options.trim() !== '') {
+                                              return true;
                                             }
                                           }
                                         }
-                                        console.log('No options found in form for question:', answer.questionId);
+                                        
                                         return false;
+                                      };
+
+                                      // Helper function to get dropdown options from form
+                                      const getDropdownOptions = () => {
+                                        if (formsLoading || !forms || forms.length === 0) {
+                                          return [];
+                                        }
+
+                                        const currentForm = forms.find(form => 
+                                          form.name === selectedReport?.formName || 
+                                          form.name === 'Advanced Audit Form'
+                                        );
+
+                                        if (!currentForm || !currentForm.sections) {
+                                          return [];
+                                        }
+
+                                        // Handle both array and object structure for sections
+                                        let sections = currentForm.sections;
+                                        
+                                        // If sections is a string (JSON), parse it
+                                        if (typeof sections === 'string') {
+                                          try {
+                                            sections = JSON.parse(sections);
+                                          } catch (e) {
+                                            return [];
+                                          }
+                                        }
+                                        
+                                        // Convert to array if it's an object
+                                        const sectionsArray = Array.isArray(sections) 
+                                          ? sections 
+                                          : Object.values(sections || {});
+                                        
+                                        // Search through all sections for the question
+                                        for (const section of sectionsArray) {
+                                          if (section && section.questions && Array.isArray(section.questions)) {
+                                            const question = section.questions.find(q => q?.id === answer.questionId);
+                                            if (question && question.options && question.options.trim() !== '') {
+                                              return question.options.split(',').map(opt => opt.trim());
+                                            }
+                                          }
+                                        }
+                                        
+                                        return [];
                                       };
 
                                       // Check if this should be a dropdown
@@ -1159,28 +1202,6 @@ export default function Ata() {
                                           <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          {/* Debug dropdown options */}
-                                          {ansIdx === 0 && answer.options ? (
-                                            console.log('Debug dropdown options:', answer.options),
-                                            null
-                                          ) : null}
-                                          
-                                          {/* Debug Partner question detection */}
-                                          {ansIdx === 0 ? (
-                                            console.log('Debug Partner detection for question:', {
-                                              questionId: answer.questionId,
-                                              text: answer.text,
-                                              questionText: answer.questionText,
-                                              type: answer.type,
-                                              isPartnerByType: answer.type === 'partner',
-                                              isPartnerByText: answer.text?.toLowerCase().includes('partner'),
-                                              isPartnerByQuestionText: answer.questionText?.toLowerCase().includes('partner'),
-                                              isPartnerById: answer.questionId?.toLowerCase().includes('partner'),
-                                              auditorAnswer: answer.answer,
-                                              allFields: Object.keys(answer)
-                                            }),
-                                            null
-                                          ) : null}
                                           
                                           {/* Check if this is a Partner question using multiple detection methods */}
                                           {(() => {
@@ -1198,11 +1219,6 @@ export default function Ata() {
                                               ))
                                             );
                                             
-                                            console.log('Partner question check for', answer.questionId, ':', {
-                                              isPartnerQuestion,
-                                              auditorAnswer: answer.answer,
-                                              isNumeric: !isNaN(Number(answer.answer))
-                                            });
                                             
                                             return isPartnerQuestion;
                                           })() ? (
@@ -1225,50 +1241,22 @@ export default function Ata() {
                                           ) : (
                                             // Regular dropdown options from form definition
                                             (() => {
-                                              // Helper function to get dropdown options from form data
-                                              const getDropdownOptions = () => {
-                                                if (formsLoading || !forms || forms.length === 0) {
-                                                  return ['Yes', 'No', 'N/A'];
-                                                }
+                                              // Use the form-based options if available
+                                              const formOptions = getDropdownOptions();
+                                              if (formOptions.length > 0) {
+                                                return formOptions.map((option, idx) => (
+                                                  <SelectItem key={idx} value={option}>
+                                                    {option}
+                                                  </SelectItem>
+                                                ));
+                                              }
 
-                                                // Find the form that matches the selected report
-                                                const currentForm = forms.find(form => 
-                                                  form.name === selectedReport?.formName || 
-                                                  form.name === 'Advanced Audit Form'
-                                                );
-
-                                                if (!currentForm || !currentForm.sections) {
-                                                  return ['Yes', 'No', 'N/A'];
-                                                }
-
-                                                // Find the specific question in the form
-                                                // currentForm.sections is an object, not an array
-                                                const sections = Array.isArray(currentForm.sections) 
-                                                  ? currentForm.sections 
-                                                  : Object.values(currentForm.sections);
-                                                
-                                                for (const section of sections) {
-                                                  if (section && section.questions) {
-                                                    const question = section.questions.find(q => q.id === answer.questionId);
-                                                    if (question && question.options) {
-                                                      // Parse comma-separated options
-                                                      const options = question.options.split(',').map(opt => opt.trim());
-                                                      console.log('Found form options for', answer.questionId, ':', options);
-                                                      return options;
-                                                    }
-                                                  }
-                                                }
-
-                                                // Fallback options based on answer content
-                                                if (answer.answer === 'Yes' || answer.answer === 'No') {
-                                                  return ['Yes', 'No', 'N/A'];
-                                                }
-                                                
-                                                return ['Yes', 'No', 'N/A'];
-                                              };
-
-                                              const options = getDropdownOptions();
-                                              return options.map((option, idx) => (
+                                              // Fallback options based on answer content
+                                              const fallbackOptions = answer.answer === 'Yes' || answer.answer === 'No' 
+                                                ? ['Yes', 'No', 'N/A'] 
+                                                : ['Yes', 'No', 'N/A'];
+                                              
+                                              return fallbackOptions.map((option, idx) => (
                                                 <SelectItem key={idx} value={option}>
                                                   {option}
                                                 </SelectItem>
