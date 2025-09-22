@@ -1140,18 +1140,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Filter by partner ID OR partner name (for backward compatibility with historical data)
-      // Partners should only see their own reports
-      const whereConditions = and(
-        or(
-          eq(auditReports.partnerId, user.id),
-          and(
-            isNull(auditReports.partnerId),
-            eq(auditReports.partnerName, user.username)
+      // Management sees all partner reports, partners see only their own
+      const whereConditions = hasManagementAccess && !hasPartnerAccess
+        ? and(
+            isNotNull(auditReports.partnerId), // Only reports with partners assigned
+            eq(auditReports.deleted, false)
           )
-        ),
-        eq(auditReports.deleted, false)
-      );
+        : and(
+            or(
+              eq(auditReports.partnerId, user.id),
+              and(
+                isNull(auditReports.partnerId),
+                eq(auditReports.partnerName, user.username)
+              )
+            ),
+            eq(auditReports.deleted, false)
+          );
       
       const reports = await db.query.auditReports.findMany({
         where: whereConditions,
@@ -1183,15 +1187,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Filter by partner ID OR partner name (for backward compatibility with historical data)
-      // Partners should only see their own rebuttals
-      const whereConditions = or(
-        eq(rebuttals.partnerId, user.id),
-        and(
-          isNull(rebuttals.partnerId),
-          eq(rebuttals.partnerName, user.username)
-        )
-      );
+      // Management sees all rebuttals, partners see only their own
+      const whereConditions = hasManagementAccess && !hasPartnerAccess
+        ? undefined // No filter for management - see all rebuttals
+        : or(
+            eq(rebuttals.partnerId, user.id),
+            and(
+              isNull(rebuttals.partnerId),
+              eq(rebuttals.partnerName, user.username)
+            )
+          );
       
       const rebuttalsList = await db.query.rebuttals.findMany({
         where: whereConditions,
@@ -1324,10 +1329,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Handle different actions
       if (action === 'accept') {
-        // Partner accepts the audit report
+        // Accept the audit report and record who accepted it
         await db.update(auditReports)
           .set({ status: 'accepted' })
           .where(eq(auditReports.id, auditReportId));
+
+        // Update the latest rebuttal to show it was accepted and by whom
+        await db.update(rebuttals)
+          .set({ 
+            status: 'accepted',
+            handledBy: user.id,
+            handledByName: user.username,
+            handledAt: new Date()
+          })
+          .where(eq(rebuttals.auditReportId, auditReportId));
 
         res.json({ message: 'Report accepted successfully' });
         return;
@@ -1335,13 +1350,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (action === 'reject' || action === 'rebuttal' || action === 're_rebuttal' || action === 'bod') {
         const rebuttalType = action === 're_rebuttal' ? 're_rebuttal' : 'rebuttal';
+        
+        // If this is a rejection of an existing rebuttal by management, handle it differently
+        if (action === 'reject' && (user.rights.includes('admin') || user.rights.includes('manager') || user.rights.includes('teamleader'))) {
+          // Management is rejecting a partner's rebuttal
+          await db.update(rebuttals)
+            .set({ 
+              status: 'rejected',
+              handledBy: user.id,
+              handledByName: user.username,
+              handlerResponse: handlerResponse || rebuttalText || 'Rebuttal rejected',
+              handledAt: new Date()
+            })
+            .where(eq(rebuttals.auditReportId, auditReportId));
+
+          // Update audit report status to show rebuttal was rejected
+          await db.update(auditReports)
+            .set({ status: 'rebuttal_rejected' })
+            .where(eq(auditReports.id, auditReportId));
+
+          res.json({ message: 'Rebuttal rejected successfully' });
+          return;
+        }
+
         const rebuttalData = {
           auditReportId,
           partnerId: user.id,
           partnerName: user.username,
           rebuttalText: rebuttalText || (action === 'bod' ? 'Benefit of Doubt applied' : ''),
           rebuttalType,
-          status: action === 'bod' ? 'accepted' : 'pending'
+          status: action === 'bod' ? 'accepted' : 'pending',
+          ...(action === 'bod' && {
+            handledBy: user.id,
+            handledByName: user.username,
+            handledAt: new Date()
+          })
         };
 
         const validatedRebuttalData = insertRebuttalSchema.parse(rebuttalData);

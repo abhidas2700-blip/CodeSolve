@@ -88,6 +88,19 @@ export default function Partners() {
     return partner ? partner.username : `Partner ${partnerId}`;
   };
 
+  // Helper function to check if user has management rights
+  const isManagement = () => {
+    return user?.rights?.includes('admin') || 
+           user?.rights?.includes('manager') || 
+           user?.rights?.includes('teamleader') ||
+           user?.rights?.includes('createLowerUsers');
+  };
+
+  // Helper function to check if user is partner only
+  const isPartnerOnly = () => {
+    return user?.rights?.includes('partner') && !isManagement();
+  };
+
   // Helper function to format section answers for display
   const formatSectionAnswers = (sectionAnswers: any) => {
     if (!sectionAnswers || typeof sectionAnswers !== 'object') return null;
@@ -183,6 +196,31 @@ export default function Partners() {
     return rebuttal?.rebuttalType || null;
   };
 
+  // Get rebuttal handler information
+  const getRebuttalHandler = (reportId: number) => {
+    const rebuttal = rebuttals.find(r => r.auditReportId === reportId);
+    if (!rebuttal || !rebuttal.handledByName) return null;
+    
+    return {
+      handledBy: rebuttal.handledByName,
+      handledAt: rebuttal.handledAt,
+      status: rebuttal.status
+    };
+  };
+
+  // Get formatted handler text
+  const getHandlerText = (reportId: number) => {
+    const handler = getRebuttalHandler(reportId);
+    if (!handler) return null;
+    
+    if (handler.status === 'accepted') {
+      return `Accepted by ${handler.handledBy}`;
+    } else if (handler.status === 'rejected') {
+      return `Rejected by ${handler.handledBy}`;
+    }
+    return null;
+  };
+
   // Handle rebuttal actions
   const handleAccept = (report: AuditReport) => {
     rebuttalMutation.mutate({
@@ -257,13 +295,20 @@ export default function Partners() {
                 Score: {report.score}%
               </Badge>
               {rebuttalStatus !== 'none' && (
-                <Badge variant={
-                  rebuttalStatus === 'accepted' ? 'default' : 
-                  rebuttalStatus === 'rejected' ? 'destructive' : 'secondary'
-                }>
-                  {rebuttalStatus === 'pending' ? 'Pending Review' : 
-                   rebuttalStatus === 'accepted' ? 'Accepted' : 'Rejected'}
-                </Badge>
+                <div className="flex flex-col items-end space-y-1">
+                  <Badge variant={
+                    rebuttalStatus === 'accepted' ? 'default' : 
+                    rebuttalStatus === 'rejected' ? 'destructive' : 'secondary'
+                  }>
+                    {rebuttalStatus === 'pending' ? 'Pending Review' : 
+                     rebuttalStatus === 'accepted' ? 'Accepted' : 'Rejected'}
+                  </Badge>
+                  {getHandlerText(report.id) && (
+                    <span className="text-xs text-gray-500">
+                      {getHandlerText(report.id)}
+                    </span>
+                  )}
+                </div>
               )}
               {isReRebuttal && (
                 <Badge variant="outline">Re-Rebuttal</Badge>
