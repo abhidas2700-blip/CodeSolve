@@ -1188,8 +1188,13 @@ export default function Ata() {
                                                 }
 
                                                 // Find the specific question in the form
-                                                for (const section of currentForm.sections) {
-                                                  if (section.questions) {
+                                                // currentForm.sections is an object, not an array
+                                                const sections = Array.isArray(currentForm.sections) 
+                                                  ? currentForm.sections 
+                                                  : Object.values(currentForm.sections);
+                                                
+                                                for (const section of sections) {
+                                                  if (section && section.questions) {
                                                     const question = section.questions.find(q => q.id === answer.questionId);
                                                     if (question && question.options) {
                                                       // Parse comma-separated options
