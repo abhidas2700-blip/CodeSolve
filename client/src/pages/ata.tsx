@@ -73,36 +73,39 @@ export default function Ata() {
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
     return reportsToFilter.filter(report => {
-      // Partner filter
-      if (filterPartner && !report.agent?.toLowerCase().includes(filterPartner.toLowerCase())) {
+      // Partner filter - use exact matching for dropdown selection
+      if (filterPartner && report.agent !== filterPartner) {
         return false;
       }
       
-      // Auditor filter
-      if (filterAuditor && !report.auditor?.toLowerCase().includes(filterAuditor.toLowerCase())) {
+      // Auditor filter - use exact matching for dropdown selection
+      if (filterAuditor && report.auditor !== filterAuditor) {
         return false;
       }
       
-      // Agent ID filter
-      if (filterAgentId && !report.agentId?.toLowerCase().includes(filterAgentId.toLowerCase())) {
+      // Agent ID filter - use substring matching for text input
+      if (filterAgentId && !report.agentId?.toLowerCase().includes(filterAgentId.toLowerCase().trim())) {
         return false;
       }
       
-      // Date filter (check if report date matches selected date)
+      // Date filter - use local date comparison to avoid timezone issues
       if (filterDate) {
-        const reportDate = new Date(report.timestamp).toISOString().split('T')[0];
-        if (reportDate !== filterDate) {
+        const reportDate = new Date(report.timestamp);
+        const localDateString = reportDate.getFullYear() + '-' + 
+          String(reportDate.getMonth() + 1).padStart(2, '0') + '-' + 
+          String(reportDate.getDate()).padStart(2, '0');
+        if (localDateString !== filterDate) {
           return false;
         }
       }
       
-      // Form filter
-      if (filterForm && !report.formName?.toLowerCase().includes(filterForm.toLowerCase())) {
+      // Form filter - use exact matching for dropdown selection
+      if (filterForm && report.formName !== filterForm) {
         return false;
       }
       
-      // Audit ID filter
-      if (filterAuditId && !report.id?.toLowerCase().includes(filterAuditId.toLowerCase())) {
+      // Audit ID filter - use substring matching for text input
+      if (filterAuditId && !report.id?.toLowerCase().includes(filterAuditId.toLowerCase().trim())) {
         return false;
       }
       
@@ -112,9 +115,14 @@ export default function Ata() {
 
   // Helper functions to get unique values for dropdowns
   const getUniquePartners = (): string[] => {
+    // Use actual partners from API if available, otherwise fall back to unique agents from reports
+    if (partners && partners.length > 0) {
+      return partners.map((p: any) => p.username).sort();
+    }
+    
     const allReports = [...reports, ...reviewedReports];
-    const partners = allReports.map(r => r.agent).filter(Boolean);
-    return Array.from(new Set(partners)).sort();
+    const agentNames = allReports.map(r => r.agent).filter(Boolean);
+    return Array.from(new Set(agentNames)).sort();
   };
 
   const getUniqueAuditors = (): string[] => {
@@ -1020,7 +1028,6 @@ export default function Ata() {
                         <SelectValue placeholder="All Partners" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Partners</SelectItem>
                         {getUniquePartners().map((partner) => (
                           <SelectItem key={partner} value={partner}>
                             {partner}
@@ -1038,7 +1045,6 @@ export default function Ata() {
                         <SelectValue placeholder="All Auditors" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Auditors</SelectItem>
                         {getUniqueAuditors().map((auditor) => (
                           <SelectItem key={auditor} value={auditor}>
                             {auditor}
@@ -1080,7 +1086,6 @@ export default function Ata() {
                         <SelectValue placeholder="All Forms" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Forms</SelectItem>
                         {getUniqueForms().map((form) => (
                           <SelectItem key={form} value={form}>
                             {form}
@@ -1397,7 +1402,7 @@ export default function Ata() {
                                           })() ? (
                                             // Special handling for Partner questions - use API data
                                             partnersLoading ? (
-                                              <SelectItem value="">Loading partners...</SelectItem>
+                                              <SelectItem value="loading" disabled>Loading partners...</SelectItem>
                                             ) : partners && partners.length > 0 ? (
                                               partners.map((partner: any) => (
                                                 <SelectItem key={partner.id} value={partner.username}>
