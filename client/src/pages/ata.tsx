@@ -24,6 +24,8 @@ interface AuditReport {
   timestamp: number;
   sectionAnswers: SectionAnswers[];
   status: string;
+  partnerName?: string;
+  partnerId?: number;
   ataReview?: {
     reviewerId: number;
     reviewerName: string;
@@ -73,9 +75,15 @@ export default function Ata() {
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
     return reportsToFilter.filter(report => {
-      // Partner filter - filter by partnerName field directly
-      if (filterPartner && report.partnerName !== filterPartner) {
-        return false;
+      // Partner filter - filter by partnerId for reliability
+      if (filterPartner) {
+        // Get partnerId from partners array based on selected partner username
+        const selectedPartner = partners?.find((p: any) => p.username === filterPartner);
+        const selectedPartnerId = selectedPartner?.id;
+        
+        if (selectedPartnerId && report.partnerId !== selectedPartnerId) {
+          return false;
+        }
       }
       
       // Auditor filter - use exact matching for dropdown selection
@@ -490,7 +498,9 @@ export default function Ata() {
                 auditor: report.auditor || 'Unknown Auditor',
                 timestamp: report.timestamp || new Date().toISOString(),
                 sectionAnswers: [], // Empty to avoid data issues
-                status: 'completed'
+                status: 'completed',
+                partnerName: report.partnerName || report.partner_name,
+                partnerId: report.partnerId || report.partner_id
               };
               
               auditMap.set(reportKey, safeAuditObject);
@@ -670,6 +680,8 @@ export default function Ata() {
           timestamp: audit.timestamp || new Date().toISOString(),
           sectionAnswers: processedSectionAnswers,
           status: audit.status || 'completed',
+          partnerName: audit.partnerName || audit.partner_name,
+          partnerId: audit.partnerId || audit.partner_id,
           ...(audit.ataReview ? { ataReview: audit.ataReview } : {})
         };
         
