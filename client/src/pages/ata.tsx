@@ -1068,7 +1068,10 @@ export default function Ata() {
                                     {answer.questionId.includes("dropdown") || 
                                      answer.type === "dropdown" ||
                                      answer.answer === 'Yes' || 
-                                     answer.answer === 'No' ? (
+                                     answer.answer === 'No' ||
+                                     // Include Partner questions (detected by text or numeric answers)
+                                     answer.text?.toLowerCase().includes('partner') ||
+                                     (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ? (
                                       <Select 
                                         value={masterAnswers[stateKey] || answer.answer} 
                                         onValueChange={(value) => {
@@ -1104,6 +1107,7 @@ export default function Ata() {
                                               isPartnerByText: answer.text?.toLowerCase().includes('partner'),
                                               isPartnerByQuestionText: answer.questionText?.toLowerCase().includes('partner'),
                                               isPartnerById: answer.questionId?.toLowerCase().includes('partner'),
+                                              auditorAnswer: answer.answer,
                                               allFields: Object.keys(answer)
                                             }),
                                             null
