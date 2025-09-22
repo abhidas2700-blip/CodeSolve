@@ -640,6 +640,40 @@ function NoFormState() {
   );
 }
 
+// Partner Selector Component  
+function PartnerSelector({ questionId, value, onChange }: { 
+  questionId: string; 
+  value: string; 
+  onChange: (value: string) => void; 
+}) {
+  const { data: partners = [], isLoading: partnersLoading, error: partnersError } = useQuery<any[]>({
+    queryKey: ['/api/partners']
+  });
+
+  return (
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger data-testid={`input-partner-${questionId}`}>
+        <SelectValue placeholder="Select partner..." />
+      </SelectTrigger>
+      <SelectContent>
+        {partnersLoading ? (
+          <SelectItem value="loading" disabled>Loading partners...</SelectItem>
+        ) : partnersError ? (
+          <SelectItem value="error" disabled>Error loading partners</SelectItem>
+        ) : partners.length > 0 ? (
+          partners.map((partner: any) => (
+            <SelectItem key={partner.id} value={partner.id.toString()}>
+              {partner.username}
+            </SelectItem>
+          ))
+        ) : (
+          <SelectItem value="none" disabled>No partners available</SelectItem>
+        )}
+      </SelectContent>
+    </Select>
+  );
+}
+
 function AuditFormRenderer({ formName }: { formName: string }) {
   // All state hooks must be defined at the top level
   const [form, setForm] = useState<AuditForm | null>(null);
@@ -1310,6 +1344,14 @@ function AuditFormRenderer({ formName }: { formName: string }) {
                   </div>
                 )}
                 
+                {question.type === 'partner' && (
+                  <PartnerSelector 
+                    questionId={question.id}
+                    value={answers[question.id]}
+                    onChange={(value) => handleAnswerChange(question.id, value)}
+                  />
+                )}
+
                 {question.type === 'text' && (
                   <Input 
                     id={question.id}
