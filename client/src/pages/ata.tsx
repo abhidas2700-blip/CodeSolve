@@ -357,19 +357,77 @@ export default function Ata() {
         }
         console.log('Audit:', audit.id, 'Status:', audit.status || 'unknown');
         
-        // Simplified section processing - avoid complex data structures
-        const processedSectionAnswers = Array.isArray(audit.sectionAnswers) ? 
+        // Enhanced section processing - try to get answers from multiple sources
+        let processedSectionAnswers = Array.isArray(audit.sectionAnswers) ? 
           audit.sectionAnswers.map((section: any) => ({
             sectionName: section?.sectionName || 'Unknown Section',
-            answers: Array.isArray(section?.answers) ? section.answers.map((answer: any) => ({
-              questionId: answer?.questionId || 'unknown',
-              text: answer?.text || answer?.questionId || 'Question',
-              answer: answer?.answer || '',
-              remarks: answer?.remarks || '',
-              options: Array.isArray(answer?.options) ? answer.options : [],
-              isFatal: Boolean(answer?.isFatal)
-            })) : []
+            answers: Array.isArray(section?.answers) ? section.answers.map((answer: any) => {
+              // Try to extract auditor's answer from various possible field names
+              let auditorAnswer = answer?.answer || answer?.auditorAnswer || answer?.selectedAnswer || answer?.value || '';
+              
+              // If no answer found, try to find it in the qa-reports data
+              if (!auditorAnswer) {
+                const matchingReport = reportsFromMain.find((r: any) => r.id === audit.id || r.auditId === audit.id);
+                if (matchingReport && matchingReport.answers) {
+                  // Search through the report sections for this question
+                  for (const reportSection of matchingReport.answers) {
+                    if (reportSection.questions) {
+                      const matchingQuestion = reportSection.questions.find((q: any) => 
+                        q.id === answer.questionId || q.questionId === answer.questionId
+                      );
+                      if (matchingQuestion) {
+                        auditorAnswer = matchingQuestion.answer || matchingQuestion.selectedAnswer || '';
+                        if (auditorAnswer) {
+                          console.log('Found answer in qa-reports for question:', answer.questionId, '=', auditorAnswer);
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              // Debug log to see what fields are available
+              console.log('Processing answer for question:', answer?.questionId, {
+                hasAnswer: !!answer?.answer,
+                hasAuditorAnswer: !!answer?.auditorAnswer,
+                hasSelectedAnswer: !!answer?.selectedAnswer,
+                hasValue: !!answer?.value,
+                extractedAnswer: auditorAnswer,
+                allFields: Object.keys(answer || {}),
+                foundInReports: auditorAnswer && !answer?.answer
+              });
+              
+              return {
+                questionId: answer?.questionId || 'unknown',
+                text: answer?.text || answer?.questionId || 'Question',
+                answer: auditorAnswer,
+                remarks: answer?.remarks || '',
+                options: Array.isArray(answer?.options) ? answer.options : [],
+                isFatal: Boolean(answer?.isFatal)
+              };
+            }) : []
           })) : [];
+        
+        // If still no answers found and this audit exists in qa-reports, try to reconstruct the section answers
+        if (processedSectionAnswers.length === 0 || 
+            processedSectionAnswers.every(section => section.answers.every(ans => !ans.answer))) {
+          const matchingReport = reportsFromMain.find((r: any) => r.id === audit.id || r.auditId === audit.id);
+          if (matchingReport && matchingReport.answers) {
+            console.log('Reconstructing section answers from qa-reports for audit:', audit.id);
+            processedSectionAnswers = matchingReport.answers.map((section: any) => ({
+              sectionName: section?.sectionName || section?.name || 'Unknown Section',
+              answers: Array.isArray(section?.questions) ? section.questions.map((question: any) => ({
+                questionId: question?.id || question?.questionId || 'unknown',
+                text: question?.text || question?.questionText || question?.id || 'Question',
+                answer: question?.answer || question?.selectedAnswer || '',
+                remarks: question?.remarks || '',
+                options: Array.isArray(question?.options) ? question.options : [],
+                isFatal: Boolean(question?.isFatal)
+              })) : []
+            }));
+          }
+        }
         
 
         
