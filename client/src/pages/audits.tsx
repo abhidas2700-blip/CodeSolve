@@ -27,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { databaseSync } from '../services/databaseSync';
+import { useQuery } from "@tanstack/react-query";
 
 // Process audit answers for display in a results modal
 // Global audit data store
