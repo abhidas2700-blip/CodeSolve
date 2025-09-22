@@ -5,10 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/auth-context';
-import { CheckCircle, XCircle, MessageSquare, Eye, AlertTriangle, ThumbsUp } from 'lucide-react';
+import { CheckCircle, XCircle, MessageSquare, Eye, AlertTriangle, ThumbsUp, Download } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
+import * as XLSX from 'xlsx';
 import {
   Dialog,
   DialogContent,
@@ -216,6 +217,69 @@ export default function Partners() {
     return assignedReports.filter(report => 
       report.status === 'rebuttal_rejected' || report.status === 'under_re_rebuttal'
     );
+  };
+
+  const getBODReports = () => {
+    return assignedReports.filter(report => {
+      const rebuttal = getLatestRebuttal(report.id);
+      return rebuttal && 
+             rebuttal.status === 'accepted' && 
+             rebuttal.handlerResponse && 
+             /(benefit\s+of\s+(the\s+)?doubt|\bBOD\b)/i.test(rebuttal.handlerResponse);
+    });
+  };
+
+  // Download BOD reports as Excel
+  const downloadBODReports = () => {
+    const bodReports = getBODReports();
+    
+    if (bodReports.length === 0) {
+      toast({
+        title: "No Data",
+        description: "No BOD reports available for download",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Prepare data for Excel export
+    const excelData = bodReports.map(report => {
+      const rebuttal = getLatestRebuttal(report.id);
+      return {
+        'Audit ID': report.auditId,
+        'Form Name': report.formName,
+        'Agent': report.agent,
+        'Auditor': report.auditorName,
+        'Partner': report.partnerName || getPartnerNameById(report.partnerId || ''),
+        'Score (%)': `${report.score}%`,
+        'Score': report.score,
+        'Max Score': report.maxScore,
+        'Fatal Error': report.hasFatal ? 'Yes' : 'No',
+        'Date': new Date(report.timestamp).toISOString().split('T')[0],
+        'BOD Applied By': rebuttal?.handledByName || '',
+        'BOD Date': rebuttal?.handledAt ? new Date(rebuttal.handledAt).toISOString().split('T')[0] : '',
+        'Handler Response': rebuttal?.handlerResponse || ''
+      };
+    });
+
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(excelData);
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, "BOD Reports");
+    
+    // Generate filename with current date
+    const today = new Date().toISOString().split('T')[0];
+    const filename = `BOD_Reports_${today}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, filename);
+    
+    toast({
+      title: "Success",
+      description: `BOD reports downloaded as ${filename}`
+    });
   };
 
   // Get rebuttal status for a report
@@ -467,16 +531,18 @@ export default function Partners() {
                 {/* Actions for new/completed reports */}
                 {(report.status === 'completed' || !report.status) && (
                   <>
-                    <Button 
-                      size="sm" 
-                      variant="default"
-                      onClick={() => handleAccept(report)}
-                      disabled={rebuttalMutation.isPending}
-                      data-testid={`button-accept-${report.id}`}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Accept
-                    </Button>
+                    {isManagement() && (
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        onClick={() => handleAccept(report)}
+                        disabled={rebuttalMutation.isPending}
+                        data-testid={`button-accept-${report.id}`}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Accept
+                      </Button>
+                    )}
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button 
@@ -523,27 +589,31 @@ export default function Partners() {
                 {/* Actions for under rebuttal reports */}
                 {report.status === 'under_rebuttal' && (
                   <div className="flex space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant="default"
-                      onClick={() => handleAccept(report)}
-                      disabled={rebuttalMutation.isPending}
-                      data-testid={`button-accept-rejected-${report.id}`}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Accept
-                    </Button>
-                    
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleBOD(report)}
-                      disabled={rebuttalMutation.isPending}
-                      data-testid={`button-bod-${report.id}`}
-                    >
-                      <ThumbsUp className="h-4 w-4 mr-2" />
-                      BOD
-                    </Button>
+                    {isManagement() && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="default"
+                          onClick={() => handleAccept(report)}
+                          disabled={rebuttalMutation.isPending}
+                          data-testid={`button-accept-rejected-${report.id}`}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Accept
+                        </Button>
+                        
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleBOD(report)}
+                          disabled={rebuttalMutation.isPending}
+                          data-testid={`button-bod-${report.id}`}
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-2" />
+                          BOD
+                        </Button>
+                      </>
+                    )}
                     
                     <Dialog>
                       <DialogTrigger asChild>
@@ -589,7 +659,7 @@ export default function Partners() {
                 )}
                 
                 {/* Actions for rebuttal rejected reports */}
-                {report.status === 'rebuttal_rejected' && (
+                {report.status === 'rebuttal_rejected' && isManagement() && (
                   <div className="flex space-x-2">
                     <Button 
                       size="sm" 
@@ -616,7 +686,7 @@ export default function Partners() {
                 )}
                 
                 {/* Actions for re-rebuttal reports (accept and BOD only) */}
-                {report.status === 'under_re_rebuttal' && (
+                {report.status === 'under_re_rebuttal' && isManagement() && (
                   <div className="flex space-x-2">
                     <Button 
                       size="sm" 
@@ -662,11 +732,12 @@ export default function Partners() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="all-reports">All Reports</TabsTrigger>
           <TabsTrigger value="accepted">Accepted Reports</TabsTrigger>
           <TabsTrigger value="rejected">Rebuttal Rejected Reports</TabsTrigger>
           <TabsTrigger value="re-rebuttal">Re-Rebuttal Reports</TabsTrigger>
+          <TabsTrigger value="bod-reports">BOD Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all-reports" className="mt-6">
@@ -759,6 +830,42 @@ export default function Partners() {
               ) : (
                 <div className="space-y-4">
                   {getReRebuttalReports().map(report => renderReportCard(report, true))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bod-reports" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>BOD Reports</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Reports that have been marked as Benefit of Doubt by management
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={downloadBODReports}
+                  disabled={getBODReports().length === 0}
+                  data-testid="button-download-bod-reports"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download Excel
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {getBODReports().length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <ThumbsUp className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                  <p>No BOD reports available.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {getBODReports().map(report => renderReportCard(report, false))}
                 </div>
               )}
             </CardContent>
