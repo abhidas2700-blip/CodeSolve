@@ -62,6 +62,53 @@ export default function Ata() {
   const [answerComments, setAnswerComments] = useState<{[key: string]: string}>({});
   const [selectedReportDebugDone, setSelectedReportDebugDone] = useState<boolean>(false);
 
+  // Function to get dropdown options from form definition
+  const getFormDropdownOptions = (questionId: string, reportFormName: string): string[] => {
+    if (!forms || forms.length === 0) return ['Yes', 'No', 'N/A'];
+    
+    // Find the form that matches this report
+    const matchingForm = forms.find((form: any) => form.name === reportFormName);
+    if (!matchingForm) return ['Yes', 'No', 'N/A'];
+    
+    // Parse the sections - they might be stored as string or object
+    let sections;
+    try {
+      sections = typeof matchingForm.sections === 'string' 
+        ? JSON.parse(matchingForm.sections) 
+        : matchingForm.sections;
+    } catch (error) {
+      console.error('Error parsing form sections:', error);
+      return ['Yes', 'No', 'N/A'];
+    }
+    
+    // Handle different section structures
+    if (Array.isArray(sections)) {
+      // sections is an array of section objects
+      for (const section of sections) {
+        if (section.questions && Array.isArray(section.questions)) {
+          const question = section.questions.find((q: any) => q.id === questionId);
+          if (question && question.options) {
+            return question.options.split(',').map((opt: string) => opt.trim());
+          }
+        }
+      }
+    } else if (sections && typeof sections === 'object') {
+      // sections might be an object with section names as keys
+      for (const sectionKey in sections) {
+        const section = sections[sectionKey];
+        if (section.questions && Array.isArray(section.questions)) {
+          const question = section.questions.find((q: any) => q.id === questionId);
+          if (question && question.options) {
+            return question.options.split(',').map((opt: string) => opt.trim());
+          }
+        }
+      }
+    }
+    
+    // Fallback to default options
+    return ['Yes', 'No', 'N/A'];
+  };
+
   // Fetch partners data for dropdown options
   const { data: partners, isLoading: partnersLoading } = useQuery({
     queryKey: ['/api/partners'],
@@ -1146,11 +1193,14 @@ export default function Ata() {
                                             )
                                           ) : (
                                             // Regular dropdown options from form definition
-                                            ['Yes', 'No', 'N/A'].map((option, idx) => (
-                                              <SelectItem key={idx} value={option}>
-                                                {option}
-                                              </SelectItem>
-                                            ))
+                                            (() => {
+                                              const formOptions = getFormDropdownOptions(answer.questionId, selectedReport?.formName || '');
+                                              return formOptions.map((option, idx) => (
+                                                <SelectItem key={idx} value={option}>
+                                                  {option}
+                                                </SelectItem>
+                                              ));
+                                            })()
                                           )}
                                           
                                         </SelectContent>
