@@ -1293,9 +1293,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const user = req.user as any;
     
-    // Only partners can create rebuttals
-    if (!user.rights.includes('partner')) {
-      return res.status(403).json({ error: 'Only partners can create rebuttals' });
+    // Permission check: Partners can create rebuttals, Management can create re-rebuttals
+    const isPartner = user.rights.includes('partner');
+    const isManagement = user.rights.includes('admin') || user.rights.includes('manager') || user.rights.includes('teamleader');
+    
+    if (!isPartner && !isManagement) {
+      return res.status(403).json({ error: 'Insufficient permissions to create rebuttals' });
     }
     
     try {
@@ -1314,17 +1317,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Rebuttal text is required for reject, rebuttal, and re-rebuttal actions' });
       }
       
-      // Verify that the audit report exists, is not deleted, and belongs to this partner
+      // Verify that the audit report exists and is not deleted
+      // Partners can only access their own reports, Management can access any report
+      const reportAccessConditions = [
+        eq(auditReports.id, auditReportId),
+        eq(auditReports.deleted, false)
+      ];
+      
+      // Add partner restriction only for partner users
+      if (isPartner && !isManagement) {
+        reportAccessConditions.push(eq(auditReports.partnerId, user.id));
+      }
+      
       const auditReport = await db.query.auditReports.findFirst({
-        where: and(
-          eq(auditReports.id, auditReportId),
-          eq(auditReports.partnerId, user.id),
-          eq(auditReports.deleted, false)
-        )
+        where: and(...reportAccessConditions)
       });
       
       if (!auditReport) {
-        return res.status(403).json({ error: 'Audit report not found or not accessible to this partner' });
+        const errorMsg = isPartner ? 'Audit report not found or not accessible to this partner' : 'Audit report not found';
+        return res.status(403).json({ error: errorMsg });
       }
 
       // Handle different actions
