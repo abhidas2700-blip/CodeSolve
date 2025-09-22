@@ -110,6 +110,35 @@ export default function Ata() {
     });
   };
 
+  // Helper functions to get unique values for dropdowns
+  const getUniquePartners = (): string[] => {
+    const allReports = [...reports, ...reviewedReports];
+    const partners = allReports.map(r => r.agent).filter(Boolean);
+    return [...new Set(partners)].sort();
+  };
+
+  const getUniqueAuditors = (): string[] => {
+    const allReports = [...reports, ...reviewedReports];
+    const auditors = allReports.map(r => r.auditor).filter(Boolean);
+    return [...new Set(auditors)].sort();
+  };
+
+  const getUniqueForms = (): string[] => {
+    const allReports = [...reports, ...reviewedReports];
+    const forms = allReports.map(r => r.formName).filter(Boolean);
+    return [...new Set(forms)].sort();
+  };
+
+  // Function to clear all filters
+  const clearFilters = () => {
+    setFilterPartner('');
+    setFilterAuditor('');
+    setFilterAgentId('');
+    setFilterDate('');
+    setFilterForm('');
+    setFilterAuditId('');
+  };
+
   // Function to check if a question should be a dropdown based on form definition
   const isQuestionDropdown = (questionId: string, reportFormName: string): boolean => {
     if (!forms || forms.length === 0) return false;
@@ -968,6 +997,113 @@ export default function Ata() {
               <CardTitle>Audit Reports</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Filter Panel */}
+              <div className="mb-4 p-4 border rounded-lg bg-muted/50 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-medium">Filters</h3>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={clearFilters}
+                    data-testid="button-clear-filters"
+                  >
+                    Clear All
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  {/* Partner Filter */}
+                  <div>
+                    <Label htmlFor="filter-partner" className="text-xs">Partner</Label>
+                    <Select value={filterPartner} onValueChange={setFilterPartner}>
+                      <SelectTrigger id="filter-partner" data-testid="select-filter-partner">
+                        <SelectValue placeholder="All Partners" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Partners</SelectItem>
+                        {getUniquePartners().map((partner) => (
+                          <SelectItem key={partner} value={partner}>
+                            {partner}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Auditor Filter */}
+                  <div>
+                    <Label htmlFor="filter-auditor" className="text-xs">Auditor</Label>
+                    <Select value={filterAuditor} onValueChange={setFilterAuditor}>
+                      <SelectTrigger id="filter-auditor" data-testid="select-filter-auditor">
+                        <SelectValue placeholder="All Auditors" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Auditors</SelectItem>
+                        {getUniqueAuditors().map((auditor) => (
+                          <SelectItem key={auditor} value={auditor}>
+                            {auditor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Agent ID Filter */}
+                  <div>
+                    <Label htmlFor="filter-agent-id" className="text-xs">Agent ID</Label>
+                    <Input
+                      id="filter-agent-id"
+                      placeholder="Enter Agent ID"
+                      value={filterAgentId}
+                      onChange={(e) => setFilterAgentId(e.target.value)}
+                      data-testid="input-filter-agent-id"
+                    />
+                  </div>
+                  
+                  {/* Date Filter */}
+                  <div>
+                    <Label htmlFor="filter-date" className="text-xs">Date</Label>
+                    <Input
+                      id="filter-date"
+                      type="date"
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      data-testid="input-filter-date"
+                    />
+                  </div>
+                  
+                  {/* Form Filter */}
+                  <div>
+                    <Label htmlFor="filter-form" className="text-xs">Form</Label>
+                    <Select value={filterForm} onValueChange={setFilterForm}>
+                      <SelectTrigger id="filter-form" data-testid="select-filter-form">
+                        <SelectValue placeholder="All Forms" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Forms</SelectItem>
+                        {getUniqueForms().map((form) => (
+                          <SelectItem key={form} value={form}>
+                            {form}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Audit ID Filter */}
+                  <div>
+                    <Label htmlFor="filter-audit-id" className="text-xs">Audit ID</Label>
+                    <Input
+                      id="filter-audit-id"
+                      placeholder="Enter Audit ID"
+                      value={filterAuditId}
+                      onChange={(e) => setFilterAuditId(e.target.value)}
+                      data-testid="input-filter-audit-id"
+                    />
+                  </div>
+                </div>
+              </div>
+              
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full mb-4">
                   <TabsTrigger value="pending" className="flex-1">Pending Review ({reports.length})</TabsTrigger>
