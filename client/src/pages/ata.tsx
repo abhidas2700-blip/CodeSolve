@@ -1052,7 +1052,12 @@ export default function Ata() {
                                         answer.answer === 'Yes' ? 'text-green-600' : 
                                         answer.answer === 'No' ? 'text-red-600' : ''
                                       }`}>
-                                        {answer.answer}
+                                        {/* For Partner questions, show partner name instead of ID */}
+                                        {answer.text?.toLowerCase().includes('partner') && 
+                                         !isNaN(Number(answer.answer)) && 
+                                         partners && partners.length > 0 ? (
+                                          partners.find(p => p.id === Number(answer.answer))?.username || answer.answer
+                                        ) : answer.answer}
                                       </span>
                                     </div>
                                     {answer.remarks && (
