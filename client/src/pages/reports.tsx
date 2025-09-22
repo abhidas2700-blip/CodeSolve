@@ -86,6 +86,7 @@ export default function ReportsPage() {
   const [availableForms, setAvailableForms] = useState<string[]>([]);
   const [auditorFilter, setAuditorFilter] = useState<string>("all");
   const [availableAuditors, setAvailableAuditors] = useState<string[]>([]);
+  const [partners, setPartners] = useState<Array<{id: number, username: string}>>([]);
   
   const { toast } = useToast();
   const { user } = useAuth();
@@ -106,6 +107,27 @@ export default function ReportsPage() {
     }
     return [];
   }, [hasElevatedAccess, user]);
+
+  // Helper function to resolve partner ID to partner name
+  const getPartnerNameById = useCallback((partnerId: string | number) => {
+    const partner = partners.find(p => String(p.id) === String(partnerId));
+    return partner ? partner.username : `Partner ${partnerId}`;
+  }, [partners]);
+
+  // Fetch partners data
+  const fetchPartners = useCallback(async () => {
+    try {
+      const response = await fetch('/api/partners', {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const partnersData = await response.json();
+        setPartners(partnersData);
+      }
+    } catch (error) {
+      console.error('Error fetching partners:', error);
+    }
+  }, []);
 
   // This function has been removed from the production version
 
@@ -901,6 +923,9 @@ export default function ReportsPage() {
       // Filter reports based on access level
       const filteredReports = filterReportsByAccess(savedReports);
       setReports(filteredReports);
+      
+      // Fetch partners data for resolving partner names
+      await fetchPartners();
       
       // Also load deleted reports for the UI display
       const deletedAuditsForDisplay = JSON.parse(localStorage.getItem('qa-deleted-audits') || '[]');
@@ -3876,7 +3901,7 @@ export default function ReportsPage() {
                                         question.answer === 'Fatal' ? 'bg-red-100 text-red-800 font-bold' :
                                         'bg-blue-100 text-blue-800'
                                       } rounded-full font-medium`}>
-                                        {question.answer}
+                                        {question.questionType === 'partner' ? getPartnerNameById(question.answer) : question.answer}
                                       </span>
                                     </div>
                                     
