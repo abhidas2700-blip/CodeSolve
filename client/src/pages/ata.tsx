@@ -72,11 +72,28 @@ export default function Ata() {
 
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
-    console.log('filterReports: Input reports count:', reportsToFilter.length);
     return reportsToFilter.filter(report => {
-      // Partner filter - use exact matching for dropdown selection
-      if (filterPartner && report.agent !== filterPartner) {
-        return false;
+      // Partner filter - map partner usernames to agent field values
+      if (filterPartner) {
+        // Create mapping from partner usernames to agent field values
+        // This handles the case where partner users (Tech M, Startek) need to match
+        // actual agent field values in reports (Open Sample, etc.)
+        let agentValueToMatch = filterPartner;
+        
+        // Map partner usernames to known agent field values
+        const partnerToAgentMapping: { [key: string]: string } = {
+          'Tech M': 'Open Sample',
+          'Startek': 'Open Sample',
+          // Add more mappings as needed
+        };
+        
+        if (partnerToAgentMapping[filterPartner]) {
+          agentValueToMatch = partnerToAgentMapping[filterPartner];
+        }
+        
+        if (report.agent !== agentValueToMatch) {
+          return false;
+        }
       }
       
       // Auditor filter - use exact matching for dropdown selection
@@ -116,15 +133,15 @@ export default function Ata() {
 
   // Helper functions to get unique values for dropdowns
   const getUniquePartners = (): string[] => {
-    // Always use agent names from reports instead of API partners since they contain different data
-    const allReports = [...reports, ...reviewedReports];
-    console.log('getUniquePartners: Total reports found:', allReports.length);
-    console.log('getUniquePartners: Sample report agents:', allReports.slice(0, 3).map(r => r.agent));
+    // Use actual partner users from API instead of agent names from reports
+    if (!partners || partners.length === 0) {
+      console.log('getUniquePartners: No partners loaded from API');
+      return [];
+    }
     
-    const agentNames = allReports.map(r => r.agent || '').filter(Boolean);
-    const uniqueAgents = Array.from(new Set(agentNames)).sort();
-    console.log('getUniquePartners: Final partner options:', uniqueAgents);
-    return uniqueAgents;
+    const partnerUsernames = partners.map((p: any) => p.username).filter(Boolean);
+    console.log('getUniquePartners: Partner users from API:', partnerUsernames);
+    return partnerUsernames.sort();
   };
 
   const getUniqueAuditors = (): string[] => {
