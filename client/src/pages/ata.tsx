@@ -1066,8 +1066,29 @@ export default function Ata() {
                                             null
                                           ) : null}
                                           
+                                          {/* Debug Partner question detection */}
+                                          {ansIdx === 0 ? (
+                                            console.log('Debug Partner detection for question:', {
+                                              questionId: answer.questionId,
+                                              text: answer.text,
+                                              questionText: answer.questionText,
+                                              type: answer.type,
+                                              isPartnerByType: answer.type === 'partner',
+                                              isPartnerByText: answer.text?.toLowerCase().includes('partner'),
+                                              isPartnerByQuestionText: answer.questionText?.toLowerCase().includes('partner'),
+                                              isPartnerById: answer.questionId?.toLowerCase().includes('partner'),
+                                              allFields: Object.keys(answer)
+                                            }),
+                                            null
+                                          ) : null}
+                                          
                                           {/* Check if this is a Partner question */}
-                                          {(answer.type === 'partner' || answer.text?.toLowerCase().includes('partner')) ? (
+                                          {(answer.type === 'partner' || 
+                                            answer.text?.toLowerCase().includes('partner') || 
+                                            answer.questionText?.toLowerCase().includes('partner') ||
+                                            answer.questionId?.toLowerCase().includes('partner') ||
+                                            // Also check if the answer is a number (Partner IDs are typically numeric)
+                                            (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 20)) ? (
                                             // Special handling for Partner questions - use API data
                                             partnersLoading ? (
                                               <SelectItem value="">Loading partners...</SelectItem>
