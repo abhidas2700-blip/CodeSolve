@@ -1128,6 +1128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const user = req.user as any;
+    console.log(`🔍 /api/partners/reports called by user:`, user.id, user.username);
 
     // Allow partners, admin, team lead, and manager to access this endpoint
     const hasPartnerAccess = user.rights.includes('partner');
@@ -1170,6 +1171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const user = req.user as any;
+    console.log(`🔍 /api/partners/rebuttals called by user:`, user.id, user.username);
 
     // Allow partners, admin, team lead, and manager to access this endpoint
     const hasPartnerAccess = user.rights.includes('partner');
