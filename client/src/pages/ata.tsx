@@ -160,7 +160,7 @@ export default function Ata() {
           // Check if this is a fatal question with a Fatal answer
           // Since some questions may not have their isFatal status properly propagated, 
           // we'll also check for answers that are 'Fatal' directly, but only if the answer is actually 'Fatal'
-          if (answer.answer === 'Fatal' && (questionDetails?.isFatal === true || (answer.options?.includes && answer.options?.includes('Fatal')))) {
+          if (answer.answer === 'Fatal' && (questionDetails?.isFatal === true || (Array.isArray(answer.options) && answer.options.includes('Fatal')) || (typeof answer.options === 'string' && answer.options.includes('Fatal')))) {
             console.log(`ATA: Found FATAL error in sectionAnswers for question: ${answer.questionId}`);
             hasFatal = true;
             break;
@@ -1002,14 +1002,19 @@ export default function Ata() {
                                             // If there are explicit options defined, show them all
                                             (() => {
                                               try {
-                                                return answer.options.split(',')
-                                                  .map(option => option.trim())
-                                                  .filter(option => option !== '') // Filter out empty strings
-                                                  .map((option, i) => (
+                                                // Check if options is a string before splitting
+                                                if (typeof answer.options === 'string' && answer.options.trim() !== '') {
+                                                  return answer.options.split(',')
+                                                    .map(option => option.trim())
+                                                    .filter(option => option !== '') // Filter out empty strings
+                                                    .map((option, i) => (
                                                     <SelectItem key={i} value={option}>
                                                       {option}
                                                     </SelectItem>
                                                   ));
+                                                } else {
+                                                  return [];
+                                                }
                                               } catch (e) {
                                                 console.error('Error parsing options:', e);
                                                 // Fallback to basic options
@@ -1033,6 +1038,7 @@ export default function Ata() {
                                           
                                           {/* Always ensure the original answer is an option */}
                                           {answer.options && answer.answer && answer.answer.trim() !== '' && 
+                                           typeof answer.options === 'string' &&
                                            !answer.options.split(',').map(o => o.trim()).includes(answer.answer) && (
                                             <SelectItem value={answer.answer}>{answer.answer}</SelectItem>
                                           )}
