@@ -3103,7 +3103,7 @@ export default function Audits() {
           agentId: auditInProgress.ticketId || auditInProgress.agentId,
           auditor: user?.id ? Number(user.id) : undefined,
           auditorName: user?.username || 'Unknown',
-          partnerId: partnerId,
+          partnerId: partnerId ? Number(partnerId) : undefined,
           partnerName: partnerName,
           sectionAnswers: Array.isArray(completedAudit.sectionAnswers) 
             ? completedAudit.sectionAnswers.reduce((acc, section, index) => {
