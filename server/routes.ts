@@ -591,6 +591,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: validatedData.status
       }).returning();
 
+      // Automatically create rebuttal entry if a partner was assigned to this audit
+      if (validatedData.partnerId && validatedData.partnerName) {
+        try {
+          console.log(`Creating automatic rebuttal for partner ${validatedData.partnerName} (ID: ${validatedData.partnerId}) for report ${newReport.id}`);
+          
+          await db.insert(rebuttals).values({
+            auditReportId: newReport.id,
+            partnerId: validatedData.partnerId,
+            partnerName: validatedData.partnerName,
+            rebuttalText: `Audit report assigned for review - Score: ${validatedData.score}%${validatedData.hasFatal ? ' (Contains Fatal Error)' : ''}`,
+            rebuttalType: 'rebuttal',
+            status: 'pending'
+          });
+          
+          console.log(`✅ Automatic rebuttal created for partner ${validatedData.partnerName}`);
+        } catch (rebuttalError) {
+          console.error('Error creating automatic rebuttal:', rebuttalError);
+          // Don't fail the entire report creation if rebuttal creation fails
+        }
+      }
+
       broadcast({
         type: 'report_created',
         report: newReport
