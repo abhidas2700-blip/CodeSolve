@@ -1146,28 +1146,11 @@ export default function Ata() {
                                             )
                                           ) : (
                                             // Regular dropdown options from form definition
-                                            (() => {
-                                              // Use the form-based options if available
-                                              const formOptions = getDropdownOptions();
-                                              if (formOptions.length > 0) {
-                                                return formOptions.map((option, idx) => (
-                                                  <SelectItem key={idx} value={option}>
-                                                    {option}
-                                                  </SelectItem>
-                                                ));
-                                              }
-
-                                              // Fallback options based on answer content
-                                              const fallbackOptions = answer.answer === 'Yes' || answer.answer === 'No' 
-                                                ? ['Yes', 'No', 'N/A'] 
-                                                : ['Yes', 'No', 'N/A'];
-                                              
-                                              return fallbackOptions.map((option, idx) => (
-                                                <SelectItem key={idx} value={option}>
-                                                  {option}
-                                                </SelectItem>
-                                              ));
-                                            })()
+                                            ['Yes', 'No', 'N/A'].map((option, idx) => (
+                                              <SelectItem key={idx} value={option}>
+                                                {option}
+                                              </SelectItem>
+                                            ))
                                           )}
                                           
                                         </SelectContent>
