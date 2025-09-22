@@ -528,21 +528,19 @@ export default function Partners() {
             
             {showActions && (
               <div className="flex space-x-2">
-                {/* Actions for new/completed reports */}
-                {(report.status === 'completed' || !report.status) && (
+                {/* Actions for new/completed reports - ONLY PARTNER can Accept/Reject */}
+                {(report.status === 'completed' || !report.status) && !isManagement() && (
                   <>
-                    {isManagement() && (
-                      <Button 
-                        size="sm" 
-                        variant="default"
-                        onClick={() => handleAccept(report)}
-                        disabled={rebuttalMutation.isPending}
-                        data-testid={`button-accept-${report.id}`}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Accept
-                      </Button>
-                    )}
+                    <Button 
+                      size="sm" 
+                      variant="default"
+                      onClick={() => handleAccept(report)}
+                      disabled={rebuttalMutation.isPending}
+                      data-testid={`button-accept-${report.id}`}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Accept
+                    </Button>
                     <Dialog>
                       <DialogTrigger asChild>
                         <Button 
@@ -615,18 +613,19 @@ export default function Partners() {
                       </>
                     )}
                     
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          size="sm" 
-                          variant="destructive"
-                          onClick={() => setSelectedReport(report)}
-                          data-testid={`button-re-rebuttal-${report.id}`}
-                        >
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          Re-Rebuttal
-                        </Button>
-                      </DialogTrigger>
+                    {isManagement() && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button 
+                            size="sm" 
+                            variant="destructive"
+                            onClick={() => setSelectedReport(report)}
+                            data-testid={`button-re-rebuttal-${report.id}`}
+                          >
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Re-Rebuttal
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Raise Re-Rebuttal</DialogTitle>
@@ -655,6 +654,7 @@ export default function Partners() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
+                    )
                   </div>
                 )}
                 
@@ -685,29 +685,47 @@ export default function Partners() {
                   </div>
                 )}
                 
-                {/* Actions for re-rebuttal reports (accept and BOD only) */}
-                {report.status === 'under_re_rebuttal' && isManagement() && (
+                {/* Actions for re-rebuttal reports */}
+                {report.status === 'under_re_rebuttal' && (
                   <div className="flex space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant="default"
-                      onClick={() => handleAccept(report)}
-                      disabled={rebuttalMutation.isPending}
-                      data-testid={`button-accept-final-${report.id}`}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Accept
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => handleBOD(report)}
-                      disabled={rebuttalMutation.isPending}
-                      data-testid={`button-bod-final-${report.id}`}
-                    >
-                      <ThumbsUp className="h-4 w-4 mr-2" />
-                      BOD
-                    </Button>
+                    {/* Admin: Accept and BOD options */}
+                    {isManagement() && (
+                      <>
+                        <Button 
+                          size="sm" 
+                          variant="default"
+                          onClick={() => handleAccept(report)}
+                          disabled={rebuttalMutation.isPending}
+                          data-testid={`button-accept-final-${report.id}`}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Accept
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleBOD(report)}
+                          disabled={rebuttalMutation.isPending}
+                          data-testid={`button-bod-final-${report.id}`}
+                        >
+                          <ThumbsUp className="h-4 w-4 mr-2" />
+                          BOD
+                        </Button>
+                      </>
+                    )}
+                    {/* Partner: Accept only */}
+                    {!isManagement() && (
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        onClick={() => handleAccept(report)}
+                        disabled={rebuttalMutation.isPending}
+                        data-testid={`button-accept-partner-final-${report.id}`}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Accept
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
