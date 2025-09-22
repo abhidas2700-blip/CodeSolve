@@ -1180,18 +1180,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(401).json({ error: 'Authentication required' });
     }
     
-    // Only admin, manager, or team lead can view partners list
+    // Allow admin, manager, team lead, and partners to view partners list
+    // Partners need this access when filling out audit forms to assign work
     const user = req.user as any;
     if (!user.rights.includes('admin') && 
         !user.rights.includes('manager') && 
         !user.rights.includes('teamleader') &&
-        !user.rights.includes('buildForm')) {
+        !user.rights.includes('buildForm') &&
+        !user.rights.includes('partner')) {
       return res.status(403).json({ error: 'Insufficient permissions to view partners' });
     }
     
     try {
       // Get all users and filter for active partners
-      const allUsers = await storage.getUsers();
+      const allUsers = await storage.getAllUsers();
       const partners = allUsers.filter(user => 
         !user.isInactive && 
         user.rights && 
