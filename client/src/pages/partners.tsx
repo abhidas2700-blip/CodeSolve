@@ -90,15 +90,17 @@ export default function Partners() {
 
   // Helper function to check if user has management rights
   const isManagement = () => {
-    return user?.rights?.includes('admin') || 
-           user?.rights?.includes('manager') || 
-           user?.rights?.includes('teamleader') ||
-           user?.rights?.includes('createLowerUsers');
+    const rights = user?.rights as string[] | undefined;
+    return rights?.includes('admin') || 
+           rights?.includes('manager') || 
+           rights?.includes('teamleader') ||
+           rights?.includes('createLowerUsers');
   };
 
   // Helper function to check if user is partner only
   const isPartnerOnly = () => {
-    return user?.rights?.includes('partner') && !isManagement();
+    const rights = user?.rights as string[] | undefined;
+    return rights?.includes('partner') && !isManagement();
   };
 
   // Helper function to format section answers for display
@@ -136,17 +138,49 @@ export default function Partners() {
     fetchPartners();
   }, []);
 
+  // Get the latest rebuttal for a report (for management actions)
+  const getLatestRebuttal = (reportId: number) => {
+    const reportRebuttals = rebuttals.filter(r => r.auditReportId === reportId);
+    return reportRebuttals.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  };
+
   // Mutation for creating/updating rebuttals
   const rebuttalMutation = useMutation({
     mutationFn: async (data: RebuttalAction) => {
-      const response = await fetch('/api/rebuttals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to process rebuttal action');
-      return response.json();
+      // Use action type alone to determine endpoint - let backend enforce permissions
+      const isManagementAction = ['accept', 'reject', 'bod'].includes(data.action);
+      
+      if (isManagementAction) {
+        // Management actions use PATCH endpoint - find rebuttal from all rebuttals
+        const rebuttal = getLatestRebuttal(data.auditReportId);
+        if (!rebuttal) {
+          throw new Error('No rebuttal found for this report');
+        }
+        
+        const response = await fetch(`/api/rebuttals/${rebuttal.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            status: data.action === 'accept' ? 'accepted' : data.action === 'bod' ? 'accepted' : 'rejected',
+            handledBy: user?.id,
+            handledByName: user?.username,
+            handlerResponse: data.rebuttalText || (data.action === 'bod' ? 'Benefit of Doubt applied' : '')
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to process rebuttal action');
+        return response.json();
+      } else {
+        // Partner actions use POST endpoint
+        const response = await fetch('/api/rebuttals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error('Failed to process rebuttal action');
+        return response.json();
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/partners/reports'] });
@@ -186,19 +220,19 @@ export default function Partners() {
 
   // Get rebuttal status for a report
   const getRebuttalStatus = (reportId: number) => {
-    const rebuttal = rebuttals.find(r => r.auditReportId === reportId);
+    const rebuttal = getLatestRebuttal(reportId);
     return rebuttal?.status || 'none';
   };
 
   // Get rebuttal type for a report
   const getRebuttalType = (reportId: number) => {
-    const rebuttal = rebuttals.find(r => r.auditReportId === reportId);
+    const rebuttal = getLatestRebuttal(reportId);
     return rebuttal?.rebuttalType || null;
   };
 
   // Get rebuttal handler information
   const getRebuttalHandler = (reportId: number) => {
-    const rebuttal = rebuttals.find(r => r.auditReportId === reportId);
+    const rebuttal = getLatestRebuttal(reportId);
     if (!rebuttal || !rebuttal.handledByName) return null;
     
     return {
@@ -241,19 +275,32 @@ export default function Partners() {
       return;
     }
     
-    // Determine action based on authoritative report status
-    let action: string;
-    if (report.status === 'completed' || !report.status) {
-      action = 'rebuttal';
-    } else if (report.status === 'rebuttal_rejected') {
-      action = 're_rebuttal';
+    // Check if this is a management user (for UI context)
+    const rights = user?.rights as string[] | undefined;
+    const isManagementUser = rights?.includes('admin') || 
+                            rights?.includes('manager') || 
+                            rights?.includes('teamleader');
+    
+    let action: 'rebuttal' | 're_rebuttal' | 'reject';
+    
+    if (isManagementUser) {
+      // Management users always use 'reject' action for consistency
+      action = 'reject';
     } else {
-      toast({ 
-        title: "Error", 
-        description: "Invalid action for current report status",
-        variant: "destructive" 
-      });
-      return;
+      // Partner users: determine action based on report status
+      if (report.status === 'completed' || !report.status) {
+        action = 'rebuttal';
+      } else if (report.status === 'rebuttal_rejected') {
+        action = 're_rebuttal';
+      } else {
+        // Partners should not reach the reject action for unexpected statuses
+        toast({ 
+          title: "Error", 
+          description: "Invalid action for current report status",
+          variant: "destructive" 
+        });
+        return;
+      }
     }
     
     rebuttalMutation.mutate({
