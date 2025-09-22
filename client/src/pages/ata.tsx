@@ -64,59 +64,37 @@ export default function Ata() {
 
   // Function to check if a question should be a dropdown based on form definition
   const isQuestionDropdown = (questionId: string, reportFormName: string): boolean => {
-    if (!forms || forms.length === 0) {
-      console.log('No forms available for dropdown detection');
-      return false;
-    }
+    if (!forms || forms.length === 0) return false;
     
     // Find the form that matches this report
     const matchingForm = forms.find((form: any) => form.name === reportFormName);
-    if (!matchingForm) {
-      console.log(`No matching form found for: ${reportFormName}`);
-      return false;
-    }
+    if (!matchingForm) return false;
     
-    console.log(`Checking dropdown for questionId: ${questionId} in form: ${reportFormName}`);
-    
-    // Parse the sections - they might be stored as string or object
+    // Parse the sections
     let sections;
     try {
       sections = typeof matchingForm.sections === 'string' 
         ? JSON.parse(matchingForm.sections) 
         : matchingForm.sections;
-      console.log('Parsed sections:', sections);
     } catch (error) {
-      console.error('Error parsing form sections:', error);
       return false;
     }
     
-    // Handle different section structures
-    if (Array.isArray(sections)) {
-      // sections is an array of section objects
-      for (const section of sections) {
-        if (section.questions && Array.isArray(section.questions)) {
-          const question = section.questions.find((q: any) => q.id === questionId);
-          if (question) {
-            console.log(`Found question: ${questionId}, type: ${question.type}`);
-            return question.type === 'dropdown' || question.type === 'partner';
-          }
-        }
-      }
-    } else if (sections && typeof sections === 'object') {
-      // sections might be an object with section names as keys
-      for (const sectionKey in sections) {
-        const section = sections[sectionKey];
-        if (section.questions && Array.isArray(section.questions)) {
-          const question = section.questions.find((q: any) => q.id === questionId);
-          if (question) {
-            console.log(`Found question: ${questionId}, type: ${question.type}`);
-            return question.type === 'dropdown' || question.type === 'partner';
-          }
+    // Access the actual sections array - handle nested structure
+    const actualSections = sections?.sections || sections;
+    
+    if (!Array.isArray(actualSections)) return false;
+    
+    // Search for the question
+    for (const section of actualSections) {
+      if (section.questions && Array.isArray(section.questions)) {
+        const question = section.questions.find((q: any) => q.id === questionId);
+        if (question) {
+          return question.type === 'dropdown' || question.type === 'partner';
         }
       }
     }
     
-    console.log(`Question ${questionId} not found or not a dropdown`);
     return false;
   };
 
@@ -139,10 +117,15 @@ export default function Ata() {
       return ['Yes', 'No', 'N/A'];
     }
     
-    // Handle different section structures
-    if (Array.isArray(sections)) {
+    // Handle different section structures - check if sections are nested under 'sections' key
+    let actualSections = sections;
+    if (sections && sections.sections && Array.isArray(sections.sections)) {
+      actualSections = sections.sections;
+    }
+    
+    if (Array.isArray(actualSections)) {
       // sections is an array of section objects
-      for (const section of sections) {
+      for (const section of actualSections) {
         if (section.questions && Array.isArray(section.questions)) {
           const question = section.questions.find((q: any) => q.id === questionId);
           if (question && question.options) {
@@ -150,10 +133,10 @@ export default function Ata() {
           }
         }
       }
-    } else if (sections && typeof sections === 'object') {
+    } else if (actualSections && typeof actualSections === 'object') {
       // sections might be an object with section names as keys
-      for (const sectionKey in sections) {
-        const section = sections[sectionKey];
+      for (const sectionKey in actualSections) {
+        const section = actualSections[sectionKey];
         if (section.questions && Array.isArray(section.questions)) {
           const question = section.questions.find((q: any) => q.id === questionId);
           if (question && question.options) {
