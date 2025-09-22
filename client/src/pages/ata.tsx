@@ -72,6 +72,7 @@ export default function Ata() {
 
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
+    console.log(`Filter function called with filterPartner="${filterPartner}", reports count=${reportsToFilter.length}`);
     return reportsToFilter.filter(report => {
       // Partner filter - map partner usernames to agent field values
       if (filterPartner) {
@@ -90,6 +91,8 @@ export default function Ata() {
         if (partnerToAgentMapping[filterPartner]) {
           agentValueToMatch = partnerToAgentMapping[filterPartner];
         }
+        
+        console.log(`Partner filter debug: Selected="${filterPartner}", Mapped to="${agentValueToMatch}", Report agent="${report.agent}", Match=${report.agent === agentValueToMatch}`);
         
         if (report.agent !== agentValueToMatch) {
           return false;
@@ -141,6 +144,12 @@ export default function Ata() {
     
     const partnerUsernames = partners.map((p: any) => p.username).filter(Boolean);
     console.log('getUniquePartners: Partner users from API:', partnerUsernames);
+    
+    // Debug: Show actual agent values in reports for mapping
+    const allReports = [...reports, ...reviewedReports];
+    const uniqueAgentValues = Array.from(new Set(allReports.map(r => r.agent).filter(Boolean)));
+    console.log('DEBUG: All unique agent field values in reports:', uniqueAgentValues);
+    
     return partnerUsernames.sort();
   };
 
