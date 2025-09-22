@@ -1362,99 +1362,22 @@ export default function Ata() {
                                     )}
                                   </div>
                                   
-                                  {/* Master auditor's answer */}
+                                  {/* Master auditor's answer - frozen to match auditor's answer */}
                                   <div className="space-y-1">
                                     <Label className="text-xs text-muted-foreground">Your Answer:</Label>
-                                    {(() => {
-                                      // Check if this question should be a dropdown based on form definition
-                                      const shouldBeDropdown = isQuestionDropdown(answer.questionId, selectedReport?.formName || '');
-                                      
-                                      return shouldBeDropdown ? (
-                                      <Select 
-                                        value={masterAnswers[stateKey] || answer.answer} 
-                                        onValueChange={(value) => {
-                                          setMasterAnswers(prev => ({
-                                            ...prev,
-                                            [stateKey]: value
-                                          }));
-                                          // Auto-mark as incorrect if answers don't match
-                                          setAnswerCorrectness(prev => ({
-                                            ...prev,
-                                            [stateKey]: value === answer.answer
-                                          }));
-                                        }}
-                                      >
-                                        <SelectTrigger>
-                                          <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          
-                                          {/* Check if this is a Partner question using multiple detection methods */}
-                                          {(() => {
-                                            const isPartnerQuestion = (
-                                              answer.type === 'partner' || 
-                                              answer.text?.toLowerCase().includes('partner') || 
-                                              answer.questionText?.toLowerCase().includes('partner') ||
-                                              answer.questionId?.toLowerCase().includes('partner') ||
-                                              // Check if the auditor answer is numeric (Partners are often stored as IDs)
-                                              (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ||
-                                              // Check specific question patterns from the UI display
-                                              (selectedReport?.sectionAnswers?.some(s => 
-                                                s.answers?.some(a => a.questionId === answer.questionId && 
-                                                  (a.text === 'Partner' || a.text?.includes('Partner')))
-                                              ))
-                                            );
-                                            
-                                            
-                                            return isPartnerQuestion;
-                                          })() ? (
-                                            // Special handling for Partner questions - use API data
-                                            partnersLoading ? (
-                                              <SelectItem value="loading" disabled>Loading partners...</SelectItem>
-                                            ) : partners && partners.length > 0 ? (
-                                              partners.map((partner: any) => (
-                                                <SelectItem key={partner.id} value={partner.username}>
-                                                  {partner.username}
-                                                </SelectItem>
-                                              ))
-                                            ) : (
-                                              <>
-                                                <SelectItem value="Partner 1">Partner 1</SelectItem>
-                                                <SelectItem value="Partner 2">Partner 2</SelectItem>
-                                                <SelectItem value="Tech M">Tech M</SelectItem>
-                                              </>
-                                            )
-                                          ) : (
-                                            // Regular dropdown options from form definition
-                                            (() => {
-                                              const formOptions = getFormDropdownOptions(answer.questionId, selectedReport?.formName || '');
-                                              return formOptions.map((option, idx) => (
-                                                <SelectItem key={idx} value={option}>
-                                                  {option}
-                                                </SelectItem>
-                                              ));
-                                            })()
-                                          )}
-                                          
-                                        </SelectContent>
-                                      </Select>
-                                    ) : (
-                                      <Input 
-                                        value={masterAnswers[stateKey] || answer.answer} 
-                                        onChange={(e) => {
-                                          setMasterAnswers(prev => ({
-                                            ...prev,
-                                            [stateKey]: e.target.value
-                                          }));
-                                          // Auto-mark as incorrect if answers don't match
-                                          setAnswerCorrectness(prev => ({
-                                            ...prev,
-                                            [stateKey]: e.target.value === answer.answer
-                                          }));
-                                        }} 
-                                      />
-                                    );
-                                    })()}
+                                    <div className="p-2 bg-muted rounded">
+                                      <span className={`font-medium ${
+                                        answer.answer === 'Yes' ? 'text-green-600' : 
+                                        answer.answer === 'No' ? 'text-red-600' : ''
+                                      }`}>
+                                        {/* For Partner questions, show partner name instead of ID */}
+                                        {answer.text?.toLowerCase().includes('partner') && 
+                                         !isNaN(Number(answer.answer)) && 
+                                         partners && partners.length > 0 ? (
+                                          partners.find((p: any) => p.id === Number(answer.answer))?.username || answer.answer
+                                        ) : answer.answer}
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                                 
