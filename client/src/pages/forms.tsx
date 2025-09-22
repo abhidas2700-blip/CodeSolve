@@ -26,7 +26,7 @@ const generateId = (prefix: string) => `${prefix}_${Math.random().toString(36).s
 interface Question {
   id: string;
   text: string;
-  type: "text" | "dropdown" | "multiSelect" | "number" | "date";
+  type: "text" | "dropdown" | "multiSelect" | "number" | "date" | "partner";
   options?: string;
   weightage: number;
   deductionPoints?: number;
@@ -101,7 +101,7 @@ export default function Forms() {
   
   // Form fields
   const [questionText, setQuestionText] = useState("");
-  const [questionType, setQuestionType] = useState<"text" | "dropdown" | "multiSelect" | "number" | "date">("dropdown");
+  const [questionType, setQuestionType] = useState<"text" | "dropdown" | "multiSelect" | "number" | "date" | "partner">("dropdown");
   const [questionOptions, setQuestionOptions] = useState("Yes,No,NA");
   const [questionWeightage, setQuestionWeightage] = useState(0); // Changed default from 5 to 0
   const [isMandatory, setIsMandatory] = useState(true);
@@ -493,9 +493,9 @@ export default function Forms() {
       id: generateId('question'),
       text: questionText,
       type: questionType,
-      options: questionType === 'dropdown' || questionType === 'multiSelect' ? questionOptions : undefined,
-      // For agent sections, set weightage to 0 (no marks)
-      weightage: isAgentSection ? 0 : questionWeightage,
+      options: (questionType === 'dropdown' || questionType === 'multiSelect') && questionType !== 'partner' ? questionOptions : undefined,
+      // For agent sections or partner questions, set weightage to 0 (no marks)
+      weightage: isAgentSection || questionType === 'partner' ? 0 : questionWeightage,
       mandatory: isMandatory,
       // No fatal errors for agent sections
       isFatal: isAgentSection ? false : isFatal,
@@ -1839,6 +1839,7 @@ export default function Forms() {
                                   <SelectItem value="multiSelect">Multi Select</SelectItem>
                                   <SelectItem value="number">Number Input</SelectItem>
                                   <SelectItem value="date">Date (Calendar)</SelectItem>
+                                  <SelectItem value="partner">Partner Dropdown</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
