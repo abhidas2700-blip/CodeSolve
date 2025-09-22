@@ -72,6 +72,16 @@ export default function Ata() {
     }
   });
 
+  // Fetch forms data to get question options
+  const { data: forms = [], isLoading: formsLoading } = useQuery({
+    queryKey: ['/api/forms'],
+    queryFn: async () => {
+      const response = await fetch('/api/forms');
+      if (!response.ok) throw new Error('Failed to fetch forms');
+      return response.json();
+    }
+  });
+
   useEffect(() => {
     const isMasterAuditor = user?.rights?.includes('masterAuditor');
     const isAdmin = user?.rights?.includes('admin');
@@ -1158,50 +1168,55 @@ export default function Ata() {
                                                 <SelectItem value="Tech M">Tech M</SelectItem>
                                               </>
                                             )
-                                          ) : answer.options ? (
-                                            // If there are explicit options defined, show them all
-                                            (() => {
-                                              try {
-                                                // Check if options is a string before splitting
-                                                if (typeof answer.options === 'string' && answer.options.trim() !== '') {
-                                                  return answer.options.split(',')
-                                                    .map(option => option.trim())
-                                                    .filter(option => option !== '') // Filter out empty strings
-                                                    .map((option, i) => (
-                                                    <SelectItem key={i} value={option}>
-                                                      {option}
-                                                    </SelectItem>
-                                                  ));
-                                                } else {
-                                                  return [];
-                                                }
-                                              } catch (e) {
-                                                console.error('Error parsing options:', e);
-                                                // Fallback to basic options
-                                                return (
-                                                  <>
-                                                    <SelectItem value="Yes">Yes</SelectItem>
-                                                    <SelectItem value="No">No</SelectItem>
-                                                    <SelectItem value="N/A">N/A</SelectItem>
-                                                  </>
-                                                );
-                                              }
-                                            })()
                                           ) : (
-                                            // Otherwise show common options
-                                            <>
-                                              <SelectItem value="Yes">Yes</SelectItem>
-                                              <SelectItem value="No">No</SelectItem>
-                                              <SelectItem value="N/A">N/A</SelectItem>
-                                            </>
+                                            // Regular dropdown options from form definition
+                                            (() => {
+                                              // Helper function to get dropdown options from form data
+                                              const getDropdownOptions = () => {
+                                                if (formsLoading || !forms || forms.length === 0) {
+                                                  return ['Yes', 'No', 'N/A'];
+                                                }
+
+                                                // Find the form that matches the selected report
+                                                const currentForm = forms.find(form => 
+                                                  form.name === selectedReport?.formName || 
+                                                  form.name === 'Advanced Audit Form'
+                                                );
+
+                                                if (!currentForm || !currentForm.sections) {
+                                                  return ['Yes', 'No', 'N/A'];
+                                                }
+
+                                                // Find the specific question in the form
+                                                for (const section of currentForm.sections) {
+                                                  if (section.questions) {
+                                                    const question = section.questions.find(q => q.id === answer.questionId);
+                                                    if (question && question.options) {
+                                                      // Parse comma-separated options
+                                                      const options = question.options.split(',').map(opt => opt.trim());
+                                                      console.log('Found form options for', answer.questionId, ':', options);
+                                                      return options;
+                                                    }
+                                                  }
+                                                }
+
+                                                // Fallback options based on answer content
+                                                if (answer.answer === 'Yes' || answer.answer === 'No') {
+                                                  return ['Yes', 'No', 'N/A'];
+                                                }
+                                                
+                                                return ['Yes', 'No', 'N/A'];
+                                              };
+
+                                              const options = getDropdownOptions();
+                                              return options.map((option, idx) => (
+                                                <SelectItem key={idx} value={option}>
+                                                  {option}
+                                                </SelectItem>
+                                              ));
+                                            })()
                                           )}
                                           
-                                          {/* Always ensure the original answer is an option */}
-                                          {answer.options && answer.answer && answer.answer.trim() !== '' && 
-                                           typeof answer.options === 'string' &&
-                                           !answer.options.split(',').map(o => o.trim()).includes(answer.answer) && (
-                                            <SelectItem value={answer.answer}>{answer.answer}</SelectItem>
-                                          )}
                                         </SelectContent>
                                       </Select>
                                     ) : (
