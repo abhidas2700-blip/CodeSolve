@@ -1080,13 +1080,50 @@ export default function Ata() {
                                   {/* Master auditor's answer */}
                                   <div className="space-y-1">
                                     <Label className="text-xs text-muted-foreground">Your Answer:</Label>
-                                    {answer.questionId.includes("dropdown") || 
-                                     answer.type === "dropdown" ||
-                                     answer.answer === 'Yes' || 
-                                     answer.answer === 'No' ||
-                                     // Include Partner questions (detected by text or numeric answers)
-                                     answer.text?.toLowerCase().includes('partner') ||
-                                     (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ? (
+                                    {(() => {
+                                      // Helper function to check if question has dropdown options in form
+                                      const hasDropdownOptions = () => {
+                                        if (formsLoading || !forms || forms.length === 0) {
+                                          return false;
+                                        }
+
+                                        const currentForm = forms.find(form => 
+                                          form.name === selectedReport?.formName || 
+                                          form.name === 'Advanced Audit Form'
+                                        );
+
+                                        if (!currentForm || !currentForm.sections) {
+                                          return false;
+                                        }
+
+                                        const sections = Array.isArray(currentForm.sections) 
+                                          ? currentForm.sections 
+                                          : Object.values(currentForm.sections);
+                                        
+                                        for (const section of sections) {
+                                          if (section && section.questions) {
+                                            const question = section.questions.find(q => q.id === answer.questionId);
+                                            if (question && question.options && question.options.trim() !== '') {
+                                              return true;
+                                            }
+                                          }
+                                        }
+                                        return false;
+                                      };
+
+                                      // Check if this should be a dropdown
+                                      return (
+                                        answer.questionId.includes("dropdown") || 
+                                        answer.type === "dropdown" ||
+                                        answer.answer === 'Yes' || 
+                                        answer.answer === 'No' ||
+                                        // Include Partner questions (detected by text or numeric answers)
+                                        answer.text?.toLowerCase().includes('partner') ||
+                                        (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50) ||
+                                        // Most importantly: Check if the question has options defined in the form
+                                        hasDropdownOptions()
+                                      );
+                                    })() ? (
                                       <Select 
                                         value={masterAnswers[stateKey] || answer.answer} 
                                         onValueChange={(value) => {
