@@ -115,14 +115,12 @@ export default function Ata() {
 
   // Helper functions to get unique values for dropdowns
   const getUniquePartners = (): string[] => {
-    // Use actual partners from API if available, otherwise fall back to unique agents from reports
-    if (partners && partners.length > 0) {
-      return partners.map((p: any) => p.username).sort();
-    }
-    
+    // Always use agent names from reports instead of API partners since they contain different data
     const allReports = [...reports, ...reviewedReports];
-    const agentNames = allReports.map(r => r.agent).filter(Boolean);
-    return Array.from(new Set(agentNames)).sort();
+    const agentNames = allReports.map(r => r.agent || r.agentName || '').filter(Boolean);
+    const uniqueAgents = Array.from(new Set(agentNames)).sort();
+    console.log('Partner filter options (using report agents):', uniqueAgents);
+    return uniqueAgents;
   };
 
   const getUniqueAuditors = (): string[] => {
@@ -399,6 +397,9 @@ export default function Ata() {
       console.log('Loading from qa-submitted-audits:', submittedAudits.length);
       console.log('Loading from qa-completed-audits:', completedAudits.length);
       console.log('Loading from qa-reports (main Reports page):', reportsFromMain.length);
+      
+      // Debug: Show agent names in reports
+      console.log('Agent names in reports:', reportsFromMain.map((r: any) => r.agent || r.agentName || 'No agent field'));
       
       // CRITICAL DEBUG: Let's see exactly why ATA pending is 0
       console.log('🔍 === ATA DIAGNOSTIC ===');
@@ -1023,7 +1024,10 @@ export default function Ata() {
                   {/* Partner Filter */}
                   <div>
                     <Label htmlFor="filter-partner" className="text-xs">Partner</Label>
-                    <Select value={filterPartner} onValueChange={setFilterPartner}>
+                    <Select value={filterPartner} onValueChange={(value) => {
+                      console.log('Partner filter changed to:', value);
+                      setFilterPartner(value);
+                    }}>
                       <SelectTrigger id="filter-partner" data-testid="select-filter-partner">
                         <SelectValue placeholder="All Partners" />
                       </SelectTrigger>
