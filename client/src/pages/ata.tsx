@@ -1094,6 +1094,7 @@ export default function Ata() {
                                         );
 
                                         console.log('Current form found:', currentForm?.name, 'for question:', answer.questionId);
+                                        console.log('Raw form sections data:', currentForm.sections);
 
                                         if (!currentForm || !currentForm.sections) {
                                           console.log('No current form or sections for', answer.questionId);
@@ -1104,7 +1105,8 @@ export default function Ata() {
                                           ? currentForm.sections 
                                           : Object.values(currentForm.sections);
                                         
-                                        console.log('Form sections:', sections.map(s => s.name || s.id));
+                                        console.log('Form sections after processing:', sections);
+                                        console.log('Form sections names:', sections.map(s => s?.name || s?.id || 'Unknown'));
                                         
                                         for (const section of sections) {
                                           if (section && section.questions) {
