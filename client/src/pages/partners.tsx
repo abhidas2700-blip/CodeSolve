@@ -68,6 +68,7 @@ export default function Partners() {
   const [rebuttalText, setRebuttalText] = useState('');
   const [handlerResponse, setHandlerResponse] = useState('');
   const [activeTab, setActiveTab] = useState('all-reports');
+  const [partners, setPartners] = useState<Array<{id: number, username: string}>>([]);
 
   // Fetch audit reports assigned to current partner
   const { data: assignedReports = [], isLoading: reportsLoading } = useQuery<AuditReport[]>({
@@ -80,6 +81,47 @@ export default function Partners() {
     queryKey: ['/api/partners/rebuttals'],
     enabled: !!user?.id,
   });
+
+  // Helper function to resolve partner ID to partner name
+  const getPartnerNameById = (partnerId: string | number) => {
+    const partner = partners.find(p => String(p.id) === String(partnerId));
+    return partner ? partner.username : `Partner ${partnerId}`;
+  };
+
+  // Helper function to format section answers for display
+  const formatSectionAnswers = (sectionAnswers: any) => {
+    if (!sectionAnswers || typeof sectionAnswers !== 'object') return null;
+
+    const sections = [];
+    for (const [key, section] of Object.entries(sectionAnswers)) {
+      if (section && typeof section === 'object' && (section as any).sectionName) {
+        sections.push({
+          name: (section as any).sectionName,
+          questions: (section as any).answers || []
+        });
+      }
+    }
+    return sections;
+  };
+
+  // Fetch partners data
+  useEffect(() => {
+    const fetchPartners = async () => {
+      try {
+        const response = await fetch('/api/partners', {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const partnersData = await response.json();
+          setPartners(partnersData);
+        }
+      } catch (error) {
+        console.error('Error fetching partners:', error);
+      }
+    };
+    
+    fetchPartners();
+  }, []);
 
   // Mutation for creating/updating rebuttals
   const rebuttalMutation = useMutation({
@@ -277,10 +319,50 @@ export default function Partners() {
                   </div>
                   {report.sectionAnswers && (
                     <div>
-                      <h4 className="font-medium mb-2">Audit Details:</h4>
-                      <pre className="bg-gray-100 p-3 rounded text-sm max-h-64 overflow-y-auto">
-                        {JSON.stringify(report.sectionAnswers, null, 2)}
-                      </pre>
+                      <h4 className="font-medium mb-4">Audit Details:</h4>
+                      {formatSectionAnswers(report.sectionAnswers)?.map((section, sectionIndex) => (
+                        <div key={sectionIndex} className="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="bg-blue-50 px-4 py-3 border-b">
+                            <h5 className="font-semibold text-blue-900">{section.name}</h5>
+                          </div>
+                          <div className="p-4 space-y-4">
+                            {section.questions?.map((question: any, questionIndex: number) => (
+                              <div key={questionIndex} className="grid grid-cols-1 gap-2">
+                                {/* Question */}
+                                <div className="bg-white p-3 rounded border border-gray-200">
+                                  <div className="flex justify-between items-start">
+                                    <div>
+                                      <span className="text-sm text-gray-500 font-semibold">Question:</span>
+                                      <div className="font-medium mt-1">{question.questionText}</div>
+                                    </div>
+                                    {question.questionType && (
+                                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded-full">
+                                        Type: {question.questionType}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {/* Answer */}
+                                <div className="bg-white p-3 rounded border border-gray-200">
+                                  <span className="text-sm text-gray-500 font-semibold">Auditor's Response:</span>
+                                  <div className="font-medium mt-1 flex items-center">
+                                    <span className={`inline-flex px-3 py-1 ${
+                                      question.answer === 'Yes' ? 'bg-green-100 text-green-800' : 
+                                      question.answer === 'No' ? 'bg-red-100 text-red-800' : 
+                                      question.answer === 'N/A' || question.answer === 'NA' ? 'bg-gray-100 text-gray-800' : 
+                                      question.answer === 'Fatal' ? 'bg-red-100 text-red-800 font-bold' :
+                                      'bg-blue-100 text-blue-800'
+                                    } rounded-full font-medium`}>
+                                      {question.questionType === 'partner' ? getPartnerNameById(question.answer) : question.answer}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
