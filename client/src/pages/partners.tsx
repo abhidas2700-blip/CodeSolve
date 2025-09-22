@@ -211,6 +211,7 @@ export default function Partners() {
   // Get formatted handler text
   const getHandlerText = (reportId: number) => {
     const handler = getRebuttalHandler(reportId);
+    console.log(`🔍 Handler info for report ${reportId}:`, handler);
     if (!handler) return null;
     
     if (handler.status === 'accepted') {
