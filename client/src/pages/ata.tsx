@@ -114,19 +114,19 @@ export default function Ata() {
   const getUniquePartners = (): string[] => {
     const allReports = [...reports, ...reviewedReports];
     const partners = allReports.map(r => r.agent).filter(Boolean);
-    return [...new Set(partners)].sort();
+    return Array.from(new Set(partners)).sort();
   };
 
   const getUniqueAuditors = (): string[] => {
     const allReports = [...reports, ...reviewedReports];
     const auditors = allReports.map(r => r.auditor).filter(Boolean);
-    return [...new Set(auditors)].sort();
+    return Array.from(new Set(auditors)).sort();
   };
 
   const getUniqueForms = (): string[] => {
     const allReports = [...reports, ...reviewedReports];
     const forms = allReports.map(r => r.formName).filter(Boolean);
-    return [...new Set(forms)].sort();
+    return Array.from(new Set(forms)).sort();
   };
 
   // Function to clear all filters
@@ -1106,14 +1106,14 @@ export default function Ata() {
               
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="w-full mb-4">
-                  <TabsTrigger value="pending" className="flex-1">Pending Review ({reports.length})</TabsTrigger>
-                  <TabsTrigger value="reviewed" className="flex-1">Reviewed ({reviewedReports.length})</TabsTrigger>
+                  <TabsTrigger value="pending" className="flex-1">Pending Review ({filterReports(reports).length})</TabsTrigger>
+                  <TabsTrigger value="reviewed" className="flex-1">Reviewed ({filterReports(reviewedReports).length})</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="pending" className="mt-0">
                   <div className="space-y-2">
-                    {reports.length > 0 ? (
-                      reports.map((report) => (
+                    {filterReports(reports).length > 0 ? (
+                      filterReports(reports).map((report) => (
                         <div 
                           key={report.id}
                           className={`p-3 rounded-md border cursor-pointer hover:bg-muted transition-colors ${selectedReport?.id === report.id ? 'bg-muted border-primary' : ''}`}
@@ -1143,8 +1143,8 @@ export default function Ata() {
                 
                 <TabsContent value="reviewed" className="mt-0">
                   <div className="space-y-2">
-                    {reviewedReports.length > 0 ? (
-                      reviewedReports.map((report) => (
+                    {filterReports(reviewedReports).length > 0 ? (
+                      filterReports(reviewedReports).map((report) => (
                         <div 
                           key={report.id}
                           className={`p-3 rounded-md border cursor-pointer hover:bg-muted transition-colors ${selectedReport?.id === report.id ? 'bg-muted border-primary' : ''}`}
