@@ -1139,16 +1139,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Partners see only their assigned reports, management sees all reports with partners
-      const whereConditions = hasPartnerAccess && !hasManagementAccess
-        ? and(
-            eq(auditReports.partnerId, user.id),
-            eq(auditReports.deleted, false)
-          )
-        : and(
-            isNotNull(auditReports.partnerId), // Only reports with partners assigned
-            eq(auditReports.deleted, false)
-          );
+      // Always filter by partner ID for this endpoint - partners should only see their own reports
+      // Management can use the regular reports page to see all reports
+      const whereConditions = and(
+        eq(auditReports.partnerId, user.id),
+        eq(auditReports.deleted, false)
+      );
       
       const reports = await db.query.auditReports.findMany({
         where: whereConditions,
@@ -1179,10 +1175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Partners see only their rebuttals, management sees all rebuttals
-      const whereConditions = hasPartnerAccess && !hasManagementAccess
-        ? eq(rebuttals.partnerId, user.id)
-        : undefined; // No filter for management - see all rebuttals
+      // Always filter by partner ID for this endpoint - partners should only see their own rebuttals
+      // Management can use the regular reports page to see all rebuttals
+      const whereConditions = eq(rebuttals.partnerId, user.id);
       
       const rebuttalsList = await db.query.rebuttals.findMany({
         where: whereConditions,
