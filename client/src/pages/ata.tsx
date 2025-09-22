@@ -62,6 +62,64 @@ export default function Ata() {
   const [answerComments, setAnswerComments] = useState<{[key: string]: string}>({});
   const [selectedReportDebugDone, setSelectedReportDebugDone] = useState<boolean>(false);
 
+  // Function to check if a question should be a dropdown based on form definition
+  const isQuestionDropdown = (questionId: string, reportFormName: string): boolean => {
+    if (!forms || forms.length === 0) {
+      console.log('No forms available for dropdown detection');
+      return false;
+    }
+    
+    // Find the form that matches this report
+    const matchingForm = forms.find((form: any) => form.name === reportFormName);
+    if (!matchingForm) {
+      console.log(`No matching form found for: ${reportFormName}`);
+      return false;
+    }
+    
+    console.log(`Checking dropdown for questionId: ${questionId} in form: ${reportFormName}`);
+    
+    // Parse the sections - they might be stored as string or object
+    let sections;
+    try {
+      sections = typeof matchingForm.sections === 'string' 
+        ? JSON.parse(matchingForm.sections) 
+        : matchingForm.sections;
+      console.log('Parsed sections:', sections);
+    } catch (error) {
+      console.error('Error parsing form sections:', error);
+      return false;
+    }
+    
+    // Handle different section structures
+    if (Array.isArray(sections)) {
+      // sections is an array of section objects
+      for (const section of sections) {
+        if (section.questions && Array.isArray(section.questions)) {
+          const question = section.questions.find((q: any) => q.id === questionId);
+          if (question) {
+            console.log(`Found question: ${questionId}, type: ${question.type}`);
+            return question.type === 'dropdown' || question.type === 'partner';
+          }
+        }
+      }
+    } else if (sections && typeof sections === 'object') {
+      // sections might be an object with section names as keys
+      for (const sectionKey in sections) {
+        const section = sections[sectionKey];
+        if (section.questions && Array.isArray(section.questions)) {
+          const question = section.questions.find((q: any) => q.id === questionId);
+          if (question) {
+            console.log(`Found question: ${questionId}, type: ${question.type}`);
+            return question.type === 'dropdown' || question.type === 'partner';
+          }
+        }
+      }
+    }
+    
+    console.log(`Question ${questionId} not found or not a dropdown`);
+    return false;
+  };
+
   // Function to get dropdown options from form definition
   const getFormDropdownOptions = (questionId: string, reportFormName: string): string[] => {
     if (!forms || forms.length === 0) return ['Yes', 'No', 'N/A'];
@@ -1128,15 +1186,10 @@ export default function Ata() {
                                   <div className="space-y-1">
                                     <Label className="text-xs text-muted-foreground">Your Answer:</Label>
                                     {(() => {
-                                      return (
-                                        answer.questionId.includes("dropdown") || 
-                                        answer.type === "dropdown" ||
-                                        answer.answer === 'Yes' || 
-                                        answer.answer === 'No' ||
-                                        // Include Partner questions (detected by text or numeric answers)
-                                        answer.text?.toLowerCase().includes('partner') ||
-                                        (!isNaN(Number(answer.answer)) && Number(answer.answer) > 0 && Number(answer.answer) < 50)
-                                      ) ? (
+                                      // Check if this question should be a dropdown based on form definition
+                                      const shouldBeDropdown = isQuestionDropdown(answer.questionId, selectedReport?.formName || '');
+                                      
+                                      return shouldBeDropdown ? (
                                       <Select 
                                         value={masterAnswers[stateKey] || answer.answer} 
                                         onValueChange={(value) => {
