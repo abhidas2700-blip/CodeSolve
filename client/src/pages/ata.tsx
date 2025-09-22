@@ -72,6 +72,7 @@ export default function Ata() {
 
   // Function to filter reports based on current filter criteria
   const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
+    console.log('filterReports: Input reports count:', reportsToFilter.length);
     return reportsToFilter.filter(report => {
       // Partner filter - use exact matching for dropdown selection
       if (filterPartner && report.agent !== filterPartner) {
@@ -117,9 +118,12 @@ export default function Ata() {
   const getUniquePartners = (): string[] => {
     // Always use agent names from reports instead of API partners since they contain different data
     const allReports = [...reports, ...reviewedReports];
-    const agentNames = allReports.map(r => r.agent || r.agentName || '').filter(Boolean);
+    console.log('getUniquePartners: Total reports found:', allReports.length);
+    console.log('getUniquePartners: Sample report agents:', allReports.slice(0, 3).map(r => r.agent));
+    
+    const agentNames = allReports.map(r => r.agent || '').filter(Boolean);
     const uniqueAgents = Array.from(new Set(agentNames)).sort();
-    console.log('Partner filter options (using report agents):', uniqueAgents);
+    console.log('getUniquePartners: Final partner options:', uniqueAgents);
     return uniqueAgents;
   };
 
