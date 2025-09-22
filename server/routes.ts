@@ -23,7 +23,7 @@ import {
 import { z } from "zod";
 import { setupAuth, hashPassword } from "./auth";
 import { db } from "./db";
-import { eq, desc, and, sql, isNotNull } from "drizzle-orm";
+import { eq, desc, and, sql, isNotNull, or, isNull } from "drizzle-orm";
 import { healthCheck } from "./health";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1139,10 +1139,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Always filter by partner ID for this endpoint - partners should only see their own reports
-      // Management can use the regular reports page to see all reports
+      // Filter by partner ID OR partner name (for backward compatibility with historical data)
+      // Partners should only see their own reports
       const whereConditions = and(
-        eq(auditReports.partnerId, user.id),
+        or(
+          eq(auditReports.partnerId, user.id),
+          and(
+            isNull(auditReports.partnerId),
+            eq(auditReports.partnerName, user.username)
+          )
+        ),
         eq(auditReports.deleted, false)
       );
       
@@ -1175,9 +1181,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Always filter by partner ID for this endpoint - partners should only see their own rebuttals
-      // Management can use the regular reports page to see all rebuttals
-      const whereConditions = eq(rebuttals.partnerId, user.id);
+      // Filter by partner ID OR partner name (for backward compatibility with historical data)
+      // Partners should only see their own rebuttals
+      const whereConditions = or(
+        eq(rebuttals.partnerId, user.id),
+        and(
+          isNull(rebuttals.partnerId),
+          eq(rebuttals.partnerName, user.username)
+        )
+      );
       
       const rebuttalsList = await db.query.rebuttals.findMany({
         where: whereConditions,
