@@ -61,6 +61,54 @@ export default function Ata() {
   const [answerNonCriticality, setAnswerNonCriticality] = useState<{[key: string]: boolean}>({});
   const [answerComments, setAnswerComments] = useState<{[key: string]: string}>({});
   const [selectedReportDebugDone, setSelectedReportDebugDone] = useState<boolean>(false);
+  
+  // Filter states
+  const [filterPartner, setFilterPartner] = useState<string>('');
+  const [filterAuditor, setFilterAuditor] = useState<string>('');
+  const [filterAgentId, setFilterAgentId] = useState<string>('');
+  const [filterDate, setFilterDate] = useState<string>('');
+  const [filterForm, setFilterForm] = useState<string>('');
+  const [filterAuditId, setFilterAuditId] = useState<string>('');
+
+  // Function to filter reports based on current filter criteria
+  const filterReports = (reportsToFilter: AuditReport[]): AuditReport[] => {
+    return reportsToFilter.filter(report => {
+      // Partner filter
+      if (filterPartner && !report.agent?.toLowerCase().includes(filterPartner.toLowerCase())) {
+        return false;
+      }
+      
+      // Auditor filter
+      if (filterAuditor && !report.auditor?.toLowerCase().includes(filterAuditor.toLowerCase())) {
+        return false;
+      }
+      
+      // Agent ID filter
+      if (filterAgentId && !report.agentId?.toLowerCase().includes(filterAgentId.toLowerCase())) {
+        return false;
+      }
+      
+      // Date filter (check if report date matches selected date)
+      if (filterDate) {
+        const reportDate = new Date(report.timestamp).toISOString().split('T')[0];
+        if (reportDate !== filterDate) {
+          return false;
+        }
+      }
+      
+      // Form filter
+      if (filterForm && !report.formName?.toLowerCase().includes(filterForm.toLowerCase())) {
+        return false;
+      }
+      
+      // Audit ID filter
+      if (filterAuditId && !report.id?.toLowerCase().includes(filterAuditId.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
 
   // Function to check if a question should be a dropdown based on form definition
   const isQuestionDropdown = (questionId: string, reportFormName: string): boolean => {
